@@ -2,22 +2,30 @@
   "name": "second-brain-publisher",
   "version": "0.0.1",
   "description": "Project for synchronizing org roam notes and second brain ",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "test": "test"
+    "start": "node --loader tsm src/index.ts",
+    "build": "tsc --project tsconfig.json",
+    "prepublish": "npm run build"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Artawower/second-brain-publisher.git"
   },
-  "keywords": ["org", "roam", "second brain"],
+  "keywords": [
+    "org",
+    "roam",
+    "second brain"
+  ],
   "author": "darkawower <artawower@mail.ru> (https://du-blog.ru/)",
   "license": "MIT",
+  "bin": "src/index.js",
   "bugs": {
     "url": "https://github.com/Artawower/second-brain-publisher/issues"
   },
   "homepage": "https://github.com/Artawower/second-brain-publisher#readme",
   "devDependencies": {
+    "@types/axios": "^0.14.0",
     "@types/jest": "27.4.1",
     "@types/node": "17.0.17",
     "jest": "27.5.1",
@@ -27,5 +35,9 @@
     "ts-node": "10.5.0",
     "tsm": "2.2.1",
     "typescript": "4.5.5"
+  },
+  "dependencies": {
+    "axios": "^0.26.1",
+    "second-brain-parser": "0.0.3"
   }
 }
