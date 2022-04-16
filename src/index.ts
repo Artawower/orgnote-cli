@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { readFileSync, statSync } from "fs";
 import { collectNoteFromFile, collectNotesFromDir } from "second-brain-parser";
 import { Note } from "second-brain-parser/dist/parser";
@@ -44,13 +46,11 @@ const syncNotes = (dirPath: string): void => {
   sendNotes(notes);
 };
 
-const collectNotes = (path: string): void => {
+export const collectNotes = (path: string): void => {
   const { isDirectory } = statSync(path);
-  const fn = isDirectory ? syncNotes : syncNote;
+  const fn = isDirectory() ? syncNotes : syncNote;
   fn(path);
 };
 
 const syncPath = process.argv[2];
-console.log("🦄: [line 54][index.ts<2>] [35msyncPath: ", syncPath);
-
 collectNotes(syncPath);
