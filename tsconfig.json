@@ -1,30 +1,31 @@
 {
   "compilerOptions": {
-    "outDir": "./dist/",
-    "skipLibCheck": true,
-    "target": "ES2021",
-    "sourceMap": false,
-    "strictNullChecks": true,
-    "module": "es2020",
-    "allowJs": false,
-    "baseUrl": "./",
-    "allowSyntheticDefaultImports": true,
-    "downlevelIteration": false,
-    "resolveJsonModule": true,
+    "target": "es2021",
+    "rootDir": "./src",
+    "baseUrl": "./src",
+    "module": "es2022",
+    "outDir": "dist",
+    "removeComments": true,
+    "declaration": true,
     "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "emitDecoratorMetadata": true,
     "esModuleInterop": true,
-    "noEmitOnError": false,
-    "noImplicitAny": true,
-    "noUnusedParameters": true
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "sourceMap": true,
+    "skipLibCheck": true,
+    "types": [
+      "node",
+      "jest",
+      "uniorg"
+    ]
   },
   "include": [
-    "./src/**/*",
-    "index.ts"
+    "src/**/*"
   ],
-  "inlineSources": true,
-  "inlineSourceMap": true,
   "exclude": [
     "node_modules",
-    "dist"
+    "**/*.spec.ts"
   ]
 }

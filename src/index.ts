@@ -1,12 +1,17 @@
 #!/usr/bin/env node
 
 import axios from "axios";
-import { readFileSync, statSync } from "fs";
+import { existsSync, readFileSync, statSync } from "fs";
+import { dirname, join } from "path";
 import {
   collectNoteFromFile,
   collectOrgNotesFromDir,
 } from "second-brain-parser";
-import { Note } from "second-brain-parser/dist/parser";
+import {
+  createLinkMiddleware,
+  Note,
+} from "second-brain-parser/dist/parser/index.js";
+import FormData from "form-data";
 
 interface SecondBrainPublishedConfig {
   remoteAddress: string;
@@ -37,9 +42,15 @@ const readConfig = (): SecondBrainPublishedConfig => {
   }
 };
 
+const extractFilenameFromPath = (path: string): string =>
+  path.split("/").pop() as string;
+
 const syncNote = (filePath: string): Note[] => {
   // TODO: master check if path and token exist before start main operations
-  const note = collectNoteFromFile(filePath);
+  // middleware here
+  const note = collectNoteFromFile(filePath, [
+    createLinkMiddleware(dirname(filePath)),
+  ]);
   if (!note.id) {
     throw "File is not a org file";
   }
@@ -51,13 +62,53 @@ const syncNotes = (dirPath: string): Note[] => {
   return notes;
 };
 
+const readFiles = (
+  filePaths: string[]
+): Array<{ blob: Buffer; fileName: string }> => {
+  const files = filePaths.reduce((files, filePath) => {
+    if (existsSync(filePath)) {
+      return [
+        ...files,
+        {
+          blob: readFileSync(filePath),
+          fileName: extractFilenameFromPath(filePath),
+        },
+      ];
+    }
+    return files;
+  }, []);
+  return files;
+};
+
 // TODO: master move connectors to external module
-const sendNotes = async (notes: Note[], config: SecondBrainPublishedConfig) => {
+const sendNotes = async (
+  notes: Note[],
+  config: SecondBrainPublishedConfig,
+  dirPath: string
+) => {
+  console.log(
+    "🦄: [line 79][index.ts] [35mnotes: ",
+    notes.flatMap((note) => note.meta.images?.map((img) => join(dirPath, img)))
+  );
+  const files = readFiles(
+    notes
+      .flatMap((note) => note.meta.images?.map((img) => join(dirPath, img)))
+      .filter((i) => !!i) as string[]
+  );
+  const formData = new FormData();
+  notes.forEach((note) => formData.append("notes", JSON.stringify(note)));
+  files.forEach((f) => {
+    formData.append("files", f.blob, {
+      filename: f.fileName,
+      contentType: "file",
+    });
+  });
   try {
     const rspns = await axios({
       url: `${config.remoteAddress}/api/${config.version}/notes/bulk-upsert`,
       method: "put",
-      data: notes,
+      headers: formData.getHeaders(),
+      data: formData,
     });
     console.log("🦄: [line 55][index.ts] [35mrspns: ", rspns.status);
   } catch (e) {
@@ -71,8 +122,9 @@ const collectNotes = async (
 ): Promise<void> => {
   const stats = statSync(path);
   const collectNoteFn = stats.isDirectory() ? syncNotes : syncNote;
+  const dirPath = stats.isDirectory() ? path : dirname(path);
   const notes = collectNoteFn(path);
-  await sendNotes(notes, config);
+  await sendNotes(notes, config, dirPath);
 };
 
 const loadNotes = async (config: SecondBrainPublishedConfig) => {
