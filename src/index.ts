@@ -86,10 +86,6 @@ const sendNotes = async (
   config: SecondBrainPublishedConfig,
   dirPath: string
 ) => {
-  console.log(
-    "🦄: [line 79][index.ts] [35mnotes: ",
-    notes.flatMap((note) => note.meta.images?.map((img) => join(dirPath, img)))
-  );
   const files = readFiles(
     notes
       .flatMap((note) => note.meta.images?.map((img) => join(dirPath, img)))
@@ -110,7 +106,6 @@ const sendNotes = async (
       headers: formData.getHeaders(),
       data: formData,
     });
-    console.log("🦄: [line 55][index.ts] [35mrspns: ", rspns.status);
   } catch (e) {
     console.log("🦄: [line 62][index.ts] [35me: ", e.response);
   }
@@ -153,7 +148,6 @@ const commands: {
   },
   [CliCommand.Collect]: async (config: SecondBrainPublishedConfig) => {
     const collectedNotes = await loadNotes(config);
-    console.log("🦄: [line 88][index.ts<2>] [35mcollectedNotes: ", collectedNotes);
   },
 };
 
