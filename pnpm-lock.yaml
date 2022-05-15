@@ -9,7 +9,7 @@ specifiers:
   jest: 27.5.1
   nyc: 15.1.0
   prettier: 2.5.1
-  second-brain-parser: 0.0.20
+  second-brain-parser: 0.0.21
   ts-jest: 27.1.3
   ts-node: 10.5.0
   tsm: 2.2.1
@@ -18,7 +18,7 @@ specifiers:
 dependencies:
   axios: 0.26.1
   form-data: 4.0.0
-  second-brain-parser: 0.0.20
+  second-brain-parser: 0.0.21
 
 devDependencies:
   '@types/axios': 0.14.0
@@ -2930,8 +2930,8 @@ packages:
       xmlchars: 2.2.0
     dev: true
 
-  /second-brain-parser/0.0.20:
-    resolution: {integrity: sha512-i0bTqGazBqF8X9DSgGyC+qBAnoMDQ5rJVfiVL8tx59fmenC3wmLjJvSagxeONE7dXfLrJAZISHDmPm6qik3n5w==}
+  /second-brain-parser/0.0.21:
+    resolution: {integrity: sha512-8nryGQvO6mRWGhBLjSBzwBNuHqCIUVd1fy0BMhg/Ne3zqye7Ixu3VSAhQ2DQ3o6RDsdov8cdA/GJoLVBXLVb5w==}
     dependencies:
       orga: 3.2.1
       rehype-stringify: 9.0.3
