@@ -13,6 +13,7 @@ import {
 } from "second-brain-parser/dist/parser/index.js";
 import FormData from "form-data";
 import { v4 as uuidv4 } from "uuid";
+import os from "os";
 
 interface SecondBrainPublishedConfig {
   remoteAddress: string;
@@ -26,20 +27,26 @@ const defaultUrl =
 // process.env.SECOND_BRAIN_SERVER_URL || "https://second-brain.org";
 
 const configPath =
-  process.env.SECOND_BRAIN_CONFIG_PATH || "~/.config/second-brain/config.json";
+  process.env.SECOND_BRAIN_CONFIG_PATH ||
+  `${os.homedir()}/.config/second-brain/config.json`;
 
 const baseDir = process.env.SECOND_BRAIN_BASE_DIR || "";
 
 const readConfig = (): SecondBrainPublishedConfig => {
+  const defaultConfigs = {
+    remoteAddress: defaultUrl,
+    token: process.env.SECOND_BRAIN_TOKEN || "",
+    baseDir,
+    version: process.env.SECOND_BRAIN_VERSION || "v1",
+  };
   try {
-    return JSON.parse(readFileSync(configPath).toString());
-  } catch (e) {
     return {
-      remoteAddress: defaultUrl,
-      token: process.env.SECOND_BRAIN_TOKEN || "",
-      baseDir,
-      version: process.env.SECOND_BRAIN_VERSION || "v1",
+      ...defaultConfigs,
+      ...JSON.parse(readFileSync(configPath).toString()),
     };
+  } catch (e) {
+    console.log(e);
+    return defaultConfigs;
   }
 };
 
@@ -112,13 +119,19 @@ const sendNotes = async (
     formData.append("files", f.blob, {
       filename: f.fileName,
       contentType: "file",
+      header: {
+        Authorization: `Bearer ${config.token}`,
+      },
     });
   });
   try {
     const rspns = await axios({
-      url: `${config.remoteAddress}/api/${config.version}/notes/bulk-upsert`,
+      url: `${config.remoteAddress}/${config.version}/notes/bulk-upsert`,
       method: "put",
-      headers: formData.getHeaders(),
+      headers: {
+        ...formData.getHeaders(),
+        Authorization: `Bearer ${config.token}`,
+      },
       data: formData,
     });
   } catch (e) {
@@ -142,7 +155,7 @@ const loadNotes = async (config: SecondBrainPublishedConfig) => {
   try {
     const rspns = await axios({
       method: "get",
-      url: `${config.remoteAddress}/api/${config.version}/notes`,
+      url: `${config.remoteAddress}/${config.version}/notes`,
     });
     return rspns.data;
   } catch (e) {
