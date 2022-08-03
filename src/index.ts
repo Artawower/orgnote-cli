@@ -14,12 +14,15 @@ import {
 import FormData from "form-data";
 import { v4 as uuidv4 } from "uuid";
 import os from "os";
+import yargs from "yargs";
+import { hideBin } from "yargs/helpers";
 
 interface SecondBrainPublishedConfig {
   remoteAddress: string;
   token: string;
   baseDir: string;
   version: string;
+  name?: string;
 }
 
 const defaultUrl =
@@ -32,22 +35,26 @@ const configPath =
 
 const baseDir = process.env.SECOND_BRAIN_BASE_DIR || "";
 
-const readConfig = (): SecondBrainPublishedConfig => {
-  const defaultConfigs = {
+const readConfig = (accountName?: string): SecondBrainPublishedConfig => {
+  let defaultConfigs = {
     remoteAddress: defaultUrl,
     token: process.env.SECOND_BRAIN_TOKEN || "",
     baseDir,
     version: process.env.SECOND_BRAIN_VERSION || "v1",
   };
+
   try {
-    return {
-      ...defaultConfigs,
-      ...JSON.parse(readFileSync(configPath).toString()),
-    };
+    const configs = JSON.parse(
+      readFileSync(configPath).toString()
+    ) as SecondBrainPublishedConfig[];
+    const config = accountName
+      ? configs.find((c) => c.name === accountName)
+      : configs?.[0];
+    defaultConfigs = { ...defaultConfigs, ...(config || {}) };
   } catch (e) {
-    console.log(e);
-    return defaultConfigs;
+    console.error("File read error: ", e);
   }
+  return defaultConfigs;
 };
 
 const extractFilenameFromPath = (path: string): string =>
@@ -57,13 +64,11 @@ const extractFilenameFromPath = (path: string): string =>
 const addIdToSrcBlock = (orgData: any) => {
   if (orgData.type === "src-block") {
     orgData.id = uuidv4();
-    console.log("🦄: [line 53][index.ts<2>] [35morgData.id: ", orgData.id);
   }
   return orgData;
 };
 
 const syncNote = (filePath: string): Note[] => {
-  // TODO: master check if path and token exist before start main operations
   // middleware here
   const note = collectNoteFromFile(filePath, [
     createLinkMiddleware(dirname(filePath)),
@@ -111,9 +116,6 @@ const sendNotes = async (
   );
   const formData = new FormData();
   notes.forEach((note) => formData.append("notes", JSON.stringify(note)));
-  console.log("Its files");
-
-  console.log(files);
 
   files.forEach((f) => {
     formData.append("files", f.blob, {
@@ -135,8 +137,9 @@ const sendNotes = async (
       data: formData,
     });
   } catch (e) {
-    // TODO: master throw http errors
-    console.log("🦄: [line 62][index.ts] [35me: ", e.response);
+    // TODO: master catch only http errors
+    console.error("🦄: [line 62][index.ts] [35me: ", e.response.data);
+    process.exit(1);
   }
 };
 
@@ -169,11 +172,16 @@ enum CliCommand {
 }
 
 const commands: {
-  [key in CliCommand]: (arg0: SecondBrainPublishedConfig) => Promise<void>;
+  [key in CliCommand]: (
+    arg0: SecondBrainPublishedConfig,
+    path?: string
+  ) => Promise<void>;
 } = {
-  [CliCommand.Publish]: async (config: SecondBrainPublishedConfig) => {
-    const syncPath = process.argv[3];
-    await collectNotes(syncPath, config);
+  [CliCommand.Publish]: async (
+    config: SecondBrainPublishedConfig,
+    path: string
+  ) => {
+    await collectNotes(path, config);
   },
   [CliCommand.Collect]: async (config: SecondBrainPublishedConfig) => {
     const collectedNotes = await loadNotes(config);
@@ -181,11 +189,24 @@ const commands: {
 };
 
 (async () => {
-  const command = process.argv[2] as CliCommand;
+  const argv = yargs(hideBin(process.argv)).argv;
+  const command = argv._[0] as CliCommand;
   const commandExecutor = commands[command];
+  const path = argv._[1] as string;
+  const accountName = argv.accountName as string;
+
   if (commandExecutor) {
-    const config = readConfig();
-    await commandExecutor(config);
+    const config = {
+      ...readConfig(accountName),
+    };
+    config.remoteAddress ||= argv.remoteAddress as string;
+    config.token ||= argv.token as string;
+    console.log(
+      "Started with provided configs: ",
+      JSON.stringify(config, null, 2)
+    );
+
+    await commandExecutor(config, path);
     return;
   }
   throw `Command ${command} is not supported`;
