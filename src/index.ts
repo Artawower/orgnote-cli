@@ -199,8 +199,9 @@ const commands: {
     const config = {
       ...readConfig(accountName),
     };
-    config.remoteAddress ||= argv.remoteAddress as string;
-    config.token ||= argv.token as string;
+    config.remoteAddress =
+      (argv.remoteAddress as string) || config.remoteAddress;
+    config.token = (argv.token as string) || config.token;
     console.log(
       "Started with provided configs: ",
       JSON.stringify(config, null, 2)
