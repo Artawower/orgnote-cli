@@ -9,6 +9,7 @@ import {
 } from "second-brain-parser";
 import {
   createLinkMiddleware,
+  createPreviewImageMiddleware,
   Note,
 } from "second-brain-parser/dist/parser/index.js";
 import FormData from "form-data";
@@ -72,6 +73,7 @@ const syncNote = (filePath: string): Note[] => {
   // middleware here
   const note = collectNoteFromFile(filePath, [
     createLinkMiddleware(dirname(filePath)),
+    createPreviewImageMiddleware(dirname(filePath)),
     addIdToSrcBlock,
   ]);
   if (!note.id) {
@@ -138,7 +140,9 @@ const sendNotes = async (
     });
   } catch (e) {
     // TODO: master catch only http errors
-    console.error("🦄: [line 62][index.ts] [35me: ", e.response.data);
+    console.error("🦄: [line 62][index.ts] [35me: ", e.response?.data);
+    // console.log(e);
+
     process.exit(1);
   }
 };
@@ -190,9 +194,11 @@ const commands: {
 
 (async () => {
   const argv = yargs(hideBin(process.argv)).argv;
+  console.log(argv, argv.remoteAddress, argv["remote-address"]);
+
   const command = argv._[0] as CliCommand;
   const commandExecutor = commands[command];
-  const path = argv._[1] as string;
+  const path = argv._[argv._.length - 1] as string;
   const accountName = argv.accountName as string;
 
   if (commandExecutor) {
