@@ -1,22 +1,14 @@
 #!/usr/bin/env node
 
 import axios from "axios";
-import { existsSync, readFileSync, statSync } from "fs";
-import { dirname, join } from "path";
-import {
-  collectNoteFromFile,
-  collectOrgNotesFromDir,
-} from "second-brain-parser";
-import {
-  createLinkMiddleware,
-  createPreviewImageMiddleware,
-  Note,
-} from "second-brain-parser/dist/parser/index.js";
+import { Dirent, existsSync, readdirSync, readFileSync, statSync } from "fs";
+import { dirname, join, resolve } from "path";
 import FormData from "form-data";
-import { v4 as uuidv4 } from "uuid";
 import os from "os";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
+import { Note } from "types";
+import { parse, withMetaInfo } from "org-mode-ast";
 
 interface SecondBrainPublishedConfig {
   remoteAddress: string;
@@ -25,6 +17,8 @@ interface SecondBrainPublishedConfig {
   version: string;
   name?: string;
 }
+
+export const isOrgFile = (fileName: string): boolean => /\.org$/.test(fileName);
 
 const defaultUrl =
   process.env.SECOND_BRAIN_SERVER_URL || "http://localhost:8000";
@@ -61,29 +55,44 @@ const readConfig = (accountName?: string): SecondBrainPublishedConfig => {
 const extractFilenameFromPath = (path: string): string =>
   path.split("/").pop() as string;
 
-// TODO: type it
-const addIdToSrcBlock = (orgData: any) => {
-  if (orgData.type === "src-block") {
-    orgData.id = uuidv4();
-  }
-  return orgData;
-};
-
 const syncNote = (filePath: string): Note[] => {
   // middleware here
-  const note = collectNoteFromFile(filePath, [
-    createLinkMiddleware(dirname(filePath)),
-    createPreviewImageMiddleware(dirname(filePath)),
-    addIdToSrcBlock,
-  ]);
+  const fileContent = readFileSync(filePath, "utf8");
+  const nodeTree = withMetaInfo(parse(fileContent));
+  const note: Note = {
+    id: nodeTree.meta.id,
+    meta: nodeTree.meta,
+    content: fileContent,
+  };
+
   if (!note.id) {
-    throw "File is not a org file";
+    throw "File is not a org roam file. Specify id in org PROPERTY keyword and make sure that file is *.org";
   }
   return [note];
 };
 
 const syncNotes = (dirPath: string): Note[] => {
-  const notes = collectOrgNotesFromDir(dirPath);
+  const files = readdirSync(dirPath, { withFileTypes: true });
+  const notes = files.reduce((notes: Note[], dirent: Dirent) => {
+    const isDir = dirent.isDirectory();
+    const fileName = resolve(dirPath, dirent.name);
+
+    if (!isOrgFile(fileName)) {
+      return notes;
+    }
+
+    if (isDir) {
+      return [...notes, ...syncNotes(fileName)];
+    }
+
+    const collectedNote = syncNote(fileName);
+    if (collectedNote) {
+      return [...notes, ...collectedNote];
+    }
+
+    return notes;
+  }, []);
+
   return notes;
 };
 
