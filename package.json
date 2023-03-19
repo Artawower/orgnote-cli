@@ -7,7 +7,8 @@
   "scripts": {
     "start": "node --loader tsm src/index.ts",
     "clear": "rm -rf dist",
-    "build": "npm run clear && tsc --project tsconfig.json && chmod +x ./dist/index.js"
+    "build": "npm run clear && tsc --project tsconfig.json && chmod +x ./dist/index.js",
+    "prepublish": "npm run build"
   },
   "repository": {
     "type": "git",
