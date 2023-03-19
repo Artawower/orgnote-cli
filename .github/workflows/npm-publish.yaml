@@ -15,6 +15,6 @@ jobs:
           scope: 'darkawower'
       - run: yarn
       - run: yarn build
-      - run: yarn publish
+      - run: yarn publish --new-version ${{ github.event.release.tag_name }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
