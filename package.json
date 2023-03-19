@@ -10,10 +10,7 @@
     "build": "npm run clear && tsc --project tsconfig.json && chmod +x ./dist/index.js",
     "prepublish": "npm run build"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Artawower/second-brain-publisher.git"
-  },
+  "repository": "git+https://github.com/Artawower/second-brain-publisher.git",
   "keywords": [
     "org",
     "roam",
