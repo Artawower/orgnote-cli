@@ -58,7 +58,8 @@ const extractFilenameFromPath = (path: string): string =>
 const syncNote = (filePath: string): Note[] => {
   // middleware here
   const fileContent = readFileSync(filePath, "utf8");
-  const nodeTree = withMetaInfo(parse(fileContent));
+  const parsedDoc = parse(fileContent);
+  const nodeTree = withMetaInfo(parsedDoc);
   const note: Note = {
     id: nodeTree.meta.id,
     meta: nodeTree.meta,
@@ -203,8 +204,6 @@ const commands: {
 
 (async () => {
   const argv = yargs(hideBin(process.argv)).argv;
-  console.log(argv, argv.remoteAddress, argv["remote-address"]);
-
   const command = argv._[0] as CliCommand;
   const commandExecutor = commands[command];
   const path = argv._[argv._.length - 1] as string;

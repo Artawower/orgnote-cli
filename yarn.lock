@@ -2418,10 +2418,10 @@ optionator@^0.8.1:
     type-check "~0.3.2"
     word-wrap "~1.2.3"
 
-org-mode-ast@0.1.0:
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/org-mode-ast/-/org-mode-ast-0.1.0.tgz#2df5a438f5537934785268e8b031484c53cfc411"
-  integrity sha512-b0KzgYAWh8+jnQMrzUTrktvzuuf5yoefarlsfx8nyHKgygoPeGFmBVEXdx/LNw11k0uXNCUCMDyMfBCeMboQxA==
+org-mode-ast@0.2.3:
+  version "0.2.3"
+  resolved "https://registry.yarnpkg.com/org-mode-ast/-/org-mode-ast-0.2.3.tgz#816677572b2b804e1ac2ee97d9e122d7242da18e"
+  integrity sha512-UzNcgNmecocrMxi8HVamugXK8HN69vZtBMOhFJglEZmO9InQO2MxgdU1+uOn3+c5KCw8l6xd9BNAuRygy0czXA==
 
 p-limit@^2.2.0:
   version "2.3.0"
