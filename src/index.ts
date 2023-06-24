@@ -150,8 +150,12 @@ const sendNotes = async (
     });
   } catch (e) {
     // TODO: master catch only http errors
-    console.error("🦄: [line 62][index.ts] [35me: ", e.response?.data);
-    // console.log(e);
+    // console.error(JSON.stringify(e, null, 2));
+    console.error(`🦄: [http error] [35m error while send http request:
+    | status: ${e.status ?? ''}
+    | data: ${e.response?.data ?? ''}
+    | message: ${e.message ?? ''}
+`);
 
     process.exit(1);
   }

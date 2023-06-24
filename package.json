@@ -1,6 +1,6 @@
 {
   "name": "second-brain-publisher",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Project for synchronizing org roam notes and second brain ",
   "type": "module",
   "main": "dist/index.js",
@@ -11,11 +11,7 @@
     "prepublish": "npm run build"
   },
   "repository": "git+https://github.com/Artawower/second-brain-publisher.git",
-  "keywords": [
-    "org",
-    "roam",
-    "second brain"
-  ],
+  "keywords": ["org", "roam", "second brain"],
   "author": "darkawower <artawower@protonmail.com> (https://du-blog.ru/)",
   "license": "MIT",
   "bin": {
