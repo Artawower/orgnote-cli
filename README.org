@@ -29,9 +29,24 @@ NPM binary script for synchronising and publishing notes from org roam. Closely 
 #+BEGIN_SRC bash
 npm install -g second-brain-publisher
 #+END_SRC
-* Usage
-~second-brain-publisher publish  --remote-address http://url-here/ --token api-token /file/path~
+* 👨‍🍳 Usage
+Create ~~/.config/second-brain/config.json~ with next schema:
+#+BEGIN_SRC json
+[
+  {
+    "name": "Local development",
+    "remoteAddress": "http://localhost:8000",
+    "token": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+  },
+  {
+    "name": "Remote development",
+    "remoteAddress": "http://<address>/api",
+    "token": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+  },
+]
+#+END_SRC
 
+~second-brain-publisher publish  --remote-address http://url-here/ --token api-token /file/path~
 * 🍩 Contribute guide
 Any contribution is very much appreciated! Please read the [[./CONTRIBUTE.org][style guide]] before contributing to avoid misunderstandings!
 Also, the project exists solely on donations. I would appreciate it if you would join my patreon.
