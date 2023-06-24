@@ -153,7 +153,7 @@ const sendNotes = async (
     // console.error(JSON.stringify(e, null, 2));
     console.error(`🦄: [http error] [35m error while send http request:
     | status: ${e.status ?? ''}
-    | data: ${e.response?.data ?? ''}
+    | data: ${e.response?.data ? JSON.stringify(e.response.data) : ''}
     | message: ${e.message ?? ''}
 `);
 
