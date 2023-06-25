@@ -23,6 +23,7 @@
 
 * 🌱 Introduction
 NPM binary script for synchronising and publishing notes from org roam. Closely related to the second brain project.
+*WARNING*: This package doesn't provide a way to resolve conflicts and doesn't use CRDT yet! Be careful, and don't forget to backup your notes!
 * 🍻 Connected links
 - [[https://github.com/Artawower/second-brain][Second brain main repo.]] 
 * ⚙️ Install
@@ -30,23 +31,36 @@ NPM binary script for synchronising and publishing notes from org roam. Closely 
 npm install -g second-brain-publisher
 #+END_SRC
 * 👨‍🍳 Usage
+** Configuration
 Create ~~/.config/second-brain/config.json~ with next schema:
 #+BEGIN_SRC json
 [
   {
     "name": "Local development",
     "remoteAddress": "http://localhost:8000",
-    "token": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+    "token": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "rootFolder": "~/some/path/"
   },
   {
     "name": "Remote development",
     "remoteAddress": "http://<address>/api",
     "token": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+    "rootFolder": "~/some/path/"
   },
 ]
 #+END_SRC
 
-~second-brain-publisher publish  --remote-address http://url-here/ --token api-token /file/path~
+
+** Available commands
+- ~publish~ - publish single note
+  ~second-brain-publisher publish  --remote-address http://url-here/ --token api-token /file/path~
+- ~collect~ -  forces loading of all notes from a remote resource. *WARNING*: this operation could override your local notes! 
+  /Unsupported yet/
+- orces publishing of all notes from the root folder. *WARNING*: this operation could overwrite remote notes.
+- ~sync~ - syncs all notes from the root folder into the remote service and vice versa. *WARNING*: this operation could override local and remote notes depens on timezone.
+
+
+
 * 🍩 Contribute guide
 Any contribution is very much appreciated! Please read the [[./CONTRIBUTE.org][style guide]] before contributing to avoid misunderstandings!
 Also, the project exists solely on donations. I would appreciate it if you would join my patreon.
