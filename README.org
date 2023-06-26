@@ -60,6 +60,8 @@ Create ~~/.config/second-brain/config.json~ with next schema:
 - ~sync~ - syncs all notes from the root folder into the remote service and vice versa. *WARNING*: this operation could override local and remote notes depens on timezone.
 
 
+** Available flags
+~--debug~ enable additional info logging messages
 
 * 🍩 Contribute guide
 Any contribution is very much appreciated! Please read the [[./CONTRIBUTE.org][style guide]] before contributing to avoid misunderstandings!

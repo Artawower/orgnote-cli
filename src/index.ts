@@ -9,13 +9,36 @@ import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 import { Note } from "types";
 import { parse, withMetaInfo } from "org-mode-ast";
+import { createLogger, format, transports } from 'winston';
+
+// TODO: master refactor.
+
+const logFormat = format.printf(function(info) {
+  return `${new Date().toISOString()}-${info.level}: info.message`;
+});
+
+const logger = createLogger({
+  level: 'info',
+  format: format.combine(
+    format.splat(),
+    format.json(),
+  ),
+  transports: [
+    new transports.File({ filename: 'error.log', level: 'error' }),
+    new transports.File({ filename: 'combined.log' }),
+    new transports.Console({
+      format: format.combine(format.colorize(), logFormat)
+    }),
+  ],
+});
 
 interface SecondBrainPublishedConfig {
   remoteAddress: string;
   token: string;
-  baseDir: string;
+  rootFolder: string;
   version: string;
   name?: string;
+  debug?: boolean;
 }
 
 export const isOrgFile = (fileName: string): boolean => /\.org$/.test(fileName);
@@ -28,13 +51,14 @@ const configPath =
   process.env.SECOND_BRAIN_CONFIG_PATH ||
   `${os.homedir()}/.config/second-brain/config.json`;
 
-const baseDir = process.env.SECOND_BRAIN_BASE_DIR || "";
+const rootFolder = process.env.SECOND_BRAIN_BASE_DIR || "";
 
 const readConfig = (accountName?: string): SecondBrainPublishedConfig => {
+  logger.info("Start reading configs...")
   let defaultConfigs = {
     remoteAddress: defaultUrl,
     token: process.env.SECOND_BRAIN_TOKEN || "",
-    baseDir,
+    rootFolder,
     version: process.env.SECOND_BRAIN_VERSION || "v1",
   };
 
@@ -46,8 +70,9 @@ const readConfig = (accountName?: string): SecondBrainPublishedConfig => {
       ? configs.find((c) => c.name === accountName)
       : configs?.[0];
     defaultConfigs = { ...defaultConfigs, ...(config || {}) };
+    logger.info('default configs: %o', configs)
   } catch (e) {
-    console.error("File read error: ", e);
+    logger.error("[file read error] %o", e);
   }
   return defaultConfigs;
 };
@@ -73,6 +98,7 @@ const syncNote = (filePath: string): Note[] => {
 };
 
 const syncNotes = (dirPath: string): Note[] => {
+  logger.info('dir path: %o', dirPath)
   const files = readdirSync(dirPath, { withFileTypes: true });
   const notes = files.reduce((notes: Note[], dirent: Dirent) => {
     const isDir = dirent.isDirectory();
@@ -121,12 +147,15 @@ const sendNotes = async (
   config: SecondBrainPublishedConfig,
   dirPath: string
 ) => {
+  logger.info('notes to send: %o', notes ?? [])
+
   const files = readFiles(
     notes
       .flatMap((note) => note.meta.images?.map((img) => join(dirPath, img)))
       .filter((i) => !!i) as string[]
   );
   const formData = new FormData();
+  logger.info('formData: %o', formData);
   notes.forEach((note) => formData.append("notes", JSON.stringify(note)));
 
   files.forEach((f) => {
@@ -151,8 +180,8 @@ const sendNotes = async (
   } catch (e) {
     // TODO: master catch only http errors
     // console.error(JSON.stringify(e, null, 2));
-    console.error(`🦄: [http error] [35m error while send http request:
-    | status: ${e.status ?? ''}
+    logger.error(`🦄: [http error] error while send http request:
+    | status: ${e.response?.status ?? ''}
     | data: ${e.response?.data ? JSON.stringify(e.response.data) : ''}
     | message: ${e.message ?? ''}
 `);
@@ -161,7 +190,7 @@ const sendNotes = async (
   }
 };
 
-const collectNotes = async (
+const publishNotes = async (
   path: string,
   config: SecondBrainPublishedConfig
 ): Promise<void> => {
@@ -180,13 +209,14 @@ const loadNotes = async (config: SecondBrainPublishedConfig) => {
     });
     return rspns.data;
   } catch (e) {
-    console.log(e.response);
+    logger.error(e.response);
   }
 };
 
 enum CliCommand {
   Collect = "collect",
   Publish = "publish",
+  PublishAll = "publish-all"
 }
 
 const commands: {
@@ -199,34 +229,58 @@ const commands: {
     config: SecondBrainPublishedConfig,
     path: string
   ) => {
-    await collectNotes(path, config);
+    await publishNotes(path, config);
   },
   [CliCommand.Collect]: async (config: SecondBrainPublishedConfig) => {
     const collectedNotes = await loadNotes(config);
   },
+  [CliCommand.PublishAll]: async (config: SecondBrainPublishedConfig) => {
+    const path = config.rootFolder;
+    await publishNotes(path, config)
+  },
 };
 
+
 (async () => {
-  const argv = yargs(hideBin(process.argv)).argv;
+  const argv = yargs(hideBin(process.argv))
+    .options({
+      'debug': {
+        describe: 'Enable debug mode for verbose logging',
+        type: 'boolean'
+      }
+    })
+    .argv;
   const command = argv._[0] as CliCommand;
   const commandExecutor = commands[command];
-  const path = argv._[argv._.length - 1] as string;
   const accountName = argv.accountName as string;
 
-  if (commandExecutor) {
-    const config = {
-      ...readConfig(accountName),
-    };
-    config.remoteAddress =
-      (argv.remoteAddress as string) || config.remoteAddress;
-    config.token = (argv.token as string) || config.token;
-    console.log(
-      "Started with provided configs: ",
-      JSON.stringify(config, null, 2)
-    );
-
-    await commandExecutor(config, path);
-    return;
+  if (!commandExecutor) {
+    throw `Command ${command} is not supported`;
   }
-  throw `Command ${command} is not supported`;
+
+  const config: SecondBrainPublishedConfig = {
+    ...readConfig(accountName),
+  };
+
+  config.remoteAddress =
+    (argv.remoteAddress as string) || config.remoteAddress;
+  config.token = (argv.token as string) || config.token;
+  config.debug = argv.debug as boolean ?? config.debug;
+  const path  = argv._[argv._.length - 1] as string || config.rootFolder;
+
+  if (config.debug) {
+    logger.add(new transports.Console({
+      format: format.simple(),
+    }));
+  }
+
+  logger.info('Current configuration: %o', config)
+
+  logger.info(
+    "started with provided configs: %o",
+    config,
+  );
+
+  await commandExecutor(config, path);
+
 })();
