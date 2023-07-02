@@ -2,7 +2,7 @@
 
 import axios from "axios";
 import { Dirent, existsSync, readdirSync, readFileSync, statSync } from "fs";
-import { dirname, join, resolve } from "path";
+import { join, resolve } from "path";
 import FormData from "form-data";
 import os from "os";
 import yargs from "yargs";
@@ -18,7 +18,7 @@ const logFormat = format.printf(function(info) {
 });
 
 const logger = createLogger({
-  level: 'info',
+  level: 'warning',
   format: format.combine(
     format.splat(),
     format.json(),
@@ -53,8 +53,7 @@ const configPath =
 
 const rootFolder = process.env.SECOND_BRAIN_BASE_DIR || "";
 
-const readConfig = (accountName?: string): SecondBrainPublishedConfig => {
-  logger.info("Start reading configs...")
+function readConfig(accountName?: string): SecondBrainPublishedConfig {
   let defaultConfigs = {
     remoteAddress: defaultUrl,
     token: process.env.SECOND_BRAIN_TOKEN || "",
@@ -70,9 +69,8 @@ const readConfig = (accountName?: string): SecondBrainPublishedConfig => {
       ? configs.find((c) => c.name === accountName)
       : configs?.[0];
     defaultConfigs = { ...defaultConfigs, ...(config || {}) };
-    logger.info('default configs: %o', configs)
   } catch (e) {
-    logger.error("[file read error] %o", e);
+    console.error("[file read error] %o", e);
   }
   return defaultConfigs;
 };
@@ -80,7 +78,7 @@ const readConfig = (accountName?: string): SecondBrainPublishedConfig => {
 const extractFilenameFromPath = (path: string): string =>
   path.split("/").pop() as string;
 
-const syncNote = (filePath: string): Note[] => {
+function syncNote (filePath: string): Note[] {
   // middleware here
   const fileContent = readFileSync(filePath, "utf8");
   const parsedDoc = parse(fileContent);
@@ -97,19 +95,21 @@ const syncNote = (filePath: string): Note[] => {
   return [note];
 };
 
-const syncNotes = (dirPath: string): Note[] => {
+function syncNotes(dirPath: string): Note[] {
   logger.info('dir path: %o', dirPath)
   const files = readdirSync(dirPath, { withFileTypes: true });
+  logger.info(`✎: [index.ts][${new Date().toString()}] file length %o` , files.length)
   const notes = files.reduce((notes: Note[], dirent: Dirent) => {
+    logger.info(`✎: [index.ts][${new Date().toString()}] dirent %o` , dirent.name)
     const isDir = dirent.isDirectory();
     const fileName = resolve(dirPath, dirent.name);
 
-    if (!isOrgFile(fileName)) {
-      return notes;
-    }
-
     if (isDir) {
       return [...notes, ...syncNotes(fileName)];
+    }
+
+    if (!isOrgFile(fileName)) {
+      return notes;
     }
 
     const collectedNote = syncNote(fileName);
@@ -154,8 +154,8 @@ const sendNotes = async (
       .flatMap((note) => note.meta.images?.map((img) => join(dirPath, img)))
       .filter((i) => !!i) as string[]
   );
+
   const formData = new FormData();
-  logger.info('formData: %o', formData);
   notes.forEach((note) => formData.append("notes", JSON.stringify(note)));
 
   files.forEach((f) => {
@@ -167,6 +167,7 @@ const sendNotes = async (
       },
     });
   });
+
   try {
     const rspns = await axios({
       url: `${config.remoteAddress}/${config.version}/notes/bulk-upsert`,
@@ -190,18 +191,23 @@ const sendNotes = async (
   }
 };
 
-const publishNotes = async (
+async function publishNotes(
   path: string,
   config: SecondBrainPublishedConfig
-): Promise<void> => {
+): Promise<void> {
   const stats = statSync(path);
   const collectNoteFn = stats.isDirectory() ? syncNotes : syncNote;
-  const dirPath = stats.isDirectory() ? path : dirname(path);
+  logger.info(`✎: [index.ts][${new Date().toString()}] is notes directory: %o` , stats.isDirectory())
+  logger.info(`✎: [index.ts][${new Date().toString()}] path: %o` , path);
   const notes = collectNoteFn(path);
-  await sendNotes(notes, config, dirPath);
+  if (notes.length) {
+    return;
+  }
+  logger.info(`✎: [index.ts][${new Date().toString()}] Collected notes length: %o` , notes.length);
+  await sendNotes(notes, config, path);
 };
 
-const loadNotes = async (config: SecondBrainPublishedConfig) => {
+async function loadNotes(config: SecondBrainPublishedConfig) {
   try {
     const rspns = await axios({
       method: "get",
@@ -216,7 +222,8 @@ const loadNotes = async (config: SecondBrainPublishedConfig) => {
 enum CliCommand {
   Collect = "collect",
   Publish = "publish",
-  PublishAll = "publish-all"
+  PublishAll = "publish-all",
+  // Sync = "sync",
 }
 
 const commands: {
@@ -269,6 +276,7 @@ const commands: {
   const path  = argv._[argv._.length - 1] as string || config.rootFolder;
 
   if (config.debug) {
+    logger.level = 'info';
     logger.add(new transports.Console({
       format: format.simple(),
     }));
