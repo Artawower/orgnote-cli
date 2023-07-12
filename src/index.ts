@@ -200,7 +200,7 @@ async function publishNotes(
   logger.info(`✎: [index.ts][${new Date().toString()}] is notes directory: %o` , stats.isDirectory())
   logger.info(`✎: [index.ts][${new Date().toString()}] path: %o` , path);
   const notes = collectNoteFn(path);
-  if (notes.length) {
+  if (!notes.length) {
     return;
   }
   logger.info(`✎: [index.ts][${new Date().toString()}] Collected notes length: %o` , notes.length);
