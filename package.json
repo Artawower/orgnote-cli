@@ -1,6 +1,6 @@
 {
   "name": "second-brain-publisher",
-  "version": "0.2.7",
+  "version": "0.3.1",
   "description": "Project for synchronizing org roam notes and second brain ",
   "type": "module",
   "main": "dist/index.js",

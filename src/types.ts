@@ -9,4 +9,5 @@ export interface Note {
   id: string;
   meta: MetaInfo;
   content: string;
+  filePath?: string[];
 }
