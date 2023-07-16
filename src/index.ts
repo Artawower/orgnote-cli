@@ -78,8 +78,17 @@ function readConfig(accountName?: string): SecondBrainPublishedConfig {
 const extractFilenameFromPath = (path: string): string =>
   path.split("/").pop() as string;
 
-function syncNote (filePath: string): Note[] {
+function getRelativeNotePath(rootFolder: string, filePath: string): string[] {
+  if (!filePath.startsWith(rootFolder)) {
+    return [];
+  }
+  const fullRelativePath =  filePath.slice(rootFolder.length).split('/');
+  return fullRelativePath.slice(1, fullRelativePath.length - 1)
+}
+
+function syncNote (filePath: string, config: SecondBrainPublishedConfig): Note[] {
   // middleware here
+  const relativeNotePath = getRelativeNotePath(config.rootFolder, filePath);
   const fileContent = readFileSync(filePath, "utf8");
   const parsedDoc = parse(fileContent);
   const nodeTree = withMetaInfo(parsedDoc);
@@ -87,6 +96,7 @@ function syncNote (filePath: string): Note[] {
     id: nodeTree.meta.id,
     meta: nodeTree.meta,
     content: fileContent,
+    filePath: relativeNotePath,
   };
 
   if (!note.id) {
@@ -95,7 +105,7 @@ function syncNote (filePath: string): Note[] {
   return [note];
 };
 
-function syncNotes(dirPath: string): Note[] {
+function syncNotes(dirPath: string, config: SecondBrainPublishedConfig): Note[] {
   logger.info('dir path: %o', dirPath)
   const files = readdirSync(dirPath, { withFileTypes: true });
   logger.info(`✎: [index.ts][${new Date().toString()}] file length %o` , files.length)
@@ -105,14 +115,14 @@ function syncNotes(dirPath: string): Note[] {
     const fileName = resolve(dirPath, dirent.name);
 
     if (isDir) {
-      return [...notes, ...syncNotes(fileName)];
+      return [...notes, ...syncNotes(fileName, config)];
     }
 
     if (!isOrgFile(fileName)) {
       return notes;
     }
 
-    const collectedNote = syncNote(fileName);
+    const collectedNote = syncNote(fileName, config);
     if (collectedNote) {
       return [...notes, ...collectedNote];
     }
@@ -199,7 +209,7 @@ async function publishNotes(
   const collectNoteFn = stats.isDirectory() ? syncNotes : syncNote;
   logger.info(`✎: [index.ts][${new Date().toString()}] is notes directory: %o` , stats.isDirectory())
   logger.info(`✎: [index.ts][${new Date().toString()}] path: %o` , path);
-  const notes = collectNoteFn(path);
+  const notes = collectNoteFn(path, config);
   if (!notes.length) {
     return;
   }
