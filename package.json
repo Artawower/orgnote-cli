@@ -8,10 +8,15 @@
     "start": "node --loader tsm src/index.ts",
     "clear": "rm -rf dist",
     "build": "npm run clear && tsc --project tsconfig.json && chmod +x ./dist/index.js",
-    "prepublish": "npm run build"
+    "prepublish": "npm run build",
+    "codegen:api": "openapi-generator-cli generate"
   },
   "repository": "git+https://github.com/Artawower/second-brain-publisher.git",
-  "keywords": ["org", "roam", "second brain"],
+  "keywords": [
+    "org",
+    "roam",
+    "second brain"
+  ],
   "author": "darkawower <artawower@protonmail.com> (https://du-blog.ru/)",
   "license": "MIT",
   "bin": {
@@ -22,6 +27,7 @@
   },
   "homepage": "https://github.com/Artawower/second-brain-publisher#readme",
   "devDependencies": {
+    "@openapitools/openapi-generator-cli": "2.7.0",
     "@types/axios": "0.14.0",
     "@types/jest": "27.4.1",
     "@types/node": "17.0.17",
