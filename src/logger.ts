@@ -1,3 +1,4 @@
+import { SecondBrainPublishedConfig } from 'config';
 import { createLogger, format, Logger, transports } from 'winston';
 
 const logFormat = format.printf(function (info) {
@@ -6,9 +7,13 @@ const logFormat = format.printf(function (info) {
 
 let logger: Logger;
 
-function initLogger(): void {
+function initLogger(config: Partial<SecondBrainPublishedConfig> = {}): void {
+  console.log(
+    `✎: [logger.ts][${new Date().toString()}] config?.debug`,
+    config?.debug
+  );
   logger = createLogger({
-    level: 'warning',
+    level: config?.debug ? 'info' : 'warning',
     format: format.combine(format.splat(), format.json()),
     transports: [
       new transports.File({ filename: 'error.log', level: 'error' }),
@@ -18,10 +23,21 @@ function initLogger(): void {
       }),
     ],
   });
+
+  if (config.debug) {
+    logger.add(
+      new transports.Console({
+        format: format.simple(),
+      })
+    );
+  }
 }
-export function getLogger(): Logger {
+export function getLogger(
+  config: Partial<SecondBrainPublishedConfig> = {}
+): Logger {
+  console.log('✎: [line 38][logger.ts] config: ', config);
   if (!logger) {
-    initLogger();
+    initLogger(config);
   }
   return logger;
 }

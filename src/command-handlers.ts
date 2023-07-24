@@ -2,14 +2,17 @@ import { getLogger } from './logger.js';
 import { SecondBrainPublishedConfig } from './config.js';
 import { Note } from 'types';
 import FormData from 'form-data';
-import { Dirent, existsSync, readdirSync, readFileSync, statSync } from 'fs';
+import { Dirent, readdirSync, readFileSync, statSync } from 'fs';
 import { parse, withMetaInfo } from 'org-mode-ast';
 import { join, resolve } from 'path';
 import axios from 'axios';
+import { Logger } from 'winston';
+import { getRelativeNotePath } from './tools/relative-file-path.js';
+import { readFiles } from './tools/read-files.js';
 
 export const isOrgFile = (fileName: string): boolean => /\.org$/.test(fileName);
 
-const logger = getLogger();
+let logger: Logger;
 
 export enum CliCommand {
   Collect = 'collect',
@@ -31,34 +34,6 @@ const commands: {
 } = {};
 
 // TMP FUNCS
-const extractFilenameFromPath = (path: string): string =>
-  path.split('/').pop() as string;
-
-const readFiles = (
-  filePaths: string[]
-): Array<{ blob: Buffer; fileName: string }> => {
-  const files = filePaths.reduce((files, filePath) => {
-    if (existsSync(filePath)) {
-      return [
-        ...files,
-        {
-          blob: readFileSync(filePath),
-          fileName: extractFilenameFromPath(filePath),
-        },
-      ];
-    }
-    return files;
-  }, []);
-  return files;
-};
-
-function getRelativeNotePath(rootFolder: string, filePath: string): string[] {
-  if (!filePath.startsWith(rootFolder)) {
-    return [];
-  }
-  const fullRelativePath = filePath.slice(rootFolder.length).split('/');
-  return fullRelativePath.slice(1);
-}
 
 function syncNote(
   filePath: string,
@@ -223,6 +198,7 @@ export async function handleCommand(
   config: SecondBrainPublishedConfig,
   path: string
 ) {
+  logger = getLogger(config);
   const commandExecutor = commands[command];
   if (!commandExecutor) {
     throw `Command ${command} is not supported`;
