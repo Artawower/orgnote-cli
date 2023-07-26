@@ -7,13 +7,9 @@ const logFormat = format.printf(function (info) {
 
 let logger: Logger;
 
-function initLogger(config: Partial<SecondBrainPublishedConfig> = {}): void {
-  console.log(
-    `✎: [logger.ts][${new Date().toString()}] config?.debug`,
-    config?.debug
-  );
+function initLogger(): void {
   logger = createLogger({
-    level: config?.debug ? 'info' : 'warning',
+    level: 'warning',
     format: format.combine(format.splat(), format.json()),
     transports: [
       new transports.File({ filename: 'error.log', level: 'error' }),
@@ -23,21 +19,25 @@ function initLogger(config: Partial<SecondBrainPublishedConfig> = {}): void {
       }),
     ],
   });
+}
 
-  if (config.debug) {
-    logger.add(
-      new transports.Console({
-        format: format.simple(),
-      })
-    );
+function configureLogger(config?: Partial<SecondBrainPublishedConfig>): void {
+  if (!config?.debug) {
+    return;
   }
+  logger.level = 'info';
+  logger.add(
+    new transports.Console({
+      format: format.simple(),
+    })
+  );
 }
 export function getLogger(
   config: Partial<SecondBrainPublishedConfig> = {}
 ): Logger {
-  console.log('✎: [line 38][logger.ts] config: ', config);
   if (!logger) {
-    initLogger(config);
+    initLogger();
   }
+  configureLogger(config);
   return logger;
 }

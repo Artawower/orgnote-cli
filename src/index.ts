@@ -5,7 +5,7 @@ import { hideBin } from 'yargs/helpers';
 import { getLogger } from './logger.js';
 import { getConfig } from './config.js';
 import { Logger } from 'winston';
-import { CliCommand, handleCommand } from './command-handlers.js';
+import { CliCommand, handleCommand } from './commands/command-handlers.js';
 
 let logger: Logger;
 

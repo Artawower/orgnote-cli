@@ -11,7 +11,7 @@ export interface SecondBrainPublishedConfig {
 }
 
 const defaultUrl =
-  process.env.SECOND_BRAIN_SERVER_URL || 'http://localhost:8000';
+  process.env.SECOND_BRAIN_SERVER_URL || 'http://localhost:8000/v1';
 // process.env.SECOND_BRAIN_SERVER_URL || "https://second-brain.org";
 
 const configPath =

@@ -37,13 +37,13 @@ Create ~~/.config/second-brain/config.json~ with next schema:
 [
   {
     "name": "Local development",
-    "remoteAddress": "http://localhost:8000",
+    "remoteAddress": "http://localhost:8000/v1",
     "token": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
     "rootFolder": "~/some/path/"
   },
   {
     "name": "Remote development",
-    "remoteAddress": "http://<address>/api",
+    "remoteAddress": "http://<address>/api/v1",
     "token": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
     "rootFolder": "~/some/path/"
   },
