@@ -1,6 +1,6 @@
 {
   "name": "second-brain-publisher",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Project for synchronizing org roam notes and second brain ",
   "type": "module",
   "main": "dist/index.js",
@@ -17,6 +17,7 @@
   "keywords": ["org", "roam", "second brain"],
   "author": "darkawower <artawower@protonmail.com> (https://du-blog.ru/)",
   "license": "MIT",
+  "files": ["dist/**"],
   "bin": {
     "second-brain-publisher": "dist/index.js"
   },
