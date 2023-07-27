@@ -15,7 +15,7 @@ import localVarRequest from 'request';
 import http from 'http';
 
 /* tslint:disable:no-unused-locals */
-import { HandlersCreatedNote } from '../model/handlersCreatedNote.js';
+import { HandlersCreatingNote } from '../model/handlersCreatingNote.js';
 import { HandlersHttpErrorAny } from '../model/handlersHttpErrorAny.js';
 import { HandlersHttpResponseAnyAny } from '../model/handlersHttpResponseAnyAny.js';
 import { HandlersHttpResponseArrayModelsPublicNoteModelsPagination } from '../model/handlersHttpResponseArrayModelsPublicNoteModelsPagination.js';
@@ -94,10 +94,9 @@ export class NotesApi {
     /**
      * Bulk update or insert notes
      * @summary Upsert notes
-     * @param notes Notes payload. See CreatedNote model
-     * @param files Form data files.
+     * @param notes List of created notes
      */
-    public async notesBulkUpsertPut (notes: Array<string>, files: Array<string>, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: object;  }> {
+    public async notesBulkUpsertPut (notes: Array<HandlersCreatingNote>, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: object;  }> {
         const localVarPath = this.basePath + '/notes/bulk-upsert';
         let localVarQueryParameters: any = {};
         let localVarHeaderParams: any = (<any>Object).assign({}, this._defaultHeaders);
@@ -115,22 +114,9 @@ export class NotesApi {
             throw new Error('Required parameter notes was null or undefined when calling notesBulkUpsertPut.');
         }
 
-        // verify required parameter 'files' is not null or undefined
-        if (files === null || files === undefined) {
-            throw new Error('Required parameter files was null or undefined when calling notesBulkUpsertPut.');
-        }
-
         (<any>Object).assign(localVarHeaderParams, options.headers);
 
         let localVarUseFormData = false;
-
-        if (notes !== undefined) {
-            localVarFormParams['notes'] = ObjectSerializer.serialize(notes, "Array<string>");
-        }
-
-        if (files !== undefined) {
-            localVarFormParams['files'] = ObjectSerializer.serialize(files, "Array<string>");
-        }
 
         let localVarRequestOptions: localVarRequest.Options = {
             method: 'PUT',
@@ -139,6 +125,7 @@ export class NotesApi {
             uri: localVarPath,
             useQuerystring: this._useQuerystring,
             json: true,
+            body: ObjectSerializer.serialize(notes, "Array<HandlersCreatingNote>")
         };
 
         let authenticationPromise = Promise.resolve();
@@ -470,7 +457,7 @@ export class NotesApi {
      * @summary Create note
      * @param note Note model
      */
-    public async notesPost (note: HandlersCreatedNote, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: object;  }> {
+    public async notesPost (note: HandlersCreatingNote, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: object;  }> {
         const localVarPath = this.basePath + '/notes/';
         let localVarQueryParameters: any = {};
         let localVarHeaderParams: any = (<any>Object).assign({}, this._defaultHeaders);
@@ -499,7 +486,7 @@ export class NotesApi {
             uri: localVarPath,
             useQuerystring: this._useQuerystring,
             json: true,
-            body: ObjectSerializer.serialize(note, "HandlersCreatedNote")
+            body: ObjectSerializer.serialize(note, "HandlersCreatingNote")
         };
 
         let authenticationPromise = Promise.resolve();

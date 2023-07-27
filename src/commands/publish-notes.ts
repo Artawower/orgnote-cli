@@ -6,8 +6,19 @@ import { dirname, join } from 'path';
 import { prepareNotes } from '../tools/prepare-note.js';
 import { getApi } from './sdk.js';
 import { statSync } from 'fs';
+import { HandlersCreatingNote, ModelsNoteMeta } from 'generated/api/api.js';
 
 const logger = getLogger();
+
+function mapNoteToCreatingNote(note: Note): HandlersCreatingNote {
+  return {
+    id: note.id,
+    content: note.content,
+    filePath: note.filePath,
+    // TODO: master generate correct enum type from swagger
+    meta: note.meta as unknown as ModelsNoteMeta,
+  };
+}
 
 const sendNotes = async (
   notes: Note[],
@@ -22,8 +33,11 @@ const sendNotes = async (
       .filter((i) => !!i)
   );
 
+  const mappedNotes = notes.map((note) => mapNoteToCreatingNote(note));
+
   try {
-    await api.notes.notesBulkUpsert(notes, files);
+    await api.files.uploadFiles(files);
+    await api.notes.notesBulkUpsertPut(mappedNotes);
   } catch (e) {
     const data = e.response?.data ?? e.body;
     logger.error(`🦄: [http error] error while send http request:
@@ -31,7 +45,6 @@ const sendNotes = async (
     | data: ${data ? JSON.stringify(data) : ''}
     | message: ${e.message ?? ''}
 `);
-    logger.error(`✎: [publish-notes.ts][${new Date().toString()}]  %o`, e);
     process.exit(1);
   }
 };

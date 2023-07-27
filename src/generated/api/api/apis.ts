@@ -1,5 +1,7 @@
 export * from './authApi.js';
 import { AuthApi } from './authApi.js';
+export * from './filesApi.js';
+import { FilesApi } from './filesApi.js';
 export * from './notesApi.js';
 import { NotesApi } from './notesApi.js';
 export * from './tagsApi.js';
@@ -15,4 +17,4 @@ export class HttpError extends Error {
 
 export { RequestFile } from '../model/models.js';
 
-export const APIS = [AuthApi, NotesApi, TagsApi];
+export const APIS = [AuthApi, FilesApi, NotesApi, TagsApi];

@@ -1,6 +1,7 @@
 import localVarRequest from 'request';
 
-export * from './handlersCreatedNote.js';
+export * from './filesUploadPostRequest.js';
+export * from './handlersCreatingNote.js';
 export * from './handlersHttpErrorAny.js';
 export * from './handlersHttpResponseAnyAny.js';
 export * from './handlersHttpResponseArrayModelsAPITokenAny.js';
@@ -37,7 +38,8 @@ export interface RequestDetailedFile {
 export type RequestFile = string | Buffer | fs.ReadStream | RequestDetailedFile;
 
 
-import { HandlersCreatedNote } from './handlersCreatedNote.js';
+import { FilesUploadPostRequest } from './filesUploadPostRequest.js';
+import { HandlersCreatingNote } from './handlersCreatingNote.js';
 import { HandlersHttpErrorAny } from './handlersHttpErrorAny.js';
 import { HandlersHttpResponseAnyAny } from './handlersHttpResponseAnyAny.js';
 import { HandlersHttpResponseArrayModelsAPITokenAny } from './handlersHttpResponseArrayModelsAPITokenAny.js';
@@ -78,7 +80,8 @@ let enumsMap: {[index: string]: any} = {
 }
 
 let typeMap: {[index: string]: any} = {
-    "HandlersCreatedNote": HandlersCreatedNote,
+    "FilesUploadPostRequest": FilesUploadPostRequest,
+    "HandlersCreatingNote": HandlersCreatingNote,
     "HandlersHttpErrorAny": HandlersHttpErrorAny,
     "HandlersHttpResponseAnyAny": HandlersHttpResponseAnyAny,
     "HandlersHttpResponseArrayModelsAPITokenAny": HandlersHttpResponseArrayModelsAPITokenAny,

@@ -1,15 +1,21 @@
 import { SecondBrainPublishedConfig } from 'config.js';
-import { NotesApi } from './notes-api.js';
+import { FilesApi } from './files-api.js';
+import { NotesApi } from '../generated/api/api.js';
 
-type Api = { notes: NotesApi };
+type Api = { notes: NotesApi; files: FilesApi };
 let api: Api;
 
 function initApi(c: SecondBrainPublishedConfig): void {
-  const notes = new NotesApi(c.remoteAddress);
-  notes.defaultHeaders = {
+  const defaultHeaders = {
     Authorization: `Bearer ${c.token}`,
   };
-  api = { notes };
+  const notes = new NotesApi(c.remoteAddress);
+  notes.defaultHeaders = defaultHeaders;
+
+  const files = new FilesApi(c.remoteAddress);
+  files.defaultHeaders = defaultHeaders;
+
+  api = { notes, files };
 }
 
 export function getApi(c: SecondBrainPublishedConfig): Api {
