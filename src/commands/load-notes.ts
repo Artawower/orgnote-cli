@@ -1,4 +1,3 @@
-import { Note } from '../types.js';
 import { SecondBrainPublishedConfig } from '../config.js';
 import { getApi } from './sdk.js';
 import { getLogger } from '../logger.js';
@@ -7,6 +6,7 @@ import { join } from 'path';
 import { writeContent } from '../tools/write-file.js';
 import { touch } from '../tools/touch.js';
 import { ModelsPublicNote } from '../generated/api/api.js';
+import { set } from '../store.js';
 
 const notesLimit = 100;
 
@@ -16,6 +16,7 @@ export async function loadNotes(
 ): Promise<void> {
   const notes = await getNotes(config);
   notes.forEach((n) => saveNoteLocally(config.rootFolder, n));
+  set('lastSync', new Date());
   backupDirectory(config.rootFolder, config.backupCount, config.backupDir);
 }
 
