@@ -36,7 +36,7 @@ const sendNotes = async (
   const mappedNotes = notes.map((note) => mapNoteToCreatingNote(note));
 
   try {
-    await api.files.uploadFiles(files);
+    !!files.length && (await api.files.uploadFiles(files));
     await api.notes.notesBulkUpsertPut(mappedNotes);
   } catch (e) {
     const data = e.response?.data ?? e.body;
