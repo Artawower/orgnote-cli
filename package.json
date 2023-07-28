@@ -14,10 +14,16 @@
     "codegen:api2": "swagger-typescript-api --axios -p http://localhost:8000/v1/swagger/doc.json -o ./src -n generated/api.ts && yarn convert:api"
   },
   "repository": "git+https://github.com/Artawower/second-brain-publisher.git",
-  "keywords": ["org", "roam", "second brain"],
+  "keywords": [
+    "org",
+    "roam",
+    "second brain"
+  ],
   "author": "darkawower <artawower@protonmail.com> (https://du-blog.ru/)",
   "license": "MIT",
-  "files": ["dist/**"],
+  "files": [
+    "dist/**"
+  ],
   "bin": {
     "second-brain-publisher": "dist/index.js"
   },
@@ -49,6 +55,7 @@
     "form-data": "4.0.0",
     "org-mode-ast": "0.2.8",
     "request": "2.88.2",
+    "sqlite3": "5.1.6",
     "uuid": "8.3.2",
     "winston": "3.9.0",
     "yargs": "17.5.1"

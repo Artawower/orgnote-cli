@@ -12,8 +12,6 @@ function initLogger(): void {
     level: 'warning',
     format: format.combine(format.splat(), format.json()),
     transports: [
-      new transports.File({ filename: 'error.log', level: 'error' }),
-      new transports.File({ filename: 'combined.log' }),
       new transports.Console({
         format: format.combine(format.colorize(), logFormat),
       }),
@@ -26,11 +24,20 @@ function configureLogger(config?: Partial<SecondBrainPublishedConfig>): void {
     return;
   }
   logger.level = 'info';
-  logger.add(
+  [
+    new transports.File({
+      dirname: config.logPath,
+      filename: 'second-brain-error.log',
+      level: 'error',
+    }),
+    new transports.File({
+      dirname: config.logPath,
+      filename: 'second-brain-combined.log',
+    }),
     new transports.Console({
       format: format.simple(),
-    })
-  );
+    }),
+  ].forEach((transport) => logger.add(transport));
 }
 export function getLogger(
   config: Partial<SecondBrainPublishedConfig> = {}

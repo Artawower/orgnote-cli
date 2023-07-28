@@ -8,6 +8,7 @@ export interface SecondBrainPublishedConfig {
   version: string;
   name?: string;
   debug?: boolean;
+  logPath?: string;
 }
 
 const defaultUrl =
@@ -28,6 +29,7 @@ export function getConfig(
     token: process.env.SECOND_BRAIN_TOKEN || '',
     rootFolder,
     version: process.env.SECOND_BRAIN_VERSION || 'v1',
+    logPath: '/tmp/log/second-brain',
   };
 
   try {
