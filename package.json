@@ -1,6 +1,6 @@
 {
   "name": "second-brain-publisher",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "Project for synchronizing org roam notes and second brain ",
   "type": "module",
   "main": "dist/index.js",
@@ -14,16 +14,10 @@
     "codegen:api2": "swagger-typescript-api --axios -p http://localhost:8000/v1/swagger/doc.json -o ./src -n generated/api.ts && yarn convert:api"
   },
   "repository": "git+https://github.com/Artawower/second-brain-publisher.git",
-  "keywords": [
-    "org",
-    "roam",
-    "second brain"
-  ],
+  "keywords": ["org", "roam", "second brain"],
   "author": "darkawower <artawower@protonmail.com> (https://du-blog.ru/)",
   "license": "MIT",
-  "files": [
-    "dist/**"
-  ],
+  "files": ["dist/**"],
   "bin": {
     "second-brain-publisher": "dist/index.js"
   },
@@ -58,6 +52,7 @@
     "sqlite3": "5.1.6",
     "uuid": "8.3.2",
     "winston": "3.9.0",
-    "yargs": "17.5.1"
+    "yargs": "17.5.1",
+    "zip-a-folder": "2.0.0"
   }
 }

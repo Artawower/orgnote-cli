@@ -29,5 +29,6 @@ let logger: Logger;
     await handleCommand(command, config, path)
   } catch (e) {
     logger.error(e);
+    throw e;
   }
 })();

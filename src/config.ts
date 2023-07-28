@@ -9,6 +9,8 @@ export interface SecondBrainPublishedConfig {
   name?: string;
   debug?: boolean;
   logPath?: string;
+  backupCount?: number;
+  backupDir?: string;
 }
 
 const defaultUrl =
@@ -30,6 +32,7 @@ export function getConfig(
     rootFolder,
     version: process.env.SECOND_BRAIN_VERSION || 'v1',
     logPath: '/tmp/log/second-brain',
+    backupCount: 3,
   };
 
   try {

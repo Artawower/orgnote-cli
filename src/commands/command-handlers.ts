@@ -1,7 +1,7 @@
 import { getLogger } from '../logger.js';
 import { SecondBrainPublishedConfig } from '../config.js';
-import axios from 'axios';
 import { publishNotes } from './publish-notes.js';
+import { loadNotes } from './load-notes.js';
 
 const logger = getLogger();
 
@@ -25,18 +25,6 @@ const commands: {
 } = {};
 
 // TMP FUNCS
-
-async function loadNotes(config: SecondBrainPublishedConfig) {
-  try {
-    const rspns = await axios({
-      method: 'get',
-      url: `${config.remoteAddress}/${config.version}/notes`,
-    });
-    return rspns.data;
-  } catch (e) {
-    logger.error(e.response);
-  }
-}
 
 const registerCommand = (command: CliCommand, handler: CommandHandlerFn) => {
   commands[command] = handler;

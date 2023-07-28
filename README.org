@@ -39,7 +39,9 @@ Create ~~/.config/second-brain/config.json~ with next schema:
     "name": "Local development",
     "remoteAddress": "http://localhost:8000/v1",
     "token": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-    "rootFolder": "~/some/path/"
+    "rootFolder": "~/some/path/",
+    "backupDir": "/tmp/second-brain/backups",
+    "backupCount": 2
   },
   {
     "name": "Remote development",

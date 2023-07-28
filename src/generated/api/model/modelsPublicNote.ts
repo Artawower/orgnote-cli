@@ -20,6 +20,7 @@ export class ModelsPublicNote {
     'filePath'?: Array<string>;
     'id'?: string;
     'meta'?: ModelsNoteMeta;
+    'updatedAt'?: string;
 
     static discriminator: string | undefined = undefined;
 
@@ -48,6 +49,11 @@ export class ModelsPublicNote {
             "name": "meta",
             "baseName": "meta",
             "type": "ModelsNoteMeta"
+        },
+        {
+            "name": "updatedAt",
+            "baseName": "updatedAt",
+            "type": "string"
         }    ];
 
     static getAttributeTypeMap() {

@@ -232,12 +232,13 @@ export class NotesApi {
     /**
      * Get all notes with optional filter
      * @summary Get notes
-     * @param limit Limit for pagination
-     * @param offset Offset for pagination
-     * @param userId User ID
-     * @param searchText Search text
+     * @param limit 
+     * @param offset 
+     * @param userId User id of which notes to load
+     * @param searchText 
+     * @param my Load all my own notes (user will be used from provided token)
      */
-    public async notesGet (limit: number, offset: number, userId?: string, searchText?: string, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: HandlersHttpResponseArrayModelsPublicNoteModelsPagination;  }> {
+    public async notesGet (limit?: number, offset?: number, userId?: string, searchText?: string, my?: boolean, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: HandlersHttpResponseArrayModelsPublicNoteModelsPagination;  }> {
         const localVarPath = this.basePath + '/notes/';
         let localVarQueryParameters: any = {};
         let localVarHeaderParams: any = (<any>Object).assign({}, this._defaultHeaders);
@@ -250,14 +251,12 @@ export class NotesApi {
         }
         let localVarFormParams: any = {};
 
-        // verify required parameter 'limit' is not null or undefined
-        if (limit === null || limit === undefined) {
-            throw new Error('Required parameter limit was null or undefined when calling notesGet.');
+        if (limit !== undefined) {
+            localVarQueryParameters['limit'] = ObjectSerializer.serialize(limit, "number");
         }
 
-        // verify required parameter 'offset' is not null or undefined
-        if (offset === null || offset === undefined) {
-            throw new Error('Required parameter offset was null or undefined when calling notesGet.');
+        if (offset !== undefined) {
+            localVarQueryParameters['offset'] = ObjectSerializer.serialize(offset, "number");
         }
 
         if (userId !== undefined) {
@@ -268,12 +267,8 @@ export class NotesApi {
             localVarQueryParameters['searchText'] = ObjectSerializer.serialize(searchText, "string");
         }
 
-        if (limit !== undefined) {
-            localVarQueryParameters['limit'] = ObjectSerializer.serialize(limit, "number");
-        }
-
-        if (offset !== undefined) {
-            localVarQueryParameters['offset'] = ObjectSerializer.serialize(offset, "number");
+        if (my !== undefined) {
+            localVarQueryParameters['my'] = ObjectSerializer.serialize(my, "boolean");
         }
 
         (<any>Object).assign(localVarHeaderParams, options.headers);
