@@ -73,6 +73,9 @@ devDependencies:
   swagger-typescript-api:
     specifier: 13.0.1
     version: 13.0.1
+  ts-add-js-extension:
+    specifier: 1.5.8
+    version: 1.5.8
   ts-jest:
     specifier: 27.1.3
     version: 27.1.3(@babel/core@7.17.9)(@types/jest@27.4.1)(jest@27.5.1)(typescript@4.5.5)
@@ -4922,6 +4925,13 @@ packages:
   /triple-beam@1.3.0:
     resolution: {integrity: sha512-XrHUvV5HpdLmIj4uVMxHggLbFSZYIn7HEWsqePZcI50pco+MPqJ50wMGY794X7AOOhxOBAjbkqfAbEe/QMp2Lw==}
     dev: false
+
+  /ts-add-js-extension@1.5.8:
+    resolution: {integrity: sha512-6k8xb7olGhFZh23LS6ND/glurraDOvt3N08jQzGnEhW5izQijeZgaTBhRtk0s39TwsOy05AGxsyAiKoWS8AbgQ==}
+    hasBin: true
+    dependencies:
+      typescript: 5.1.6
+    dev: true
 
   /ts-jest@27.1.3(@babel/core@7.17.9)(@types/jest@27.4.1)(jest@27.5.1)(typescript@4.5.5):
     resolution: {integrity: sha512-6Nlura7s6uM9BVUAoqLH7JHyMXjz8gluryjpPXxr3IxZdAXnU6FhjvVLHFtfd1vsE1p8zD1OJfskkc0jhTSnkA==}

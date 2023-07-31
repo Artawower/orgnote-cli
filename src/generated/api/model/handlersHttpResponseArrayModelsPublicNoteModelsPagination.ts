@@ -10,9 +10,9 @@
  * Do not edit the class manually.
  */
 
-import { RequestFile } from './models.js';
-import { ModelsPagination } from './modelsPagination.js';
-import { ModelsPublicNote } from './modelsPublicNote.js';
+import { RequestFile } from './models';
+import { ModelsPagination } from './modelsPagination';
+import { ModelsPublicNote } from './modelsPublicNote';
 
 export class HandlersHttpResponseArrayModelsPublicNoteModelsPagination {
     'data'?: Array<ModelsPublicNote>;

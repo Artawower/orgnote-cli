@@ -10,10 +10,10 @@
  * Do not edit the class manually.
  */
 
-import { RequestFile } from './models.js';
-import { ModelsCategory } from './modelsCategory.js';
-import { ModelsNoteHeading } from './modelsNoteHeading.js';
-import { ModelsNoteLink } from './modelsNoteLink.js';
+import { RequestFile } from './models';
+import { ModelsCategory } from './modelsCategory';
+import { ModelsNoteHeading } from './modelsNoteHeading';
+import { ModelsNoteLink } from './modelsNoteLink';
 
 export class ModelsNoteMeta {
     'category'?: ModelsCategory;

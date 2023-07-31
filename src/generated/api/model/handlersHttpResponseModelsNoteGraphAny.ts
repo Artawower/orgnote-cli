@@ -10,8 +10,8 @@
  * Do not edit the class manually.
  */
 
-import { RequestFile } from './models.js';
-import { ModelsNoteGraph } from './modelsNoteGraph.js';
+import { RequestFile } from './models';
+import { ModelsNoteGraph } from './modelsNoteGraph';
 
 export class HandlersHttpResponseModelsNoteGraphAny {
     'data'?: ModelsNoteGraph;

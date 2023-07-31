@@ -10,8 +10,8 @@
  * Do not edit the class manually.
  */
 
-import { RequestFile } from './models.js';
-import { HandlersOAuthRedirectData } from './handlersOAuthRedirectData.js';
+import { RequestFile } from './models';
+import { HandlersOAuthRedirectData } from './handlersOAuthRedirectData';
 
 export class HandlersHttpResponseHandlersOAuthRedirectDataAny {
     'data'?: HandlersOAuthRedirectData;

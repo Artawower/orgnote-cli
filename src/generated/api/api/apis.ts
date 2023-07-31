@@ -1,11 +1,11 @@
-export * from './authApi.js';
-import { AuthApi } from './authApi.js';
-export * from './filesApi.js';
-import { FilesApi } from './filesApi.js';
-export * from './notesApi.js';
-import { NotesApi } from './notesApi.js';
-export * from './tagsApi.js';
-import { TagsApi } from './tagsApi.js';
+export * from './authApi';
+import { AuthApi } from './authApi';
+export * from './filesApi';
+import { FilesApi } from './filesApi';
+export * from './notesApi';
+import { NotesApi } from './notesApi';
+export * from './tagsApi';
+import { TagsApi } from './tagsApi';
 import * as http from 'http';
 
 export class HttpError extends Error {
@@ -15,6 +15,6 @@ export class HttpError extends Error {
     }
 }
 
-export { RequestFile } from '../model/models.js';
+export { RequestFile } from '../model/models';
 
 export const APIS = [AuthApi, FilesApi, NotesApi, TagsApi];

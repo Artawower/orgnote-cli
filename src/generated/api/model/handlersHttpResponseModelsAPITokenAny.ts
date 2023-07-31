@@ -10,8 +10,8 @@
  * Do not edit the class manually.
  */
 
-import { RequestFile } from './models.js';
-import { ModelsAPIToken } from './modelsAPIToken.js';
+import { RequestFile } from './models';
+import { ModelsAPIToken } from './modelsAPIToken';
 
 export class HandlersHttpResponseModelsAPITokenAny {
     'data'?: ModelsAPIToken;

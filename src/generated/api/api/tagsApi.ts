@@ -15,12 +15,12 @@ import localVarRequest from 'request';
 import http from 'http';
 
 /* tslint:disable:no-unused-locals */
-import { HandlersHttpErrorAny } from '../model/handlersHttpErrorAny.js';
-import { HandlersHttpResponseArrayStringAny } from '../model/handlersHttpResponseArrayStringAny.js';
+import { HandlersHttpErrorAny } from '../model/handlersHttpErrorAny';
+import { HandlersHttpResponseArrayStringAny } from '../model/handlersHttpResponseArrayStringAny';
 
-import { ObjectSerializer, Authentication, VoidAuth, Interceptor } from '../model/models.js';
+import { ObjectSerializer, Authentication, VoidAuth, Interceptor } from '../model/models';
 
-import { HttpError, RequestFile } from './apis.js';
+import { HttpError, RequestFile } from './apis';
 
 let defaultBasePath = 'http://localhost/v1';
 

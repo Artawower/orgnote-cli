@@ -15,18 +15,18 @@ import localVarRequest from 'request';
 import http from 'http';
 
 /* tslint:disable:no-unused-locals */
-import { HandlersCreatingNote } from '../model/handlersCreatingNote.js';
-import { HandlersHttpErrorAny } from '../model/handlersHttpErrorAny.js';
-import { HandlersHttpResponseAnyAny } from '../model/handlersHttpResponseAnyAny.js';
-import { HandlersHttpResponseArrayModelsPublicNoteAny } from '../model/handlersHttpResponseArrayModelsPublicNoteAny.js';
-import { HandlersHttpResponseArrayModelsPublicNoteModelsPagination } from '../model/handlersHttpResponseArrayModelsPublicNoteModelsPagination.js';
-import { HandlersHttpResponseModelsNoteGraphAny } from '../model/handlersHttpResponseModelsNoteGraphAny.js';
-import { HandlersHttpResponseModelsPublicNoteAny } from '../model/handlersHttpResponseModelsPublicNoteAny.js';
-import { HandlersSyncNotesRequest } from '../model/handlersSyncNotesRequest.js';
+import { HandlersCreatingNote } from '../model/handlersCreatingNote';
+import { HandlersHttpErrorAny } from '../model/handlersHttpErrorAny';
+import { HandlersHttpResponseAnyAny } from '../model/handlersHttpResponseAnyAny';
+import { HandlersHttpResponseArrayModelsPublicNoteAny } from '../model/handlersHttpResponseArrayModelsPublicNoteAny';
+import { HandlersHttpResponseArrayModelsPublicNoteModelsPagination } from '../model/handlersHttpResponseArrayModelsPublicNoteModelsPagination';
+import { HandlersHttpResponseModelsNoteGraphAny } from '../model/handlersHttpResponseModelsNoteGraphAny';
+import { HandlersHttpResponseModelsPublicNoteAny } from '../model/handlersHttpResponseModelsPublicNoteAny';
+import { HandlersSyncNotesRequest } from '../model/handlersSyncNotesRequest';
 
-import { ObjectSerializer, Authentication, VoidAuth, Interceptor } from '../model/models.js';
+import { ObjectSerializer, Authentication, VoidAuth, Interceptor } from '../model/models';
 
-import { HttpError, RequestFile } from './apis.js';
+import { HttpError, RequestFile } from './apis';
 
 let defaultBasePath = 'http://localhost/v1';
 

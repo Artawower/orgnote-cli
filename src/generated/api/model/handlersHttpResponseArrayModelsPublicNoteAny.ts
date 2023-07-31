@@ -10,8 +10,8 @@
  * Do not edit the class manually.
  */
 
-import { RequestFile } from './models.js';
-import { ModelsPublicNote } from './modelsPublicNote.js';
+import { RequestFile } from './models';
+import { ModelsPublicNote } from './modelsPublicNote';
 
 export class HandlersHttpResponseArrayModelsPublicNoteAny {
     'data'?: Array<ModelsPublicNote>;

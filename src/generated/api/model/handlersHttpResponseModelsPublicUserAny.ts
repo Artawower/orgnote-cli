@@ -10,8 +10,8 @@
  * Do not edit the class manually.
  */
 
-import { RequestFile } from './models.js';
-import { ModelsPublicUser } from './modelsPublicUser.js';
+import { RequestFile } from './models';
+import { ModelsPublicUser } from './modelsPublicUser';
 
 export class HandlersHttpResponseModelsPublicUserAny {
     'data'?: ModelsPublicUser;

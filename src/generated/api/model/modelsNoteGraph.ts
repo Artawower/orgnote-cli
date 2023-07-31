@@ -10,9 +10,9 @@
  * Do not edit the class manually.
  */
 
-import { RequestFile } from './models.js';
-import { ModelsGraphNoteLink } from './modelsGraphNoteLink.js';
-import { ModelsGraphNoteNode } from './modelsGraphNoteNode.js';
+import { RequestFile } from './models';
+import { ModelsGraphNoteLink } from './modelsGraphNoteLink';
+import { ModelsGraphNoteNode } from './modelsGraphNoteNode';
 
 export class ModelsNoteGraph {
     'links'?: Array<ModelsGraphNoteLink>;

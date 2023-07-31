@@ -10,8 +10,8 @@
  * Do not edit the class manually.
  */
 
-import { RequestFile } from './models.js';
-import { ModelsNoteMeta } from './modelsNoteMeta.js';
+import { RequestFile } from './models';
+import { ModelsNoteMeta } from './modelsNoteMeta';
 
 export class HandlersCreatingNote {
     'content'?: string;

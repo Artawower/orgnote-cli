@@ -10,8 +10,8 @@
  * Do not edit the class manually.
  */
 
-import { RequestFile } from './models.js';
-import { HandlersCreatingNote } from './handlersCreatingNote.js';
+import { RequestFile } from './models';
+import { HandlersCreatingNote } from './handlersCreatingNote';
 
 export class HandlersSyncNotesRequest {
     'notes'?: Array<HandlersCreatingNote>;

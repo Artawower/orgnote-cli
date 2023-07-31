@@ -10,7 +10,7 @@
  * Do not edit the class manually.
  */
 
-import { RequestFile } from './models.js';
+import { RequestFile } from './models';
 
 export class HandlersOAuthRedirectData {
     'redirectUrl'?: string;

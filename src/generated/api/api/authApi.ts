@@ -15,15 +15,15 @@ import localVarRequest from 'request';
 import http from 'http';
 
 /* tslint:disable:no-unused-locals */
-import { HandlersHttpErrorAny } from '../model/handlersHttpErrorAny.js';
-import { HandlersHttpResponseArrayModelsAPITokenAny } from '../model/handlersHttpResponseArrayModelsAPITokenAny.js';
-import { HandlersHttpResponseHandlersOAuthRedirectDataAny } from '../model/handlersHttpResponseHandlersOAuthRedirectDataAny.js';
-import { HandlersHttpResponseModelsAPITokenAny } from '../model/handlersHttpResponseModelsAPITokenAny.js';
-import { HandlersHttpResponseModelsPublicUserAny } from '../model/handlersHttpResponseModelsPublicUserAny.js';
+import { HandlersHttpErrorAny } from '../model/handlersHttpErrorAny';
+import { HandlersHttpResponseArrayModelsAPITokenAny } from '../model/handlersHttpResponseArrayModelsAPITokenAny';
+import { HandlersHttpResponseHandlersOAuthRedirectDataAny } from '../model/handlersHttpResponseHandlersOAuthRedirectDataAny';
+import { HandlersHttpResponseModelsAPITokenAny } from '../model/handlersHttpResponseModelsAPITokenAny';
+import { HandlersHttpResponseModelsPublicUserAny } from '../model/handlersHttpResponseModelsPublicUserAny';
 
-import { ObjectSerializer, Authentication, VoidAuth, Interceptor } from '../model/models.js';
+import { ObjectSerializer, Authentication, VoidAuth, Interceptor } from '../model/models';
 
-import { HttpError, RequestFile } from './apis.js';
+import { HttpError, RequestFile } from './apis';
 
 let defaultBasePath = 'http://localhost/v1';
 

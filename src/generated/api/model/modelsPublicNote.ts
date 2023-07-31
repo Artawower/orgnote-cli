@@ -10,9 +10,9 @@
  * Do not edit the class manually.
  */
 
-import { RequestFile } from './models.js';
-import { ModelsNoteMeta } from './modelsNoteMeta.js';
-import { ModelsPublicUser } from './modelsPublicUser.js';
+import { RequestFile } from './models';
+import { ModelsNoteMeta } from './modelsNoteMeta';
+import { ModelsPublicUser } from './modelsPublicUser';
 
 export class ModelsPublicNote {
     'author'?: ModelsPublicUser;
