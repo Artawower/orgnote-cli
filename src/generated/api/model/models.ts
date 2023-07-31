@@ -5,6 +5,7 @@ export * from './handlersCreatingNote.js';
 export * from './handlersHttpErrorAny.js';
 export * from './handlersHttpResponseAnyAny.js';
 export * from './handlersHttpResponseArrayModelsAPITokenAny.js';
+export * from './handlersHttpResponseArrayModelsPublicNoteAny.js';
 export * from './handlersHttpResponseArrayModelsPublicNoteModelsPagination.js';
 export * from './handlersHttpResponseArrayStringAny.js';
 export * from './handlersHttpResponseHandlersOAuthRedirectDataAny.js';
@@ -13,6 +14,7 @@ export * from './handlersHttpResponseModelsNoteGraphAny.js';
 export * from './handlersHttpResponseModelsPublicNoteAny.js';
 export * from './handlersHttpResponseModelsPublicUserAny.js';
 export * from './handlersOAuthRedirectData.js';
+export * from './handlersSyncNotesRequest.js';
 export * from './modelsAPIToken.js';
 export * from './modelsCategory.js';
 export * from './modelsGraphNoteLink.js';
@@ -43,6 +45,7 @@ import { HandlersCreatingNote } from './handlersCreatingNote.js';
 import { HandlersHttpErrorAny } from './handlersHttpErrorAny.js';
 import { HandlersHttpResponseAnyAny } from './handlersHttpResponseAnyAny.js';
 import { HandlersHttpResponseArrayModelsAPITokenAny } from './handlersHttpResponseArrayModelsAPITokenAny.js';
+import { HandlersHttpResponseArrayModelsPublicNoteAny } from './handlersHttpResponseArrayModelsPublicNoteAny.js';
 import { HandlersHttpResponseArrayModelsPublicNoteModelsPagination } from './handlersHttpResponseArrayModelsPublicNoteModelsPagination.js';
 import { HandlersHttpResponseArrayStringAny } from './handlersHttpResponseArrayStringAny.js';
 import { HandlersHttpResponseHandlersOAuthRedirectDataAny } from './handlersHttpResponseHandlersOAuthRedirectDataAny.js';
@@ -51,6 +54,7 @@ import { HandlersHttpResponseModelsNoteGraphAny } from './handlersHttpResponseMo
 import { HandlersHttpResponseModelsPublicNoteAny } from './handlersHttpResponseModelsPublicNoteAny.js';
 import { HandlersHttpResponseModelsPublicUserAny } from './handlersHttpResponseModelsPublicUserAny.js';
 import { HandlersOAuthRedirectData } from './handlersOAuthRedirectData.js';
+import { HandlersSyncNotesRequest } from './handlersSyncNotesRequest.js';
 import { ModelsAPIToken } from './modelsAPIToken.js';
 import { ModelsCategory } from './modelsCategory.js';
 import { ModelsGraphNoteLink } from './modelsGraphNoteLink.js';
@@ -85,6 +89,7 @@ let typeMap: {[index: string]: any} = {
     "HandlersHttpErrorAny": HandlersHttpErrorAny,
     "HandlersHttpResponseAnyAny": HandlersHttpResponseAnyAny,
     "HandlersHttpResponseArrayModelsAPITokenAny": HandlersHttpResponseArrayModelsAPITokenAny,
+    "HandlersHttpResponseArrayModelsPublicNoteAny": HandlersHttpResponseArrayModelsPublicNoteAny,
     "HandlersHttpResponseArrayModelsPublicNoteModelsPagination": HandlersHttpResponseArrayModelsPublicNoteModelsPagination,
     "HandlersHttpResponseArrayStringAny": HandlersHttpResponseArrayStringAny,
     "HandlersHttpResponseHandlersOAuthRedirectDataAny": HandlersHttpResponseHandlersOAuthRedirectDataAny,
@@ -93,6 +98,7 @@ let typeMap: {[index: string]: any} = {
     "HandlersHttpResponseModelsPublicNoteAny": HandlersHttpResponseModelsPublicNoteAny,
     "HandlersHttpResponseModelsPublicUserAny": HandlersHttpResponseModelsPublicUserAny,
     "HandlersOAuthRedirectData": HandlersOAuthRedirectData,
+    "HandlersSyncNotesRequest": HandlersSyncNotesRequest,
     "ModelsAPIToken": ModelsAPIToken,
     "ModelsGraphNoteLink": ModelsGraphNoteLink,
     "ModelsGraphNoteNode": ModelsGraphNoteNode,

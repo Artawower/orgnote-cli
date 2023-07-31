@@ -18,9 +18,11 @@ import http from 'http';
 import { HandlersCreatingNote } from '../model/handlersCreatingNote.js';
 import { HandlersHttpErrorAny } from '../model/handlersHttpErrorAny.js';
 import { HandlersHttpResponseAnyAny } from '../model/handlersHttpResponseAnyAny.js';
+import { HandlersHttpResponseArrayModelsPublicNoteAny } from '../model/handlersHttpResponseArrayModelsPublicNoteAny.js';
 import { HandlersHttpResponseArrayModelsPublicNoteModelsPagination } from '../model/handlersHttpResponseArrayModelsPublicNoteModelsPagination.js';
 import { HandlersHttpResponseModelsNoteGraphAny } from '../model/handlersHttpResponseModelsNoteGraphAny.js';
 import { HandlersHttpResponseModelsPublicNoteAny } from '../model/handlersHttpResponseModelsPublicNoteAny.js';
+import { HandlersSyncNotesRequest } from '../model/handlersSyncNotesRequest.js';
 
 import { ObjectSerializer, Authentication, VoidAuth, Interceptor } from '../model/models.js';
 
@@ -94,7 +96,7 @@ export class NotesApi {
     /**
      * Bulk update or insert notes
      * @summary Upsert notes
-     * @param notes List of created notes
+     * @param notes List of crated notes
      */
     public async notesBulkUpsertPut (notes: Array<HandlersCreatingNote>, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: object;  }> {
         const localVarPath = this.basePath + '/notes/bulk-upsert';
@@ -237,8 +239,9 @@ export class NotesApi {
      * @param userId User id of which notes to load
      * @param searchText 
      * @param my Load all my own notes (user will be used from provided token)
+     * @param from 
      */
-    public async notesGet (limit?: number, offset?: number, userId?: string, searchText?: string, my?: boolean, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: HandlersHttpResponseArrayModelsPublicNoteModelsPagination;  }> {
+    public async notesGet (limit?: number, offset?: number, userId?: string, searchText?: string, my?: boolean, from?: string, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: HandlersHttpResponseArrayModelsPublicNoteModelsPagination;  }> {
         const localVarPath = this.basePath + '/notes/';
         let localVarQueryParameters: any = {};
         let localVarHeaderParams: any = (<any>Object).assign({}, this._defaultHeaders);
@@ -269,6 +272,10 @@ export class NotesApi {
 
         if (my !== undefined) {
             localVarQueryParameters['my'] = ObjectSerializer.serialize(my, "boolean");
+        }
+
+        if (from !== undefined) {
+            localVarQueryParameters['from'] = ObjectSerializer.serialize(from, "string");
         }
 
         (<any>Object).assign(localVarHeaderParams, options.headers);
@@ -507,6 +514,75 @@ export class NotesApi {
                     } else {
                         if (response.statusCode && response.statusCode >= 200 && response.statusCode <= 299) {
                             body = ObjectSerializer.deserialize(body, "object");
+                            resolve({ response: response, body: body });
+                        } else {
+                            reject(new HttpError(response, body, response.statusCode));
+                        }
+                    }
+                });
+            });
+        });
+    }
+    /**
+     * Synchronize notes with specific timestamp
+     * @summary Synchronize notes
+     * @param data Sync notes request
+     */
+    public async notesSyncPost (data: HandlersSyncNotesRequest, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: HandlersHttpResponseArrayModelsPublicNoteAny;  }> {
+        const localVarPath = this.basePath + '/notes/sync';
+        let localVarQueryParameters: any = {};
+        let localVarHeaderParams: any = (<any>Object).assign({}, this._defaultHeaders);
+        const produces = ['application/json'];
+        // give precedence to 'application/json'
+        if (produces.indexOf('application/json') >= 0) {
+            localVarHeaderParams.Accept = 'application/json';
+        } else {
+            localVarHeaderParams.Accept = produces.join(',');
+        }
+        let localVarFormParams: any = {};
+
+        // verify required parameter 'data' is not null or undefined
+        if (data === null || data === undefined) {
+            throw new Error('Required parameter data was null or undefined when calling notesSyncPost.');
+        }
+
+        (<any>Object).assign(localVarHeaderParams, options.headers);
+
+        let localVarUseFormData = false;
+
+        let localVarRequestOptions: localVarRequest.Options = {
+            method: 'POST',
+            qs: localVarQueryParameters,
+            headers: localVarHeaderParams,
+            uri: localVarPath,
+            useQuerystring: this._useQuerystring,
+            json: true,
+            body: ObjectSerializer.serialize(data, "HandlersSyncNotesRequest")
+        };
+
+        let authenticationPromise = Promise.resolve();
+        authenticationPromise = authenticationPromise.then(() => this.authentications.default.applyToRequest(localVarRequestOptions));
+
+        let interceptorPromise = authenticationPromise;
+        for (const interceptor of this.interceptors) {
+            interceptorPromise = interceptorPromise.then(() => interceptor(localVarRequestOptions));
+        }
+
+        return interceptorPromise.then(() => {
+            if (Object.keys(localVarFormParams).length) {
+                if (localVarUseFormData) {
+                    (<any>localVarRequestOptions).formData = localVarFormParams;
+                } else {
+                    localVarRequestOptions.form = localVarFormParams;
+                }
+            }
+            return new Promise<{ response: http.IncomingMessage; body: HandlersHttpResponseArrayModelsPublicNoteAny;  }>((resolve, reject) => {
+                localVarRequest(localVarRequestOptions, (error, response, body) => {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        if (response.statusCode && response.statusCode >= 200 && response.statusCode <= 299) {
+                            body = ObjectSerializer.deserialize(body, "HandlersHttpResponseArrayModelsPublicNoteAny");
                             resolve({ response: response, body: body });
                         } else {
                             reject(new HttpError(response, body, response.statusCode));

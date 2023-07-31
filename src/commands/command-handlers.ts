@@ -2,14 +2,15 @@ import { getLogger } from '../logger.js';
 import { SecondBrainPublishedConfig } from '../config.js';
 import { publishNotes } from './publish-notes.js';
 import { loadNotes } from './load-notes.js';
+import { syncNotes } from './sync-notes.js';
 
 const logger = getLogger();
 
 export enum CliCommand {
-  Collect = 'collect',
+  Load = 'load',
   Publish = 'publish',
   PublishAll = 'publish-all',
-  // Sync = "sync",
+  Sync = 'sync',
 }
 
 type CommandHandlerFn = (
@@ -34,13 +35,17 @@ registerCommand(CliCommand.Publish, async (config, path): Promise<void> => {
   await publishNotes(path, config);
 });
 
-registerCommand(CliCommand.Collect, async (config): Promise<void> => {
+registerCommand(CliCommand.Load, async (config): Promise<void> => {
   await loadNotes(config);
 });
 
 registerCommand(CliCommand.PublishAll, async (config): Promise<void> => {
   const path = config.rootFolder;
   await publishNotes(path, config);
+});
+
+registerCommand(CliCommand.Sync, async (config): Promise<void> => {
+  await syncNotes(config);
 });
 
 export async function handleCommand(

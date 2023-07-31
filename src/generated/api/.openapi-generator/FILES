@@ -11,6 +11,7 @@ model/handlersCreatingNote.ts
 model/handlersHttpErrorAny.ts
 model/handlersHttpResponseAnyAny.ts
 model/handlersHttpResponseArrayModelsAPITokenAny.ts
+model/handlersHttpResponseArrayModelsPublicNoteAny.ts
 model/handlersHttpResponseArrayModelsPublicNoteModelsPagination.ts
 model/handlersHttpResponseArrayStringAny.ts
 model/handlersHttpResponseHandlersOAuthRedirectDataAny.ts
@@ -19,6 +20,7 @@ model/handlersHttpResponseModelsNoteGraphAny.ts
 model/handlersHttpResponseModelsPublicNoteAny.ts
 model/handlersHttpResponseModelsPublicUserAny.ts
 model/handlersOAuthRedirectData.ts
+model/handlersSyncNotesRequest.ts
 model/models.ts
 model/modelsAPIToken.ts
 model/modelsCategory.ts

@@ -1,27 +1,16 @@
 import { readFiles } from '../tools/read-files.js';
 import { SecondBrainPublishedConfig } from '../config.js';
 import { getLogger } from '../logger.js';
-import { Note } from 'types.js';
 import { dirname, join } from 'path';
 import { prepareNotes } from '../tools/prepare-note.js';
 import { getApi } from './sdk.js';
 import { statSync } from 'fs';
-import { HandlersCreatingNote, ModelsNoteMeta } from 'generated/api/api.js';
+import { HandlersCreatingNote } from 'generated/api/api.js';
 
 const logger = getLogger();
 
-function mapNoteToCreatingNote(note: Note): HandlersCreatingNote {
-  return {
-    id: note.id,
-    content: note.content,
-    filePath: note.filePath,
-    // TODO: master generate correct enum type from swagger
-    meta: note.meta as unknown as ModelsNoteMeta,
-  };
-}
-
 const sendNotes = async (
-  notes: Note[],
+  notes: HandlersCreatingNote[],
   config: SecondBrainPublishedConfig,
   dirPath: string
 ) => {
@@ -33,11 +22,9 @@ const sendNotes = async (
       .filter((i) => !!i)
   );
 
-  const mappedNotes = notes.map((note) => mapNoteToCreatingNote(note));
-
   try {
     !!files.length && (await api.files.uploadFiles(files));
-    await api.notes.notesBulkUpsertPut(mappedNotes);
+    await api.notes.notesBulkUpsertPut(notes);
   } catch (e) {
     const data = e.response?.data ?? e.body;
     logger.error(`🦄: [http error] error while send http request:

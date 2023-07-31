@@ -1,26 +1,27 @@
 import { SecondBrainPublishedConfig } from '../config.js';
-import { readdirSync, readFileSync, statSync } from 'fs';
+import { readFileSync, statSync } from 'fs';
 import { parse, withMetaInfo } from 'org-mode-ast';
-import { Note } from 'types';
 import { getRelativeNotePath } from './relative-file-path.js';
 import { getLogger } from '../logger.js';
-import { resolve } from 'path';
-import { isOrgFile } from './is-org-file.js';
+import { getOrgFilesRecursively } from './read-orf-files-recursively.js';
+import { HandlersCreatingNote, ModelsPublicNote } from 'generated/api/api.js';
 
 const logger = getLogger();
 export function prepareNote(
   filePath: string,
   config: SecondBrainPublishedConfig
-): Note {
+): ModelsPublicNote {
   const relativeNotePath = getRelativeNotePath(config.rootFolder, filePath);
   const fileContent = readFileSync(filePath, 'utf8');
   const parsedDoc = parse(fileContent);
   const nodeTree = withMetaInfo(parsedDoc);
-  const note: Note = {
+  const lastUpdatedTime = statSync(filePath).mtime;
+  const note: HandlersCreatingNote = {
     id: nodeTree.meta.id,
-    meta: nodeTree.meta,
+    meta: nodeTree.meta as any,
     content: fileContent,
     filePath: relativeNotePath,
+    updatedAt: lastUpdatedTime.toISOString(),
   };
 
   if (!note.id) {
@@ -32,24 +33,10 @@ export function prepareNote(
 export function prepareNotesRecursively(
   dirPath: string,
   config: SecondBrainPublishedConfig
-): Note[] {
-  logger.info(
-    `✎: [prepare-note.ts][${new Date().toString()}] dirPath %o`,
-    dirPath
-  );
-
+): ModelsPublicNote[] {
   const files = getOrgFilesRecursively(dirPath);
-  logger.info(
-    `✎: [prepare-note.ts][${new Date().toString()}] file length %o`,
-    files.length
-  );
 
-  return files.reduce((notes: Note[], fileName: string) => {
-    logger.info(
-      `✎: [prepare-note.ts][${new Date().toString()}] fileName %o`,
-      fileName
-    );
-
+  return files.reduce((notes: ModelsPublicNote[], fileName: string) => {
     const collectedNote = prepareNote(fileName, config);
 
     if (collectedNote) {
@@ -60,29 +47,11 @@ export function prepareNotesRecursively(
   }, []);
 }
 
-function getOrgFilesRecursively(dirPath: string): string[] {
-  const dirents = readdirSync(dirPath, { withFileTypes: true });
-
-  return dirents.flatMap((dirent) => {
-    const filePath = resolve(dirPath, dirent.name);
-
-    if (dirent.isDirectory()) {
-      return getOrgFilesRecursively(filePath);
-    }
-
-    return isOrgFile(filePath) ? filePath : [];
-  });
-}
-
 export function prepareNotes(
   path: string,
   config: SecondBrainPublishedConfig
-): Note[] {
+): ModelsPublicNote[] {
   const stats = statSync(path);
-  logger.info(
-    `✎: [prepare-note.ts][${new Date().toString()}] is notes directory: %o`,
-    stats.isDirectory()
-  );
   const notes = stats.isDirectory()
     ? prepareNotesRecursively(path, config)
     : [prepareNote(path, config)];

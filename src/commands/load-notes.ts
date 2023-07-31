@@ -1,16 +1,12 @@
 import { SecondBrainPublishedConfig } from '../config.js';
 import { getApi } from './sdk.js';
-import { getLogger } from '../logger.js';
 import { backupDirectory } from '../backup.js';
-import { join } from 'path';
-import { writeContent } from '../tools/write-file.js';
-import { touch } from '../tools/touch.js';
 import { ModelsPublicNote } from '../generated/api/api.js';
 import { set } from '../store.js';
+import { saveNoteLocally } from '../tools/save-note.js';
 
 const notesLimit = 100;
 
-const logger = getLogger();
 export async function loadNotes(
   config: SecondBrainPublishedConfig
 ): Promise<void> {
@@ -42,14 +38,4 @@ async function getNotes(
   }
 
   return notes;
-}
-
-function saveNoteLocally(rootFolder: string, n: ModelsPublicNote): void {
-  const savePath = join(rootFolder, ...n.filePath);
-  writeContent(savePath, n.content);
-  touch(savePath, new Date(n.updatedAt));
-  logger.info(
-    `✎: [load-notes.ts][${new Date().toString()}] note: %o saved`,
-    n.filePath?.[n.filePath.length - 1]
-  );
 }

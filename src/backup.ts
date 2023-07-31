@@ -10,8 +10,8 @@ export async function backupDirectory(
   backupDir?: string
 ): Promise<void> {
   backupDir ??= path.basename(path.dirname(dirPath));
-  clearOldBackups(backupDir, backupCount);
   createBackupDir(backupDir);
+  clearOldBackups(backupDir, backupCount);
   const zipName = `${new Date().toISOString()}.zip`;
   const zipPath = join(backupDir, zipName);
   logger.info(
