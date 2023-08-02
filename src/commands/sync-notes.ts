@@ -7,7 +7,9 @@ import { prepareNotes } from '../tools/prepare-note.js';
 import { getApi } from './sdk.js';
 import { saveNotesLocally } from '../tools/save-note.js';
 import { HandlersCreatingNote } from 'generated/api/api.js';
+import { getLogger } from '../logger.js';
 
+const logger = getLogger();
 export async function syncNotes(
   config: SecondBrainPublishedConfig
 ): Promise<void> {

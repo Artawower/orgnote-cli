@@ -15,13 +15,17 @@ export function prepareNote(
   const fileContent = readFileSync(filePath, 'utf8');
   const parsedDoc = parse(fileContent);
   const nodeTree = withMetaInfo(parsedDoc);
-  const lastUpdatedTime = statSync(filePath).mtime;
+  const stat = statSync(filePath);
+  const lastUpdatedTime = stat.mtime;
+  const noteCreatedTime = stat.ctime;
+
   const note: HandlersCreatingNote = {
     id: nodeTree.meta.id,
     meta: nodeTree.meta as any,
     content: fileContent,
     filePath: relativeNotePath,
     updatedAt: lastUpdatedTime.toISOString(),
+    createdAt: noteCreatedTime.toISOString(),
   };
 
   if (!note.id) {

@@ -15,6 +15,7 @@ import { ModelsNoteMeta } from './modelsNoteMeta.js';
 
 export class HandlersCreatingNote {
     'content'?: string;
+    'createdAt'?: string;
     'filePath'?: Array<string>;
     'id'?: string;
     'meta'?: ModelsNoteMeta;
@@ -26,6 +27,11 @@ export class HandlersCreatingNote {
         {
             "name": "content",
             "baseName": "content",
+            "type": "string"
+        },
+        {
+            "name": "createdAt",
+            "baseName": "createdAt",
             "type": "string"
         },
         {
