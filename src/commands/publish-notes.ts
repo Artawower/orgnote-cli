@@ -5,7 +5,8 @@ import { dirname, join } from 'path';
 import { prepareNotes } from '../tools/prepare-note.js';
 import { getApi } from './sdk.js';
 import { statSync } from 'fs';
-import { HandlersCreatingNote } from 'generated/api/api.js';
+import { HandlersCreatingNote } from '../generated/api/api.js';
+import { preserveNotesInfo } from '../store/persistent-notes.js';
 
 const logger = getLogger();
 
@@ -21,6 +22,8 @@ const sendNotes = async (
       .flatMap((note) => note.meta.images?.map((img) => join(dirPath, img)))
       .filter((i) => !!i)
   );
+
+  preserveNotesInfo(notes);
 
   try {
     !!files.length && (await api.files.uploadFiles(files));

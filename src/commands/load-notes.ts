@@ -2,7 +2,7 @@ import { SecondBrainPublishedConfig } from '../config.js';
 import { getApi } from './sdk.js';
 import { backupDirectory } from '../backup.js';
 import { ModelsPublicNote } from '../generated/api/api.js';
-import { set } from '../store.js';
+import { set } from '../store/store.js';
 import { saveNoteLocally } from '../tools/save-note.js';
 
 const notesLimit = 100;

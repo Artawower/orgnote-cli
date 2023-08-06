@@ -18,8 +18,8 @@ import http from 'http';
 import { HandlersCreatingNote } from '../model/handlersCreatingNote.js';
 import { HandlersHttpErrorAny } from '../model/handlersHttpErrorAny.js';
 import { HandlersHttpResponseAnyAny } from '../model/handlersHttpResponseAnyAny.js';
-import { HandlersHttpResponseArrayModelsPublicNoteAny } from '../model/handlersHttpResponseArrayModelsPublicNoteAny.js';
 import { HandlersHttpResponseArrayModelsPublicNoteModelsPagination } from '../model/handlersHttpResponseArrayModelsPublicNoteModelsPagination.js';
+import { HandlersHttpResponseHandlersSyncNotesResponseAny } from '../model/handlersHttpResponseHandlersSyncNotesResponseAny.js';
 import { HandlersHttpResponseModelsNoteGraphAny } from '../model/handlersHttpResponseModelsNoteGraphAny.js';
 import { HandlersHttpResponseModelsPublicNoteAny } from '../model/handlersHttpResponseModelsPublicNoteAny.js';
 import { HandlersSyncNotesRequest } from '../model/handlersSyncNotesRequest.js';
@@ -240,8 +240,9 @@ export class NotesApi {
      * @param searchText 
      * @param my Load all my own notes (user will be used from provided token)
      * @param from 
+     * @param includeDeleted 
      */
-    public async notesGet (limit?: number, offset?: number, userId?: string, searchText?: string, my?: boolean, from?: string, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: HandlersHttpResponseArrayModelsPublicNoteModelsPagination;  }> {
+    public async notesGet (limit?: number, offset?: number, userId?: string, searchText?: string, my?: boolean, from?: string, includeDeleted?: boolean, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: HandlersHttpResponseArrayModelsPublicNoteModelsPagination;  }> {
         const localVarPath = this.basePath + '/notes/';
         let localVarQueryParameters: any = {};
         let localVarHeaderParams: any = (<any>Object).assign({}, this._defaultHeaders);
@@ -276,6 +277,10 @@ export class NotesApi {
 
         if (from !== undefined) {
             localVarQueryParameters['from'] = ObjectSerializer.serialize(from, "string");
+        }
+
+        if (includeDeleted !== undefined) {
+            localVarQueryParameters['includeDeleted'] = ObjectSerializer.serialize(includeDeleted, "boolean");
         }
 
         (<any>Object).assign(localVarHeaderParams, options.headers);
@@ -528,7 +533,7 @@ export class NotesApi {
      * @summary Synchronize notes
      * @param data Sync notes request
      */
-    public async notesSyncPost (data: HandlersSyncNotesRequest, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: HandlersHttpResponseArrayModelsPublicNoteAny;  }> {
+    public async notesSyncPost (data: HandlersSyncNotesRequest, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: HandlersHttpResponseHandlersSyncNotesResponseAny;  }> {
         const localVarPath = this.basePath + '/notes/sync';
         let localVarQueryParameters: any = {};
         let localVarHeaderParams: any = (<any>Object).assign({}, this._defaultHeaders);
@@ -576,13 +581,13 @@ export class NotesApi {
                     localVarRequestOptions.form = localVarFormParams;
                 }
             }
-            return new Promise<{ response: http.IncomingMessage; body: HandlersHttpResponseArrayModelsPublicNoteAny;  }>((resolve, reject) => {
+            return new Promise<{ response: http.IncomingMessage; body: HandlersHttpResponseHandlersSyncNotesResponseAny;  }>((resolve, reject) => {
                 localVarRequest(localVarRequestOptions, (error, response, body) => {
                     if (error) {
                         reject(error);
                     } else {
                         if (response.statusCode && response.statusCode >= 200 && response.statusCode <= 299) {
-                            body = ObjectSerializer.deserialize(body, "HandlersHttpResponseArrayModelsPublicNoteAny");
+                            body = ObjectSerializer.deserialize(body, "HandlersHttpResponseHandlersSyncNotesResponseAny");
                             resolve({ response: response, body: body });
                         } else {
                             reject(new HttpError(response, body, response.statusCode));

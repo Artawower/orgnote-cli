@@ -11,34 +11,27 @@
  */
 
 import { RequestFile } from './models.js';
-import { HandlersCreatingNote } from './handlersCreatingNote.js';
 
-export class HandlersSyncNotesRequest {
-    'deletedNotesIds'?: Array<string>;
-    'notes'?: Array<HandlersCreatingNote>;
-    'timestamp'?: string;
+export class HandlersDeletedNote {
+    'filePath'?: Array<string>;
+    'id'?: string;
 
     static discriminator: string | undefined = undefined;
 
     static attributeTypeMap: Array<{name: string, baseName: string, type: string}> = [
         {
-            "name": "deletedNotesIds",
-            "baseName": "deletedNotesIds",
+            "name": "filePath",
+            "baseName": "filePath",
             "type": "Array<string>"
         },
         {
-            "name": "notes",
-            "baseName": "notes",
-            "type": "Array<HandlersCreatingNote>"
-        },
-        {
-            "name": "timestamp",
-            "baseName": "timestamp",
+            "name": "id",
+            "baseName": "id",
             "type": "string"
         }    ];
 
     static getAttributeTypeMap() {
-        return HandlersSyncNotesRequest.attributeTypeMap;
+        return HandlersDeletedNote.attributeTypeMap;
     }
 }
 
