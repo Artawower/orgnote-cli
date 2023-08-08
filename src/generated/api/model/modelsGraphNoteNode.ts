@@ -13,7 +13,7 @@
 import { RequestFile } from './models.js';
 
 export class ModelsGraphNoteNode {
-    'id'?: string;
+    'externalId'?: string;
     'title'?: string;
     'weight'?: number;
 
@@ -21,8 +21,8 @@ export class ModelsGraphNoteNode {
 
     static attributeTypeMap: Array<{name: string, baseName: string, type: string}> = [
         {
-            "name": "id",
-            "baseName": "id",
+            "name": "externalId",
+            "baseName": "externalId",
             "type": "string"
         },
         {

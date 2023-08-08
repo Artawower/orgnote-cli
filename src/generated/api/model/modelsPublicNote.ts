@@ -18,6 +18,9 @@ export class ModelsPublicNote {
     'author'?: ModelsPublicUser;
     'content'?: string;
     'filePath'?: Array<string>;
+    /**
+    * It\'s externalID from original note
+    */
     'id'?: string;
     'meta'?: ModelsNoteMeta;
     'updatedAt'?: string;

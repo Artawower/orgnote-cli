@@ -6,6 +6,11 @@ import { ModelsPublicNote } from '../generated/api/api.js';
 
 const logger = getLogger();
 export function saveNoteLocally(rootFolder: string, n: ModelsPublicNote): void {
+  logger.info(
+    `✎: [save-note.ts][${new Date().toString()}] filePath %o, fileName: %o`,
+    n.filePath,
+    n.meta.title
+  );
   const savePath = join(rootFolder, ...n.filePath);
   writeContent(savePath, n.content);
   touch(savePath, new Date(n.updatedAt));
