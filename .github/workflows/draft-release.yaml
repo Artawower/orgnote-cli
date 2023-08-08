@@ -1,16 +1,17 @@
-name: Test
+name: 'tagged-release'
+
 on:
-  create:
+  push:
+    tags:
+      - 'v*'
+
 jobs:
-  release:
-    name: Release
-    runs-on: ubuntu-latest
+  tagged-release:
+    name: 'Tagged Release'
+    runs-on: 'ubuntu-latest'
+
     steps:
-      - name: Create a release draft for a version tag
-        id: create-release-draft
-        uses: ecampidoglio/auto-release-draft@v1
+      - uses: 'marvinpinto/action-automatic-releases@latest'
         with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Print the URL of the release draft
-        if: steps.create-release-draft.outputs.release-url != ''
-        run: echo ${{ steps.create-release-draft.outputs.release-url }}
+          repo_token: '${{ secrets.GITHUB_TOKEN }}'
+          prerelease: false
