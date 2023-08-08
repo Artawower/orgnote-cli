@@ -1,6 +1,6 @@
 {
   "name": "second-brain-publisher",
-  "version": "0.7.7",
+  "version": "v0.7.8",
   "description": "Project for synchronizing org roam notes and second brain ",
   "type": "module",
   "main": "dist/index.js",
@@ -47,7 +47,7 @@
     "@types/uuid": "^8.3.4",
     "axios": "0.26.1",
     "form-data": "4.0.0",
-    "org-mode-ast": "0.7.7",
+    "org-mode-ast": "v0.7.8",
     "request": "2.88.2",
     "sqlite3": "5.1.6",
     "uuid": "8.3.2",
