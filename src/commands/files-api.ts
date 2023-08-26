@@ -11,6 +11,19 @@ export class FilesApi extends OriginalFilesApi {
   public async uploadFiles(
     files: Array<{ blob: Buffer; fileName: string }>
   ): Promise<unknown> {
+    if (!files.length) {
+      return;
+    }
+
+    files.forEach(async (f) => {
+      await this.uploadFile(f);
+    });
+  }
+
+  public async uploadFile(file: {
+    blob: Buffer;
+    fileName: string;
+  }): Promise<unknown> {
     const localVarPath = this.basePath + '/files/upload';
     let localVarQueryParameters: any = {};
     let localVarHeaderParams: any = (<any>Object).assign(
@@ -36,13 +49,15 @@ export class FilesApi extends OriginalFilesApi {
       useQuerystring: this._useQuerystring,
       json: true,
       formData: {
-        files: files.map((f) => ({
-          value: f.blob,
-          options: {
-            filename: f.fileName,
-            contentType: 'file',
+        files: [
+          {
+            value: file.blob,
+            options: {
+              filename: file.fileName,
+              contentType: 'file',
+            },
           },
-        })),
+        ],
       },
     };
 

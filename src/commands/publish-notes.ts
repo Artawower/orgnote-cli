@@ -19,14 +19,18 @@ const sendNotes = async (
 
   const files = readFiles(
     notes
-      .flatMap((note) => note.meta.images?.map((img) => join(dirPath, img)))
+      .flatMap((note) =>
+        note.meta.images?.map((img) =>
+          join(dirPath, ...note.filePath.slice(0, -1), img)
+        )
+      )
       .filter((i) => !!i)
   );
 
   preserveNotesInfo(notes);
 
   try {
-    !!files.length && (await api.files.uploadFiles(files));
+    await api.files.uploadFiles(files);
     await api.notes.notesBulkUpsertPut(notes);
   } catch (e) {
     const data = e.response?.data ?? e.body;
