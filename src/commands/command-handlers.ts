@@ -32,7 +32,7 @@ const registerCommand = (command: CliCommand, handler: CommandHandlerFn) => {
 };
 
 registerCommand(CliCommand.Publish, async (config, path): Promise<void> => {
-  await publishNotes(path, config);
+  await publishNotes(config, path);
 });
 
 registerCommand(CliCommand.Load, async (config): Promise<void> => {
@@ -40,8 +40,7 @@ registerCommand(CliCommand.Load, async (config): Promise<void> => {
 });
 
 registerCommand(CliCommand.PublishAll, async (config): Promise<void> => {
-  const path = config.rootFolder;
-  await publishNotes(path, config);
+  await publishNotes(config);
 });
 
 registerCommand(CliCommand.Sync, async (config): Promise<void> => {

@@ -19,11 +19,18 @@ const sendNotes = async (
 
   const files = readFiles(
     notes
-      .flatMap((note) =>
-        note.meta.images?.map((img) =>
-          join(dirPath, ...note.filePath.slice(0, -1), img)
-        )
-      )
+      .flatMap((note) => {
+        const relativePath = note.filePath.slice(0, -1);
+        const mediaPath = dirPath.endsWith(relativePath.join('/'))
+          ? []
+          : relativePath;
+
+        const joined = note.meta.images?.map((img) =>
+          join(dirPath, ...mediaPath, img)
+        );
+
+        return joined;
+      })
       .filter((i) => !!i)
   );
 
@@ -44,16 +51,17 @@ const sendNotes = async (
 };
 
 export async function publishNotes(
-  path: string,
-  config: SecondBrainPublishedConfig
+  config: SecondBrainPublishedConfig,
+  path?: string
 ): Promise<void> {
-  const notes = prepareNotes(path, config);
+  const notePath = path ?? config.rootFolder;
+  const notes = prepareNotes(notePath, config);
   if (!notes.length) {
     return;
   }
-  const stats = statSync(path);
+  const stats = statSync(notePath);
   const isFile = stats.isFile();
-  const realDir = isFile ? dirname(path) : path;
+  const realDir = isFile ? dirname(notePath) : notePath;
 
   await sendNotes(notes, config, realDir);
 }

@@ -22,10 +22,6 @@ export async function syncNotes(
   const lastSync = new Date(get('lastSync') ?? 0);
   const notesFromLastSync = getNotesFromLastSync(config, lastSync);
   const deletedNotesIds = getDeletedNotesIds(config);
-  logger.info(
-    `✎: [sync-notes.ts][${new Date().toString()}] deletedNoteIds %o`,
-    deletedNotesIds
-  );
   preserveNotesInfo(notesFromLastSync);
   deleteNotesInfo(deletedNotesIds);
 
