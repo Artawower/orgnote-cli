@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
 import os from 'os';
 
-export interface SecondBrainPublishedConfig {
+export interface OrgNotePublishedConfig {
   remoteAddress: string;
   token: string;
   rootFolder: string;
@@ -13,32 +13,31 @@ export interface SecondBrainPublishedConfig {
   backupDir?: string;
 }
 
-const defaultUrl =
-  process.env.SECOND_BRAIN_SERVER_URL || 'http://localhost:8000/v1';
-// process.env.SECOND_BRAIN_SERVER_URL || "https://second-brain.org";
+const defaultUrl = process.env.OrgNote_SERVER_URL || 'http://localhost:8000/v1';
+// process.env.ORGNOTE_SERVER_URL || "https://orgnote.org";
 
 const configPath =
-  process.env.SECOND_BRAIN_CONFIG_PATH ||
-  `${os.homedir()}/.config/second-brain/config.json`;
+  process.env.OrgNote_CONFIG_PATH ||
+  `${os.homedir()}/.config/orgnote/config.json`;
 
-const rootFolder = process.env.SECOND_BRAIN_BASE_DIR || '';
+const rootFolder = process.env.OrgNote_BASE_DIR || '';
 export function getConfig(
-  override: Partial<SecondBrainPublishedConfig>,
+  override: Partial<OrgNotePublishedConfig>,
   accountName?: string
-): SecondBrainPublishedConfig {
+): OrgNotePublishedConfig {
   let defaultConfigs = {
     remoteAddress: defaultUrl,
-    token: process.env.SECOND_BRAIN_TOKEN || '',
+    token: process.env.OrgNote_TOKEN || '',
     rootFolder,
-    version: process.env.SECOND_BRAIN_VERSION || 'v1',
-    logPath: '/tmp/log/second-brain',
+    version: process.env.OrgNote_VERSION || 'v1',
+    logPath: '/tmp/log/orgnote',
     backupCount: 3,
   };
 
   try {
     const configs = JSON.parse(
       readFileSync(configPath).toString()
-    ) as SecondBrainPublishedConfig[];
+    ) as OrgNotePublishedConfig[];
     const config = accountName
       ? configs.find((c) => c.name === accountName)
       : configs?.[0];

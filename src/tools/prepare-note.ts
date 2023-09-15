@@ -1,4 +1,4 @@
-import { SecondBrainPublishedConfig } from '../config.js';
+import { OrgNotePublishedConfig } from '../config.js';
 import { readFileSync, statSync } from 'fs';
 import { parse, withMetaInfo } from 'org-mode-ast';
 import { getRelativeNotePath } from './relative-file-path.js';
@@ -9,7 +9,7 @@ import { HandlersCreatingNote, ModelsPublicNote } from 'generated/api/api.js';
 const logger = getLogger();
 export function prepareNote(
   filePath: string,
-  config: SecondBrainPublishedConfig
+  config: OrgNotePublishedConfig
 ): ModelsPublicNote {
   try {
     const relativeNotePath = getRelativeNotePath(config.rootFolder, filePath);
@@ -46,7 +46,7 @@ export function prepareNote(
 
 export function prepareNotesRecursively(
   dirPath: string,
-  config: SecondBrainPublishedConfig
+  config: OrgNotePublishedConfig
 ): ModelsPublicNote[] {
   const files = getOrgFilesRecursively(dirPath);
 
@@ -63,7 +63,7 @@ export function prepareNotesRecursively(
 
 export function prepareNotes(
   path: string,
-  config: SecondBrainPublishedConfig
+  config: OrgNotePublishedConfig
 ): ModelsPublicNote[] {
   const stats = statSync(path);
   if (stats.isDirectory()) {

@@ -1,4 +1,4 @@
-import { SecondBrainPublishedConfig } from 'config';
+import { OrgNotePublishedConfig } from 'config';
 import { createLogger, format, Logger, transports } from 'winston';
 
 const logFormat = format.printf(function (info) {
@@ -19,7 +19,7 @@ function initLogger(): void {
   });
 }
 
-function configureLogger(config?: Partial<SecondBrainPublishedConfig>): void {
+function configureLogger(config?: Partial<OrgNotePublishedConfig>): void {
   if (!config?.debug) {
     return;
   }
@@ -27,12 +27,12 @@ function configureLogger(config?: Partial<SecondBrainPublishedConfig>): void {
   [
     new transports.File({
       dirname: config.logPath,
-      filename: 'second-brain-error.log',
+      filename: 'orgnote-error.log',
       level: 'error',
     }),
     new transports.File({
       dirname: config.logPath,
-      filename: 'second-brain-combined.log',
+      filename: 'orgnote-combined.log',
     }),
     new transports.Console({
       format: format.simple(),
@@ -40,7 +40,7 @@ function configureLogger(config?: Partial<SecondBrainPublishedConfig>): void {
   ].forEach((transport) => logger.add(transport));
 }
 export function getLogger(
-  config: Partial<SecondBrainPublishedConfig> = {}
+  config: Partial<OrgNotePublishedConfig> = {}
 ): Logger {
   if (!logger) {
     initLogger();

@@ -1,5 +1,5 @@
 import { existsSync, statSync } from 'fs';
-import { SecondBrainPublishedConfig } from '../config.js';
+import { OrgNotePublishedConfig } from '../config.js';
 import { get, set } from '../store/store.js';
 import { getOrgFilesRecursively } from '../tools/read-orf-files-recursively.js';
 import { prepareNotes } from '../tools/prepare-note.js';
@@ -17,7 +17,7 @@ import { join } from 'path';
 
 const logger = getLogger();
 export async function syncNotes(
-  config: SecondBrainPublishedConfig
+  config: OrgNotePublishedConfig
 ): Promise<void> {
   const lastSync = new Date(get('lastSync') ?? 0);
   const notesFromLastSync = getNotesFromLastSync(config, lastSync);
@@ -50,7 +50,7 @@ export async function syncNotes(
 }
 
 function getNotesFromLastSync(
-  config: SecondBrainPublishedConfig,
+  config: OrgNotePublishedConfig,
   lastSync: Date
 ): HandlersCreatingNote[] {
   const orgFiles = getOrgFilesRecursively(config.rootFolder);
@@ -72,7 +72,7 @@ function getNotesFromLastSync(
   return notes;
 }
 
-function getDeletedNotesIds(config: SecondBrainPublishedConfig): string[] {
+function getDeletedNotesIds(config: OrgNotePublishedConfig): string[] {
   const notesInfo = getPreservedNotesInfo();
   const deletedNotesIds = Object.keys(notesInfo).reduce((acc, filePath) => {
     const fullPath = join(config.rootFolder, filePath);

@@ -1,5 +1,5 @@
 import { getLogger } from '../logger.js';
-import { SecondBrainPublishedConfig } from '../config.js';
+import { OrgNotePublishedConfig } from '../config.js';
 import { publishNotes } from './publish-notes.js';
 import { loadNotes } from './load-notes.js';
 import { syncNotes } from './sync-notes.js';
@@ -14,13 +14,13 @@ export enum CliCommand {
 }
 
 type CommandHandlerFn = (
-  arg0: SecondBrainPublishedConfig,
+  arg0: OrgNotePublishedConfig,
   path?: string
 ) => Promise<void>;
 
 const commands: {
   [key in CliCommand]?: (
-    arg0: SecondBrainPublishedConfig,
+    arg0: OrgNotePublishedConfig,
     path?: string
   ) => Promise<void>;
 } = {};
@@ -49,7 +49,7 @@ registerCommand(CliCommand.Sync, async (config): Promise<void> => {
 
 export async function handleCommand(
   command: CliCommand,
-  config: SecondBrainPublishedConfig,
+  config: OrgNotePublishedConfig,
   path: string
 ) {
   const commandExecutor = commands[command];

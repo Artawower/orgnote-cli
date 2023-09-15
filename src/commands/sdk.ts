@@ -1,11 +1,11 @@
-import { SecondBrainPublishedConfig } from 'config.js';
+import { OrgNotePublishedConfig } from 'config.js';
 import { FilesApi } from './files-api.js';
 import { NotesApi } from '../generated/api/api.js';
 
 type Api = { notes: NotesApi; files: FilesApi };
 let api: Api;
 
-function initApi(c: SecondBrainPublishedConfig): void {
+function initApi(c: OrgNotePublishedConfig): void {
   const defaultHeaders = {
     Authorization: `Bearer ${c.token}`,
   };
@@ -18,7 +18,7 @@ function initApi(c: SecondBrainPublishedConfig): void {
   api = { notes, files };
 }
 
-export function getApi(c: SecondBrainPublishedConfig): Api {
+export function getApi(c: OrgNotePublishedConfig): Api {
   if (!api) {
     initApi(c);
   }

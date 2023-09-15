@@ -1,5 +1,5 @@
 import { readFiles } from '../tools/read-files.js';
-import { SecondBrainPublishedConfig } from '../config.js';
+import { OrgNotePublishedConfig } from '../config.js';
 import { getLogger } from '../logger.js';
 import { dirname, join } from 'path';
 import { prepareNotes } from '../tools/prepare-note.js';
@@ -12,7 +12,7 @@ const logger = getLogger();
 
 const sendNotes = async (
   notes: HandlersCreatingNote[],
-  config: SecondBrainPublishedConfig,
+  config: OrgNotePublishedConfig,
   dirPath: string
 ) => {
   const api = getApi(config);
@@ -51,7 +51,7 @@ const sendNotes = async (
 };
 
 export async function publishNotes(
-  config: SecondBrainPublishedConfig,
+  config: OrgNotePublishedConfig,
   path?: string
 ): Promise<void> {
   const notePath = path ?? config.rootFolder;

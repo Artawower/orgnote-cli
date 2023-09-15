@@ -14,7 +14,7 @@ interface Store {
 
 let store: Store;
 // TODO: master file path for windows
-const storeFile = `${os.homedir()}/.config/second-brain/store.json`;
+const storeFile = `${os.homedir()}/.config/orgnote/store.json`;
 
 const getDefaultStore = (): Store => ({ notes: {} });
 
