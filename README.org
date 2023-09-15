@@ -21,16 +21,16 @@
 #+html: </div>
 
 
-* 🌱 Introduction
+*  Introduction
 NPM binary script for synchronising and publishing notes from org roam. Closely related to the Org Note project.
 *WARNING*: This package doesn't provide a way to resolve conflicts and doesn't use CRDT yet! Be careful, and don't forget to backup your notes!
-* 🍻 Connected links
+*  Connected links
 - [[https://github.com/Artawower/orgnote][Org Note main repo.]] 
-* ⚙️ Install
+* ️ Install
 #+BEGIN_SRC bash
 npm install -g orgnote-cli
 #+END_SRC
-* 👨‍🍳 Usage
+* Usage
 ** Configuration
 Create ~~/.config/orgnote/config.json~ with next schema:
 #+BEGIN_SRC json
@@ -67,7 +67,7 @@ Create ~~/.config/orgnote/config.json~ with next schema:
 
 * 🍩 Contribute guide
 Any contribution is very much appreciated! Please read the [[./CONTRIBUTE.org][style guide]] before contributing to avoid misunderstandings!
-Also, the project exists solely on donations. I would appreciate it if you would join my patreon.
+I would also appreciate it if you would consider becoming my [[https://www.patreon.com/artawower][patron]]
 
 
 
