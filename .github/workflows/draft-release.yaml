@@ -16,6 +16,7 @@ jobs:
           repo_token: '${{ secrets.GITHUB_TOKEN }}'
           prerelease: false
 
+  # TODO: https://github.com/oven-sh/bun/issues/1976
   publish:
     needs: tagged-release
     runs-on: ubuntu-latest
