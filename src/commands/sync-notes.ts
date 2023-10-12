@@ -14,11 +14,10 @@ import {
   preserveNotesInfo,
 } from '../store/persistent-notes.js';
 import { join } from 'path';
+import { removeRenamedNotes } from '../tools/remove-renamed-notes.js';
 
 const logger = getLogger();
-export async function syncNotes(
-  config: OrgNotePublishedConfig
-): Promise<void> {
+export async function syncNotes(config: OrgNotePublishedConfig): Promise<void> {
   const lastSync = new Date(get('lastSync') ?? 0);
   const notesFromLastSync = getNotesFromLastSync(config, lastSync);
   const deletedNotesIds = getDeletedNotesIds(config);
@@ -44,7 +43,16 @@ export async function syncNotes(
   }
 
   removeNotesLocally(config.rootFolder, rspns.body.data.deletedNotes);
+  removeRenamedNotes(config.rootFolder, rspns.body.data.notes);
   saveNotesLocally(config.rootFolder, rspns.body.data.notes);
+  preserveNotesInfo(
+    rspns.body.data.notes.map((n) => ({
+      filePath: n.filePath,
+      id: n.id,
+      updatedAt: n.updatedAt,
+    }))
+  );
+
   set('lastSync', new Date());
   return;
 }
