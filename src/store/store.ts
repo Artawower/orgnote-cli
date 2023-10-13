@@ -48,3 +48,8 @@ export function set<K extends keyof Store>(key: K, val: Store[K]): void {
   store[key] = val;
   preserveStore();
 }
+
+export function clear(): void {
+  store = getDefaultStore();
+  preserveStore();
+}

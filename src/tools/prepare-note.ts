@@ -25,7 +25,9 @@ export function prepareNote(
       meta: nodeTree.meta as any,
       content: fileContent,
       filePath: relativeNotePath,
-      updatedAt: lastUpdatedTime.toISOString(),
+      updatedAt: new Date(
+        Math.max(lastUpdatedTime.getTime(), noteCreatedTime.getTime())
+      ).toISOString(),
       createdAt: noteCreatedTime.toISOString(),
     };
 

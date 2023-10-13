@@ -1,6 +1,6 @@
 {
   "name": "orgnote-cli",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "Project for synchronizing org roam notes and Org Note ",
   "type": "module",
   "main": "dist/index.js",

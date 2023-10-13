@@ -20,7 +20,11 @@ const logger = getLogger();
 export async function syncNotes(config: OrgNotePublishedConfig): Promise<void> {
   const lastSync = new Date(get('lastSync') ?? 0);
   const notesFromLastSync = getNotesFromLastSync(config, lastSync);
+  const notesIdsFromLastSync = notesFromLastSync.map((n) => n.id);
   const deletedNotesIds = getDeletedNotesIds(config);
+  const deletedNotesIdsWithoutRename = deletedNotesIds.filter(
+    (id) => !notesIdsFromLastSync.includes(id)
+  );
   preserveNotesInfo(notesFromLastSync);
   deleteNotesInfo(deletedNotesIds);
 
@@ -28,19 +32,17 @@ export async function syncNotes(config: OrgNotePublishedConfig): Promise<void> {
 
   const rspns = await api.notes.notesSyncPost({
     notes: notesFromLastSync,
-    deletedNotesIds,
+    deletedNotesIds: deletedNotesIdsWithoutRename,
     timestamp: lastSync.toISOString(),
   });
 
-  if (config.debug) {
-    logger.info(
-      `✎: [sync-notes.ts][${new Date().toString()}] \n  notes updated from remote:\n\t%o\n  notes ids to delete:\n\t%o`,
-      rspns.body.data.notes.map((n) => `[id:${n.id}]: ${n.meta.title}`),
-      rspns.body.data.deletedNotes.map(
-        (n) => `[id:${n.id}]: ${n.filePath.join('/')}`
-      )
-    );
-  }
+  logger.info(
+    `✎: [sync-notes.ts][${new Date().toString()}] \n  notes updated from remote:\n\t%o\n  notes ids to delete:\n\t%o`,
+    rspns.body.data.notes.map((n) => `[id:${n.id}]: ${n.meta.title}`),
+    rspns.body.data.deletedNotes.map(
+      (n) => `[id:${n.id}]: ${n.filePath.join('/')}`
+    )
+  );
 
   removeNotesLocally(config.rootFolder, rspns.body.data.deletedNotes);
   removeRenamedNotes(config.rootFolder, rspns.body.data.notes);
@@ -66,7 +68,8 @@ function getNotesFromLastSync(
   const notesFilesFromLastSync = orgFiles.filter((filePath) => {
     const fileStat = statSync(filePath);
     const fileLastModified = fileStat.mtime;
-    return fileLastModified > lastSync;
+    const fileLastRenamed = fileStat.ctime;
+    return fileLastModified > lastSync || fileLastRenamed > lastSync;
   });
   const notes = notesFilesFromLastSync.flatMap((filePath) =>
     prepareNotes(filePath, config)

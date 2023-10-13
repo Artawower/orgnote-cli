@@ -64,6 +64,7 @@ Create ~~/.config/orgnote/config.json~ with next schema:
 
 ** Available flags
 ~--debug~ enable additional info logging messages
+~--force~ clear local cache and last sync time
 
 * 🍩 Contribute guide
 Any contribution is very much appreciated! Please read the [[./CONTRIBUTE.org][style guide]] before contributing to avoid misunderstandings!
