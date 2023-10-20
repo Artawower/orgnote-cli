@@ -20,6 +20,10 @@ let logger: Logger;
       describe: 'Clear all cache and force sync notes',
       type: 'boolean',
     },
+    accountName: {
+      describe: 'Account name to use for sync',
+      type: 'string',
+    },
   }).argv;
   const command = argv._[0] as CliCommand;
   const accountName = argv.accountName as string;
