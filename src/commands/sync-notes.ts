@@ -15,6 +15,7 @@ import {
 } from '../store/persistent-notes.js';
 import { join } from 'path';
 import { removeRenamedNotes } from '../tools/remove-renamed-notes.js';
+import { sendNotesFiles } from './send-notes-files.js';
 
 const logger = getLogger();
 export async function syncNotes(config: OrgNotePublishedConfig): Promise<void> {
@@ -29,6 +30,8 @@ export async function syncNotes(config: OrgNotePublishedConfig): Promise<void> {
   deleteNotesInfo(deletedNotesIds);
 
   const api = getApi(config);
+
+  await sendNotesFiles(notesFromLastSync, config, config.rootFolder);
 
   const rspns = await api.notes.notesSyncPost({
     notes: notesFromLastSync,

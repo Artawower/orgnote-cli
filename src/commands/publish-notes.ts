@@ -1,12 +1,12 @@
-import { readFiles } from '../tools/read-files.js';
 import { OrgNotePublishedConfig } from '../config.js';
 import { getLogger } from '../logger.js';
-import { dirname, join } from 'path';
+import { dirname } from 'path';
 import { prepareNotes } from '../tools/prepare-note.js';
 import { getApi } from './sdk.js';
 import { statSync } from 'fs';
 import { HandlersCreatingNote } from '../generated/api/api.js';
 import { preserveNotesInfo } from '../store/persistent-notes.js';
+import { sendNotesFiles } from './send-notes-files.js';
 
 const logger = getLogger();
 
@@ -17,27 +17,11 @@ const sendNotes = async (
 ) => {
   const api = getApi(config);
 
-  const files = readFiles(
-    notes
-      .flatMap((note) => {
-        const relativePath = note.filePath.slice(0, -1);
-        const mediaPath = dirPath.endsWith(relativePath.join('/'))
-          ? []
-          : relativePath;
-
-        const joined = note.meta.images?.map((img) =>
-          join(dirPath, ...mediaPath, img)
-        );
-
-        return joined;
-      })
-      .filter((i) => !!i)
-  );
+  await sendNotesFiles(notes, config, dirPath);
 
   preserveNotesInfo(notes);
 
   try {
-    await api.files.uploadFiles(files);
     await api.notes.notesBulkUpsertPut(notes);
   } catch (e) {
     const data = e.response?.data ?? e.body;
