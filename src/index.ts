@@ -42,7 +42,7 @@ let logger: Logger;
   try {
     await handleCommand(command, config, path)
   } catch (e) {
-    logger.error(e);
+    logger.error('Unexpected error');
     throw e;
   }
 })();

@@ -3,6 +3,8 @@ import localVarRequest from 'request';
 import http from 'http';
 import { ObjectSerializer } from '../generated/api/model/models.js';
 import { HttpError } from '../generated/api/api/apis.js';
+import axios from 'axios';
+import { Stream } from 'stream';
 
 /*
  * Patch over generated api to use multipart/form-data correctly.
@@ -102,5 +104,12 @@ export class FilesApi extends OriginalFilesApi {
         }
       );
     });
+  }
+
+  public async downloadFile(relativeFilePath: string): Promise<Stream> {
+    const downloadedFilePath = `${this.basePath}/media/${relativeFilePath}`;
+    return await axios
+      .get(downloadedFilePath, { responseType: 'stream' })
+      .then((r) => r.data);
   }
 }

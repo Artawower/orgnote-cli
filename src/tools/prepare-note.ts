@@ -39,9 +39,7 @@ export function prepareNote(
     }
     return note;
   } catch (e) {
-    console.log(
-      `✎: [prepare-note.ts][${new Date().toString()}] parsed file before error: ${filePath}`
-    );
+    logger.error("Can't parse file: %o", filePath);
     throw e;
   }
 }

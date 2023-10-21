@@ -49,7 +49,7 @@ export async function syncNotes(config: OrgNotePublishedConfig): Promise<void> {
 
   removeNotesLocally(config.rootFolder, rspns.body.data.deletedNotes);
   removeRenamedNotes(config.rootFolder, rspns.body.data.notes);
-  saveNotesLocally(config.rootFolder, rspns.body.data.notes);
+  saveNotesLocally(config, rspns.body.data.notes);
   preserveNotesInfo(
     rspns.body.data.notes.map((n) => ({
       filePath: n.filePath,

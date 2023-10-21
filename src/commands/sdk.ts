@@ -9,10 +9,11 @@ function initApi(c: OrgNotePublishedConfig): void {
   const defaultHeaders = {
     Authorization: `Bearer ${c.token}`,
   };
-  const notes = new NotesApi(c.remoteAddress);
+  const remoteApiAddress = c.remoteAddress;
+  const notes = new NotesApi(remoteApiAddress);
   notes.defaultHeaders = defaultHeaders;
 
-  const files = new FilesApi(c.remoteAddress);
+  const files = new FilesApi(remoteApiAddress);
   files.defaultHeaders = defaultHeaders;
 
   api = { notes, files };
