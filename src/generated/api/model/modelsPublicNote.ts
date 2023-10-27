@@ -17,12 +17,15 @@ import { ModelsPublicUser } from './modelsPublicUser.js';
 export class ModelsPublicNote {
     'author'?: ModelsPublicUser;
     'content'?: string;
+    'createdAt'?: string;
     'filePath'?: Array<string>;
     /**
     * It\'s externalID from original note
     */
     'id'?: string;
+    'isMy'?: boolean;
     'meta'?: ModelsNoteMeta;
+    'size'?: number;
     'updatedAt'?: string;
 
     static discriminator: string | undefined = undefined;
@@ -39,6 +42,11 @@ export class ModelsPublicNote {
             "type": "string"
         },
         {
+            "name": "createdAt",
+            "baseName": "createdAt",
+            "type": "string"
+        },
+        {
             "name": "filePath",
             "baseName": "filePath",
             "type": "Array<string>"
@@ -49,9 +57,19 @@ export class ModelsPublicNote {
             "type": "string"
         },
         {
+            "name": "isMy",
+            "baseName": "isMy",
+            "type": "boolean"
+        },
+        {
             "name": "meta",
             "baseName": "meta",
             "type": "ModelsNoteMeta"
+        },
+        {
+            "name": "size",
+            "baseName": "size",
+            "type": "number"
         },
         {
             "name": "updatedAt",

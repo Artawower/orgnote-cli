@@ -1,5 +1,8 @@
 import { readFileSync, writeFileSync } from 'fs';
+import { getLogger } from '../logger.js';
 import os from 'os';
+
+const logger = getLogger();
 
 export interface StoredNoteInfo {
   filePath: string[];
@@ -38,6 +41,7 @@ export function get<K extends keyof Store>(key: K): Store[K] {
 }
 
 function preserveStore(): void {
+  logger.info('Preserve store');
   writeFileSync(storeFile, JSON.stringify(store));
 }
 

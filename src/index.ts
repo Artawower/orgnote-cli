@@ -7,6 +7,7 @@ import { getConfig } from './config.js';
 import { Logger } from 'winston';
 import { CliCommand, handleCommand } from './commands/command-handlers.js';
 import { clear } from './store/store.js';
+import { writeFileSync } from 'fs';
 
 let logger: Logger;
 
@@ -43,6 +44,9 @@ let logger: Logger;
     await handleCommand(command, config, path)
   } catch (e) {
     logger.error('Unexpected error');
+    // write an error to the lof file from config
+    writeFileSync(config.logPath+'erorrs.log', e.toString());
+    
     throw e;
   }
 })();

@@ -23,7 +23,7 @@ async function saveNoteFiles(
     const fileStream = await sdk.files.downloadFile(remoteFilePath);
     const fileDir = note.filePath?.slice(0, -1) || [];
     const savePath = join(config.rootFolder, ...fileDir, f);
-    fileStream.pipe(createWriteStream(savePath));
+    fileStream?.pipe(createWriteStream(savePath));
   }
 }
 export async function saveNoteLocally(

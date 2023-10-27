@@ -11,23 +11,21 @@ export * from './handlersHttpResponseArrayStringAny.js';
 export * from './handlersHttpResponseHandlersOAuthRedirectDataAny.js';
 export * from './handlersHttpResponseHandlersSyncNotesResponseAny.js';
 export * from './handlersHttpResponseModelsAPITokenAny.js';
-export * from './handlersHttpResponseModelsNoteGraphAny.js';
 export * from './handlersHttpResponseModelsPublicNoteAny.js';
-export * from './handlersHttpResponseModelsPublicUserAny.js';
+export * from './handlersHttpResponseModelsUserPersonalInfoAny.js';
 export * from './handlersOAuthRedirectData.js';
+export * from './handlersSubscribeBody.js';
 export * from './handlersSyncNotesRequest.js';
 export * from './handlersSyncNotesResponse.js';
 export * from './modelsAPIToken.js';
 export * from './modelsCategory.js';
-export * from './modelsGraphNoteLink.js';
-export * from './modelsGraphNoteNode.js';
-export * from './modelsNoteGraph.js';
 export * from './modelsNoteHeading.js';
 export * from './modelsNoteLink.js';
 export * from './modelsNoteMeta.js';
 export * from './modelsPagination.js';
 export * from './modelsPublicNote.js';
 export * from './modelsPublicUser.js';
+export * from './modelsUserPersonalInfo.js';
 
 import * as fs from 'fs';
 
@@ -53,23 +51,21 @@ import { HandlersHttpResponseArrayStringAny } from './handlersHttpResponseArrayS
 import { HandlersHttpResponseHandlersOAuthRedirectDataAny } from './handlersHttpResponseHandlersOAuthRedirectDataAny.js';
 import { HandlersHttpResponseHandlersSyncNotesResponseAny } from './handlersHttpResponseHandlersSyncNotesResponseAny.js';
 import { HandlersHttpResponseModelsAPITokenAny } from './handlersHttpResponseModelsAPITokenAny.js';
-import { HandlersHttpResponseModelsNoteGraphAny } from './handlersHttpResponseModelsNoteGraphAny.js';
 import { HandlersHttpResponseModelsPublicNoteAny } from './handlersHttpResponseModelsPublicNoteAny.js';
-import { HandlersHttpResponseModelsPublicUserAny } from './handlersHttpResponseModelsPublicUserAny.js';
+import { HandlersHttpResponseModelsUserPersonalInfoAny } from './handlersHttpResponseModelsUserPersonalInfoAny.js';
 import { HandlersOAuthRedirectData } from './handlersOAuthRedirectData.js';
+import { HandlersSubscribeBody } from './handlersSubscribeBody.js';
 import { HandlersSyncNotesRequest } from './handlersSyncNotesRequest.js';
 import { HandlersSyncNotesResponse } from './handlersSyncNotesResponse.js';
 import { ModelsAPIToken } from './modelsAPIToken.js';
 import { ModelsCategory } from './modelsCategory.js';
-import { ModelsGraphNoteLink } from './modelsGraphNoteLink.js';
-import { ModelsGraphNoteNode } from './modelsGraphNoteNode.js';
-import { ModelsNoteGraph } from './modelsNoteGraph.js';
 import { ModelsNoteHeading } from './modelsNoteHeading.js';
 import { ModelsNoteLink } from './modelsNoteLink.js';
 import { ModelsNoteMeta } from './modelsNoteMeta.js';
 import { ModelsPagination } from './modelsPagination.js';
 import { ModelsPublicNote } from './modelsPublicNote.js';
 import { ModelsPublicUser } from './modelsPublicUser.js';
+import { ModelsUserPersonalInfo } from './modelsUserPersonalInfo.js';
 
 /* tslint:disable:no-unused-variable */
 let primitives = [
@@ -99,22 +95,20 @@ let typeMap: {[index: string]: any} = {
     "HandlersHttpResponseHandlersOAuthRedirectDataAny": HandlersHttpResponseHandlersOAuthRedirectDataAny,
     "HandlersHttpResponseHandlersSyncNotesResponseAny": HandlersHttpResponseHandlersSyncNotesResponseAny,
     "HandlersHttpResponseModelsAPITokenAny": HandlersHttpResponseModelsAPITokenAny,
-    "HandlersHttpResponseModelsNoteGraphAny": HandlersHttpResponseModelsNoteGraphAny,
     "HandlersHttpResponseModelsPublicNoteAny": HandlersHttpResponseModelsPublicNoteAny,
-    "HandlersHttpResponseModelsPublicUserAny": HandlersHttpResponseModelsPublicUserAny,
+    "HandlersHttpResponseModelsUserPersonalInfoAny": HandlersHttpResponseModelsUserPersonalInfoAny,
     "HandlersOAuthRedirectData": HandlersOAuthRedirectData,
+    "HandlersSubscribeBody": HandlersSubscribeBody,
     "HandlersSyncNotesRequest": HandlersSyncNotesRequest,
     "HandlersSyncNotesResponse": HandlersSyncNotesResponse,
     "ModelsAPIToken": ModelsAPIToken,
-    "ModelsGraphNoteLink": ModelsGraphNoteLink,
-    "ModelsGraphNoteNode": ModelsGraphNoteNode,
-    "ModelsNoteGraph": ModelsNoteGraph,
     "ModelsNoteHeading": ModelsNoteHeading,
     "ModelsNoteLink": ModelsNoteLink,
     "ModelsNoteMeta": ModelsNoteMeta,
     "ModelsPagination": ModelsPagination,
     "ModelsPublicNote": ModelsPublicNote,
     "ModelsPublicUser": ModelsPublicUser,
+    "ModelsUserPersonalInfo": ModelsUserPersonalInfo,
 }
 
 export class ObjectSerializer {

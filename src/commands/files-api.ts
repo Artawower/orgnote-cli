@@ -5,6 +5,9 @@ import { ObjectSerializer } from '../generated/api/model/models.js';
 import { HttpError } from '../generated/api/api/apis.js';
 import axios from 'axios';
 import { Stream } from 'stream';
+import { getLogger } from '../logger.js';
+
+const logger = getLogger();
 
 /*
  * Patch over generated api to use multipart/form-data correctly.
@@ -18,7 +21,16 @@ export class FilesApi extends OriginalFilesApi {
     }
 
     files.forEach(async (f) => {
-      await this.uploadFile(f);
+      try {
+        await this.uploadFile(f);
+      } catch (e) {
+        const data = e.response?.data ?? e.body;
+        logger.error(`🦄: [http error] error while upload file ${f.fileName}:
+    | status: ${e.statusCode ?? ''}
+    | data: ${data ? JSON.stringify(data) : ''}
+    | message: ${e.message ?? ''}
+`);
+      }
     });
   }
 
@@ -26,6 +38,7 @@ export class FilesApi extends OriginalFilesApi {
     blob: Buffer;
     fileName: string;
   }): Promise<unknown> {
+    logger.info(`Uploading file: ${file.fileName}`);
     const localVarPath = this.basePath + '/files/upload';
     let localVarQueryParameters: any = {};
     let localVarHeaderParams: any = (<any>Object).assign(
@@ -108,8 +121,16 @@ export class FilesApi extends OriginalFilesApi {
 
   public async downloadFile(relativeFilePath: string): Promise<Stream> {
     const downloadedFilePath = `${this.basePath}/media/${relativeFilePath}`;
-    return await axios
-      .get(downloadedFilePath, { responseType: 'stream' })
-      .then((r) => r.data);
+    try {
+      const stream = await axios
+        .get(downloadedFilePath, { responseType: 'stream' })
+        .then((r) => r.data);
+    } catch (e) {
+      logger.error(
+        '🦄: [http error] error while send http request for file download: %o',
+        relativeFilePath
+      );
+      return null;
+    }
   }
 }

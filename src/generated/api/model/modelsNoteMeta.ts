@@ -17,12 +17,12 @@ import { ModelsNoteLink } from './modelsNoteLink.js';
 
 export class ModelsNoteMeta {
     'category'?: ModelsCategory;
+    'connectedNotes'?: { [key: string]: string; };
     'description'?: string;
     'externalLinks'?: Array<ModelsNoteLink>;
     'fileTags'?: Array<string>;
     'headings'?: Array<ModelsNoteHeading>;
     'images'?: Array<string>;
-    'linkedArticles'?: Array<ModelsNoteLink>;
     'previewImg'?: string;
     'published'?: boolean;
     'startup'?: string;
@@ -35,6 +35,11 @@ export class ModelsNoteMeta {
             "name": "category",
             "baseName": "category",
             "type": "ModelsCategory"
+        },
+        {
+            "name": "connectedNotes",
+            "baseName": "connectedNotes",
+            "type": "{ [key: string]: string; }"
         },
         {
             "name": "description",
@@ -60,11 +65,6 @@ export class ModelsNoteMeta {
             "name": "images",
             "baseName": "images",
             "type": "Array<string>"
-        },
-        {
-            "name": "linkedArticles",
-            "baseName": "linkedArticles",
-            "type": "Array<ModelsNoteLink>"
         },
         {
             "name": "previewImg",

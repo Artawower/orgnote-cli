@@ -11,10 +11,10 @@
  */
 
 import { RequestFile } from './models.js';
-import { HandlersSyncNotesRequest } from './handlersSyncNotesRequest.js';
+import { ModelsUserPersonalInfo } from './modelsUserPersonalInfo.js';
 
-export class HandlersHttpResponseHandlersSyncNotesRequestAny {
-    'data'?: HandlersSyncNotesRequest;
+export class HandlersHttpResponseModelsUserPersonalInfoAny {
+    'data'?: ModelsUserPersonalInfo;
     'meta'?: object;
 
     static discriminator: string | undefined = undefined;
@@ -23,7 +23,7 @@ export class HandlersHttpResponseHandlersSyncNotesRequestAny {
         {
             "name": "data",
             "baseName": "data",
-            "type": "HandlersSyncNotesRequest"
+            "type": "ModelsUserPersonalInfo"
         },
         {
             "name": "meta",
@@ -32,7 +32,7 @@ export class HandlersHttpResponseHandlersSyncNotesRequestAny {
         }    ];
 
     static getAttributeTypeMap() {
-        return HandlersHttpResponseHandlersSyncNotesRequestAny.attributeTypeMap;
+        return HandlersHttpResponseModelsUserPersonalInfoAny.attributeTypeMap;
     }
 }
 

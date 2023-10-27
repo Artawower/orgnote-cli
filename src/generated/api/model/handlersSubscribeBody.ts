@@ -11,28 +11,21 @@
  */
 
 import { RequestFile } from './models.js';
-import { ModelsPublicNote } from './modelsPublicNote.js';
 
-export class HandlersHttpResponseArrayModelsPublicNoteAny {
-    'data'?: Array<ModelsPublicNote>;
-    'meta'?: object;
+export class HandlersSubscribeBody {
+    'token'?: string;
 
     static discriminator: string | undefined = undefined;
 
     static attributeTypeMap: Array<{name: string, baseName: string, type: string}> = [
         {
-            "name": "data",
-            "baseName": "data",
-            "type": "Array<ModelsPublicNote>"
-        },
-        {
-            "name": "meta",
-            "baseName": "meta",
-            "type": "object"
+            "name": "token",
+            "baseName": "token",
+            "type": "string"
         }    ];
 
     static getAttributeTypeMap() {
-        return HandlersHttpResponseArrayModelsPublicNoteAny.attributeTypeMap;
+        return HandlersSubscribeBody.attributeTypeMap;
     }
 }
 
