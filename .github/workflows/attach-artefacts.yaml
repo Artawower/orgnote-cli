@@ -1,8 +1,8 @@
-name: Draft release
+name: Attach artefacts
 
 on:
   release:
-    types: [published]
+    types: [created]
 
 jobs:
   release:
