@@ -1,4 +1,4 @@
-name: CI/CD orgnote client
+name: Auto release
 
 on: [push, pull_request]
 
