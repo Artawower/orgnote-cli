@@ -19,6 +19,7 @@ export class HandlersCreatingNote {
     'filePath'?: Array<string>;
     'id'?: string;
     'meta'?: ModelsNoteMeta;
+    'touchedAt'?: string;
     'updatedAt'?: string;
 
     static discriminator: string | undefined = undefined;
@@ -48,6 +49,11 @@ export class HandlersCreatingNote {
             "name": "meta",
             "baseName": "meta",
             "type": "ModelsNoteMeta"
+        },
+        {
+            "name": "touchedAt",
+            "baseName": "touchedAt",
+            "type": "string"
         },
         {
             "name": "updatedAt",

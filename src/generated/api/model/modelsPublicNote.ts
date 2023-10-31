@@ -26,6 +26,7 @@ export class ModelsPublicNote {
     'isMy'?: boolean;
     'meta'?: ModelsNoteMeta;
     'size'?: number;
+    'touchedAt'?: string;
     'updatedAt'?: string;
 
     static discriminator: string | undefined = undefined;
@@ -70,6 +71,11 @@ export class ModelsPublicNote {
             "name": "size",
             "baseName": "size",
             "type": "number"
+        },
+        {
+            "name": "touchedAt",
+            "baseName": "touchedAt",
+            "type": "string"
         },
         {
             "name": "updatedAt",

@@ -19,12 +19,14 @@ export function prepareNote(
     const stat = statSync(filePath);
     const lastUpdatedTime = stat.mtime;
     const noteCreatedTime = stat.ctime;
+    const lastTouched = stat.atime;
 
     const note: HandlersCreatingNote = {
       id: nodeTree.meta.id,
       meta: nodeTree.meta as any,
       content: fileContent,
       filePath: relativeNotePath,
+      touchedAt: lastTouched.toISOString(),
       updatedAt: new Date(
         Math.max(lastUpdatedTime.getTime(), noteCreatedTime.getTime())
       ).toISOString(),
