@@ -3,11 +3,13 @@
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { getLogger } from './logger.js';
-import { getConfig } from './config.js';
+import { OrgNotePublishedConfig, getConfig } from './config.js';
 import { Logger } from 'winston';
 import { CliCommand, handleCommand } from './commands/command-handlers.js';
 import { clear } from './store/store.js';
-import { writeFileSync } from 'fs';
+import { existsSync, mkdirSync, writeFileSync } from 'fs';
+import { dirname } from 'path';
+import { resolveHome } from './tools/with-home-dir.js';
 
 let logger: Logger;
 
@@ -40,6 +42,8 @@ let logger: Logger;
 
   logger.info('Current configuration: %o', config);
 
+  createLogFile(config);
+
   try {
     await handleCommand(command, config, path)
   } catch (e) {
@@ -50,3 +54,16 @@ let logger: Logger;
     throw e;
   }
 })();
+
+function createLogFile(config: OrgNotePublishedConfig): void {
+  if (!config.logPath) {
+    return;
+  }
+  if (existsSync(config.logPath)) {
+    return;
+  }
+  const logPath = resolveHome(config.logPath);
+  mkdirSync(dirname(logPath), { recursive: true });
+  writeFileSync(logPath, '');
+
+}
