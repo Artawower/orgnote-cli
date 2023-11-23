@@ -19,7 +19,7 @@ const sendNotes = async (
 
   await sendNotesFiles(notes, config, dirPath);
 
-  preserveNotesInfo(notes);
+  preserveNotesInfo(config, notes);
 
   try {
     await api.notes.notesBulkUpsertPut(notes);

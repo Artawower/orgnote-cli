@@ -3,6 +3,7 @@ import { HandlersDeletedNote } from '../generated/api/api';
 import { getLogger } from '../logger.js';
 import { join } from 'path';
 import { unlinkSync } from 'fs';
+import { OrgNotePublishedConfig } from '../config.js';
 
 const logger = getLogger();
 
@@ -26,11 +27,14 @@ export function removeNoteLocally(
 }
 
 export function removeNotesLocally(
-  rootFolder: string,
+  config: OrgNotePublishedConfig,
   deletedNotes: HandlersDeletedNote[]
 ): void {
   deletedNotes.forEach((n) => {
-    removeNoteLocally(rootFolder, n);
+    removeNoteLocally(config.rootFolder, n);
   });
-  deleteNotesInfo(deletedNotes.map((n) => n.id));
+  deleteNotesInfo(
+    config,
+    deletedNotes.map((n) => n.id)
+  );
 }

@@ -1,18 +1,16 @@
-import {
-  deleteNotesInfo,
-  getPreservedNotesInfo,
-} from '../store/persistent-notes.js';
+import { getPreservedNotesInfo } from '../store/persistent-notes.js';
 import { getLogger } from '../logger.js';
 import { join } from 'path';
 import { ModelsPublicNote } from 'generated/api/api.js';
 import { removeNoteLocally } from './remove-notes-locally.js';
+import { OrgNotePublishedConfig } from '../config.js';
 
 const logger = getLogger();
 export function removeRenamedNotes(
-  rootFolder: string,
+  config: OrgNotePublishedConfig,
   deletedNotes: ModelsPublicNote[]
 ): void {
-  const notesInfo = getPreservedNotesInfo();
+  const notesInfo = getPreservedNotesInfo(config);
   const notesInfoById = Object.values(notesInfo).reduce((acc, n) => {
     acc[n.id] = n;
     return acc;
@@ -27,7 +25,7 @@ export function removeRenamedNotes(
       `✎: [remove-renamed-notes.ts][${new Date().toString()}] remove renamed note %o`,
       notesInfoById[n.id].filePath
     );
-    removeNoteLocally(rootFolder, {
+    removeNoteLocally(config.rootFolder, {
       filePath: notesInfoById[n.id].filePath,
       id: n.id,
     });

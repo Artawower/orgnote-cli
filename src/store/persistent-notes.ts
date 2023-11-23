@@ -1,10 +1,13 @@
+import { OrgNotePublishedConfig } from 'config';
 import { getLogger } from '../logger.js';
-import { StoredNoteInfo, get, set } from './store.js';
+import { initStore, StoredNoteInfo } from './store.js';
 
 const logger = getLogger();
 export function preserveNotesInfo(
+  config: OrgNotePublishedConfig,
   updatedNotesInfo: Partial<StoredNoteInfo>[]
 ): void {
+  const { get, set } = initStore(config.name);
   const notes = get('notes');
   updatedNotesInfo.forEach((n) => {
     if (!n.id || !n.filePath) {
@@ -20,16 +23,21 @@ export function preserveNotesInfo(
   set('notes', notes);
 }
 
-export function getPreservedNotesInfo(): {
+export function getPreservedNotesInfo(config: OrgNotePublishedConfig): {
   [filePath: string]: StoredNoteInfo;
 } {
+  const { get } = initStore(config.name);
   return get('notes');
 }
 
-export function deleteNotesInfo(deletedNotesIds: string[]): void {
+export function deleteNotesInfo(
+  config: OrgNotePublishedConfig,
+  deletedNotesIds: string[]
+): void {
   if (!deletedNotesIds.length) {
     return;
   }
+  const { get, set } = initStore(config.name);
   const notes = get('notes');
   const notesAfterDeletion = Object.keys(notes).reduce((acc, key) => {
     const note = notes[key];

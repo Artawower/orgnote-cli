@@ -1,6 +1,5 @@
 import { existsSync, statSync } from 'fs';
 import { OrgNotePublishedConfig } from '../config.js';
-import { get, set } from '../store/store.js';
 import { getOrgFilesRecursively } from '../tools/read-orf-files-recursively.js';
 import { prepareNotes } from '../tools/prepare-note.js';
 import { getApi } from './sdk.js';
@@ -16,9 +15,11 @@ import {
 import { join } from 'path';
 import { removeRenamedNotes } from '../tools/remove-renamed-notes.js';
 import { sendNotesFiles } from './send-notes-files.js';
+import { initStore } from '../store/store.js';
 
 const logger = getLogger();
 export async function syncNotes(config: OrgNotePublishedConfig): Promise<void> {
+  const { get, set } = initStore(config.name);
   const lastSync = new Date(get('lastSync') ?? 0);
   const notesFromLastSync = getNotesFromLastSync(config, lastSync);
   const notesIdsFromLastSync = notesFromLastSync.map((n) => n.id);
@@ -26,8 +27,8 @@ export async function syncNotes(config: OrgNotePublishedConfig): Promise<void> {
   const deletedNotesIdsWithoutRename = deletedNotesIds.filter(
     (id) => !notesIdsFromLastSync.includes(id)
   );
-  preserveNotesInfo(notesFromLastSync);
-  deleteNotesInfo(deletedNotesIds);
+  preserveNotesInfo(config, notesFromLastSync);
+  deleteNotesInfo(config, deletedNotesIds);
 
   const api = getApi(config);
 
@@ -47,10 +48,11 @@ export async function syncNotes(config: OrgNotePublishedConfig): Promise<void> {
     )
   );
 
-  removeNotesLocally(config.rootFolder, rspns.body.data.deletedNotes);
-  removeRenamedNotes(config.rootFolder, rspns.body.data.notes);
+  removeNotesLocally(config, rspns.body.data.deletedNotes);
+  removeRenamedNotes(config, rspns.body.data.notes);
   saveNotesLocally(config, rspns.body.data.notes);
   preserveNotesInfo(
+    config,
     rspns.body.data.notes.map((n) => ({
       filePath: n.filePath,
       id: n.id,
@@ -87,7 +89,7 @@ function getNotesFromLastSync(
 }
 
 function getDeletedNotesIds(config: OrgNotePublishedConfig): string[] {
-  const notesInfo = getPreservedNotesInfo();
+  const notesInfo = getPreservedNotesInfo(config);
   const deletedNotesIds = Object.keys(notesInfo).reduce((acc, filePath) => {
     const fullPath = join(config.rootFolder, filePath);
     const fileExists = existsSync(fullPath);

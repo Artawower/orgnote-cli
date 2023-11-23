@@ -6,7 +6,7 @@ import { getLogger } from './logger.js';
 import { OrgNotePublishedConfig, getConfig } from './config.js';
 import { Logger } from 'winston';
 import { CliCommand, handleCommand } from './commands/command-handlers.js';
-import { clear } from './store/store.js';
+import { initStore } from './store/store.js';
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import { dirname } from 'path';
 import { resolveHome } from './tools/with-home-dir.js';
@@ -35,6 +35,7 @@ let logger: Logger;
   const path = (argv._[argv._.length - 1] as string) || config.rootFolder;
   logger = getLogger(config);
 
+  const { clear } = initStore(config.name);
   if (argv.force) {
     logger.warn('Force sync enabled. All cache will be cleared.');
     clear();
@@ -47,22 +48,23 @@ let logger: Logger;
   try {
     await handleCommand(command, config, path)
   } catch (e) {
-    logger.error('Unexpected error');
+    logger.error('Unexpected error', e.toString());
     // write an error to the lof file from config
-    writeFileSync(config.logPath+'erorrs.log', e.toString());
-    
+    // writeFileSync(config.logPath, e.toString());
     throw e;
   }
 })();
 
 function createLogFile(config: OrgNotePublishedConfig): void {
   if (!config.logPath) {
-    return;
-  }
-  if (existsSync(config.logPath)) {
+    console.log('[line 60]: NO LOG FILE PROVIDED')
     return;
   }
   const logPath = resolveHome(config.logPath);
+  if (existsSync(logPath)) {
+    console.log(`[line 64]: LOG FILE ALREADY EXISTS ${config.logPath}`)
+    return;
+  }
   mkdirSync(dirname(logPath), { recursive: true });
   writeFileSync(logPath, '');
 

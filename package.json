@@ -1,6 +1,6 @@
 {
   "name": "orgnote-cli",
-  "version": "0.10.6",
+  "version": "0.10.7",
   "description": "Project for synchronizing org roam notes and Org Note ",
   "type": "module",
   "main": "dist/index.js",
@@ -15,7 +15,7 @@
   },
   "repository": "git+https://github.com/Artawower/orgnote-cli.git",
   "keywords": ["org", "roam", "Org Note"],
-  "author": "darkawower <artawower@protonmail.com> (https://du-blog.ru/)",
+  "author": "darkawower <app.orgnote@gmail.com> (https://about.org-note.com)",
   "license": "MIT",
   "files": ["dist/**"],
   "bin": {

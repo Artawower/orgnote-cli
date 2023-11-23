@@ -33,6 +33,21 @@ npm install -g orgnote-cli
 * Usage
 ** Configuration
 Create ~~/.config/orgnote/config.json~ with next schema:
+#+BEGIN_SRC typescript
+export interface OrgNotePublishedConfig {
+  remoteAddress: string;
+  token: string;
+  rootFolder: string;
+  version: string;
+  name?: string;
+  debug?: boolean;
+  logPath?: string;
+  backupCount?: number;
+  backupDir?: string;
+}
+
+#+END_SRC
+Example
 #+BEGIN_SRC json
 [
   {

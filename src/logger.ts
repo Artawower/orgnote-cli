@@ -1,4 +1,6 @@
 import { OrgNotePublishedConfig } from 'config';
+import { dirname } from 'path';
+import { resolveHome } from './tools/with-home-dir.js';
 import { createLogger, format, Logger, transports } from 'winston';
 
 const logFormat = format.printf(function (info) {
@@ -23,16 +25,19 @@ function configureLogger(config?: Partial<OrgNotePublishedConfig>): void {
   if (!config?.debug) {
     return;
   }
+  if (!config.logPath) {
+    console.warn('No log path provded');
+    return;
+  }
+
   logger.level = 'info';
+  const dirName = dirname(config.logPath);
+  const fileName = config.logPath.split('/').pop();
   [
     new transports.File({
-      dirname: config.logPath,
-      filename: 'orgnote-error.log',
-      level: 'error',
-    }),
-    new transports.File({
-      dirname: config.logPath,
-      filename: 'orgnote-combined.log',
+      dirname: resolveHome(dirName),
+      filename: fileName,
+      level: 'info',
     }),
     new transports.Console({
       format: format.simple(),
