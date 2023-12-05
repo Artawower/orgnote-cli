@@ -1,5 +1,6 @@
 import { readFileSync } from 'fs';
 import os from 'os';
+import { resolveHome } from './tools/with-home-dir.js';
 
 export interface OrgNotePublishedConfig {
   remoteAddress: string;
@@ -25,7 +26,7 @@ export function getConfig(
   override: Partial<OrgNotePublishedConfig>,
   accountName?: string
 ): OrgNotePublishedConfig {
-  let defaultConfigs = {
+  let defaultConfigs: OrgNotePublishedConfig = {
     remoteAddress: defaultUrl,
     token: process.env.OrgNote_TOKEN || '',
     rootFolder,
@@ -45,5 +46,9 @@ export function getConfig(
   } catch (e) {
     console.error('[file read error] %o', e);
   }
-  return defaultConfigs;
+  return {
+    ...defaultConfigs,
+    backupDir: resolveHome(defaultConfigs.backupDir || ''),
+    rootFolder: resolveHome(defaultConfigs.rootFolder || ''),
+  };
 }

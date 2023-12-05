@@ -28,7 +28,6 @@ export const initStore = (userName: string) => {
   );
 
   const preserveStore = (): void => {
-    logger.info('Preserve store');
     writeFileSync(storeFile, JSON.stringify(store));
   };
 

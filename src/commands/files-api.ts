@@ -119,12 +119,14 @@ export class FilesApi extends OriginalFilesApi {
     });
   }
 
+  // TODO: master get user id
   public async downloadFile(relativeFilePath: string): Promise<Stream> {
     const downloadedFilePath = `${this.basePath}/media/${relativeFilePath}`;
     try {
       const stream = await axios
         .get(downloadedFilePath, { responseType: 'stream' })
         .then((r) => r.data);
+      return stream;
     } catch (e) {
       logger.error(
         '🦄: [http error] error while send http request for file download: %o',

@@ -15,7 +15,7 @@ async function saveNoteFiles(
 ): Promise<void> {
   const sdk = getApi(config);
   logger.info(
-    `✎: [save-note.ts][${new Date().toString()}] saveNoteFiles %o`,
+    `✎: [save-note.ts][${new Date().toString()}] save notes images %o`,
     note.meta.images
   );
   for (const f of note.meta?.images ?? []) {
