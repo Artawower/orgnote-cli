@@ -18,6 +18,10 @@ export class ModelsPublicNote {
     'author'?: ModelsPublicUser;
     'content'?: string;
     'createdAt'?: string;
+    /**
+    * Encrypted note content
+    */
+    'encrypted'?: ModelsPublicNote.EncryptedEnum;
     'filePath'?: Array<string>;
     /**
     * It\'s externalID from original note
@@ -46,6 +50,11 @@ export class ModelsPublicNote {
             "name": "createdAt",
             "baseName": "createdAt",
             "type": "string"
+        },
+        {
+            "name": "encrypted",
+            "baseName": "encrypted",
+            "type": "ModelsPublicNote.EncryptedEnum"
         },
         {
             "name": "filePath",
@@ -88,3 +97,9 @@ export class ModelsPublicNote {
     }
 }
 
+export namespace ModelsPublicNote {
+    export enum EncryptedEnum {
+        Gpg = <any> 'gpg',
+        Password = <any> 'password'
+    }
+}

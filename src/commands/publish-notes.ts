@@ -39,7 +39,7 @@ export async function publishNotes(
   path?: string
 ): Promise<void> {
   const notePath = path ?? config.rootFolder;
-  const notes = prepareNotes(notePath, config);
+  const notes = await prepareNotes(notePath, config);
   if (!notes.length) {
     return;
   }

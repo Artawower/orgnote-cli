@@ -44,6 +44,10 @@ export interface OrgNotePublishedConfig {
   logPath?: string;
   backupCount?: number;
   backupDir?: string;
+  encrypt?: 'gpg' | 'password';
+  gpgPublicKeyPath?: string;
+  gpgPrivateKeyPath?: string;
+  gpgPrivateKeyPassphrase?: string;
 }
 
 #+END_SRC
@@ -80,6 +84,21 @@ Example
 ** Available flags
 ~--debug~ enable additional info logging messages
 ~--force~ clear local cache and last sync time
+* Encryption.
+For exporting keys use next commands ([[https://www.gnupg.org/documentation/][check official doc]]). Make sure you have orgnote folder inside your =.config=
+#+BEGIN_SRC bash
+mkdir -p ~/.config/orgnote
+#+END_SRC
+
+Export public key:
+#+BEGIN_SRC bash
+gpg --armor --export <ID> > ~/.config/orgnote/public.key
+#+END_SRC
+
+Export private key
+#+BEGIN_SRC bash
+gpg --armor --export-secret-key <ID> > ~/.config/orgnote/private.key
+#+END_SRC
 
 * 🍩 Contribute guide
 Any contribution is very much appreciated! Please read the [[./CONTRIBUTE.org][style guide]] before contributing to avoid misunderstandings!

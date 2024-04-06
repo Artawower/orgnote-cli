@@ -30,7 +30,7 @@ let logger: Logger;
   }).argv;
   const command = argv._[0] as CliCommand;
   const accountName = argv.accountName as string;
-  const config = getConfig(argv, accountName);
+  const config = await getConfig(argv, accountName);
 
   const path = (argv._[argv._.length - 1] as string) || config.rootFolder;
   logger = getLogger(config);

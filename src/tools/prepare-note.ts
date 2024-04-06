@@ -5,28 +5,38 @@ import { getRelativeNotePath } from './relative-file-path.js';
 import { getLogger } from '../logger.js';
 import { getOrgFilesRecursively } from './read-orf-files-recursively.js';
 import { HandlersCreatingNote, ModelsPublicNote } from 'generated/api/api.js';
+import { encryptText } from './encryption.js';
 
 const logger = getLogger();
-export function prepareNote(
+export async function prepareNote(
   filePath: string,
   config: OrgNotePublishedConfig
-): ModelsPublicNote {
+): Promise<ModelsPublicNote> {
   try {
     const relativeNotePath = getRelativeNotePath(config.rootFolder, filePath);
     const fileContent = readFileSync(filePath, 'utf8');
     const parsedDoc = parse(fileContent);
     const nodeTree = withMetaInfo(parsedDoc);
+    const content =
+      !!config.encrypt && !nodeTree.meta.published
+        ? await encryptText(fileContent, config)
+        : fileContent;
     const stat = statSync(filePath);
     const lastUpdatedTime = stat.mtime;
     const noteCreatedTime = stat.ctime;
     const lastTouched = stat.atime;
 
+    const meta = (nodeTree.meta.published || !config.encrypt
+      ? nodeTree.meta
+      : { id: nodeTree.meta.id }) as unknown as ModelsPublicNote['meta'];
+
     const note: HandlersCreatingNote = {
       id: nodeTree.meta.id,
-      meta: nodeTree.meta as any,
-      content: fileContent,
+      meta,
+      content,
       filePath: relativeNotePath,
       touchedAt: lastTouched.toISOString(),
+      encrypted: config.encrypt,
       updatedAt: new Date(
         Math.max(lastUpdatedTime.getTime(), noteCreatedTime.getTime())
       ).toISOString(),
@@ -46,31 +56,34 @@ export function prepareNote(
   }
 }
 
-export function prepareNotesRecursively(
+export async function prepareNotesRecursively(
   dirPath: string,
   config: OrgNotePublishedConfig
-): ModelsPublicNote[] {
+): Promise<ModelsPublicNote[]> {
   const files = getOrgFilesRecursively(dirPath);
 
-  return files.reduce((notes: ModelsPublicNote[], fileName: string) => {
-    const collectedNote = prepareNote(fileName, config);
+  return await files.reduce(
+    async (notes: Promise<ModelsPublicNote[]>, fileName: string) => {
+      const collectedNote = await prepareNote(fileName, config);
 
-    if (collectedNote) {
-      return [...notes, collectedNote];
-    }
+      if (collectedNote) {
+        return [...(await notes), collectedNote];
+      }
 
-    return notes;
-  }, []);
+      return await notes;
+    },
+    Promise.resolve([])
+  );
 }
 
-export function prepareNotes(
+export async function prepareNotes(
   path: string,
   config: OrgNotePublishedConfig
-): ModelsPublicNote[] {
+): Promise<ModelsPublicNote[]> {
   const stats = statSync(path);
   if (stats.isDirectory()) {
-    return prepareNotesRecursively(path, config);
+    return await prepareNotesRecursively(path, config);
   }
-  const preparedNote = prepareNote(path, config);
+  const preparedNote = await prepareNote(path, config);
   return preparedNote ? [preparedNote] : [];
 }

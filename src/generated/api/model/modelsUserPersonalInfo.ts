@@ -13,7 +13,7 @@
 import { RequestFile } from './models.js';
 
 export class ModelsUserPersonalInfo {
-    'active'?: boolean;
+    'active'?: string;
     'avatarUrl'?: string;
     'email'?: string;
     'id'?: string;
@@ -29,7 +29,7 @@ export class ModelsUserPersonalInfo {
         {
             "name": "active",
             "baseName": "active",
-            "type": "boolean"
+            "type": "string"
         },
         {
             "name": "avatarUrl",

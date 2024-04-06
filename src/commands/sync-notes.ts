@@ -4,7 +4,7 @@ import { getOrgFilesRecursively } from '../tools/read-orf-files-recursively.js';
 import { prepareNotes } from '../tools/prepare-note.js';
 import { getApi } from './sdk.js';
 import { saveNotesLocally } from '../tools/save-note.js';
-import { HandlersCreatingNote } from 'generated/api/api.js';
+import { HandlersCreatingNote, ModelsPublicNote } from 'generated/api/api.js';
 import { getLogger } from '../logger.js';
 import { removeNotesLocally } from '../tools/remove-notes-locally.js';
 import {
@@ -16,12 +16,13 @@ import { join } from 'path';
 import { removeRenamedNotes } from '../tools/remove-renamed-notes.js';
 import { sendNotesFiles } from './send-notes-files.js';
 import { initStore } from '../store/store.js';
+import { decryptText } from '../tools/encryption.js';
 
 const logger = getLogger();
 export async function syncNotes(config: OrgNotePublishedConfig): Promise<void> {
   const { get, set } = initStore(config.name);
   const lastSync = new Date(get('lastSync') ?? 0);
-  const notesFromLastSync = getNotesFromLastSync(config, lastSync);
+  const notesFromLastSync = await getNotesFromLastSync(config, lastSync);
   const notesIdsFromLastSync = notesFromLastSync.map((n) => n.id);
   const deletedNotesIds = getDeletedNotesIds(config);
   const deletedNotesIdsWithoutRename = deletedNotesIds.filter(
@@ -48,9 +49,10 @@ export async function syncNotes(config: OrgNotePublishedConfig): Promise<void> {
     )
   );
 
+  const decryptedNotes = await decryptNotes(rspns.body.data.notes, config);
   removeNotesLocally(config, rspns.body.data.deletedNotes);
-  removeRenamedNotes(config, rspns.body.data.notes);
-  saveNotesLocally(config, rspns.body.data.notes);
+  removeRenamedNotes(config, decryptedNotes);
+  saveNotesLocally(config, decryptedNotes);
   preserveNotesInfo(
     config,
     rspns.body.data.notes.map((n) => ({
@@ -64,10 +66,27 @@ export async function syncNotes(config: OrgNotePublishedConfig): Promise<void> {
   return;
 }
 
-function getNotesFromLastSync(
+async function decryptNotes(
+  notes: ModelsPublicNote[],
+  config: OrgNotePublishedConfig
+): Promise<ModelsPublicNote[]> {
+  return await Promise.all(
+    notes.map(async (n) => {
+      if (n.meta.published) {
+        return n;
+      }
+      return {
+        ...n,
+        content: await decryptText(n.content, config),
+      };
+    })
+  );
+}
+
+async function getNotesFromLastSync(
   config: OrgNotePublishedConfig,
   lastSync: Date
-): HandlersCreatingNote[] {
+): Promise<HandlersCreatingNote[]> {
   const orgFiles = getOrgFilesRecursively(config.rootFolder);
 
   const notesFilesFromLastSync = orgFiles.filter((filePath) => {
@@ -76,9 +95,12 @@ function getNotesFromLastSync(
     const fileLastRenamed = fileStat.ctime;
     return fileLastModified > lastSync || fileLastRenamed > lastSync;
   });
-  const notes = notesFilesFromLastSync.flatMap((filePath) =>
-    prepareNotes(filePath, config)
+  const nestedNotes = await Promise.all(
+    notesFilesFromLastSync.map(
+      async (filePath) => await prepareNotes(filePath, config)
+    )
   );
+  const notes = nestedNotes.flat();
   if (config.debug) {
     logger.info(
       `✎: [sync-notes.ts][${new Date().toString()}] notes from last sync:\n %o`,
