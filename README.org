@@ -44,16 +44,28 @@ export interface OrgNotePublishedConfig {
   logPath?: string;
   backupCount?: number;
   backupDir?: string;
-  encrypt?: 'gpg' | 'password';
+  encrypt?: HandlersCreatingNote.EncryptedEnum;
+
+  gpgPassword?: string;
   gpgPublicKeyPath?: string;
   gpgPrivateKeyPath?: string;
   gpgPrivateKeyPassphrase?: string;
+
 }
 
 #+END_SRC
 Example
 #+BEGIN_SRC json
 [
+  {
+    "name": "User 1",
+    "remoteAddress": "http://localhost:8000/v1",
+    "token": "289cd69d-e9fb-4ad0-a907-d44e46cac786",
+    "rootFolder": "~/tmp/org-roam",
+    "logPath": "~/tmp/logs/orgnote.log",
+    "encrypt": "password",
+    "gpgPassword": "password"
+  },
   {
     "name": "Local development",
     "remoteAddress": "http://localhost:8000/v1",

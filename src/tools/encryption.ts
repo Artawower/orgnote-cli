@@ -7,6 +7,35 @@ export async function encryptText(
   config: OrgNotePublishedConfig
 ): Promise<string> {
   validateEncryptionConfig(config);
+  if (config.encrypt === HandlersCreatingNote.EncryptedEnum.Password) {
+    return encryptViaPassword(content, config);
+  }
+  if (config.encrypt === HandlersCreatingNote.EncryptedEnum.Gpg) {
+    return encryptViaKeys(content, config);
+  }
+}
+
+async function encryptViaPassword(
+  content: string,
+  config: OrgNotePublishedConfig
+): Promise<string> {
+  const message = await createMessage({
+    text: content,
+  });
+
+  const encryptedMessage = await encrypt({
+    message,
+    format: 'armored',
+    passwords: config.gpgPassword,
+  });
+
+  return encryptedMessage.toString();
+}
+
+async function encryptViaKeys(
+  content: string,
+  config: OrgNotePublishedConfig
+): Promise<string> {
   try {
     const message = await createMessage({
       text: content,
@@ -31,10 +60,33 @@ export async function decryptText(
   config: OrgNotePublishedConfig
 ): Promise<string> {
   validateEncryptionConfig(config);
-  if (config.encrypt !== HandlersCreatingNote.EncryptedEnum.Gpg) {
-    throw new Error(`Unsupported encryption method: ${config.encrypt}`);
+
+  if (config.encrypt === HandlersCreatingNote.EncryptedEnum.Password) {
+    return decryptViaPassword(content, config);
   }
 
+  if (config.encrypt === HandlersCreatingNote.EncryptedEnum.Gpg) {
+    return decryptViaKeys(content, config);
+  }
+}
+
+async function decryptViaPassword(
+  content: string,
+  config: OrgNotePublishedConfig
+): Promise<string> {
+  const message = await readMessage({ armoredMessage: content });
+
+  const { data: decryptedText } = await decrypt({
+    message,
+    passwords: config.gpgPassword,
+  });
+  return decryptedText.toString();
+}
+
+async function decryptViaKeys(
+  content: string,
+  config: OrgNotePublishedConfig
+): Promise<string> {
   const message = await readMessage({ armoredMessage: content });
 
   const { data: decryptedText } = await decrypt({
@@ -44,17 +96,53 @@ export async function decryptText(
   return decryptedText.toString();
 }
 
+export class GpgPublicKeyIsNotProvidedError extends Error {
+  constructor() {
+    super('Public key is not provided');
+  }
+}
+
+export class GpgPrivateKeyIsNotProvidedError extends Error {
+  constructor() {
+    super('Private key is not provided');
+  }
+}
+
+export class GpgPasswordIsNotProvidedError extends Error {
+  constructor() {
+    super('Encryption password is not provided');
+  }
+}
+
+export class UnsupportedEncryptionMethodError extends Error {
+  constructor(encrypt: string) {
+    super(`Unsupported encryption method: ${encrypt}`);
+  }
+}
+
 function validateEncryptionConfig(
   config: OrgNotePublishedConfig
 ): void | never {
-  if (config.encrypt !== HandlersCreatingNote.EncryptedEnum.Gpg) {
-    throw new Error(`Unsupported encryption method: ${config.encrypt}`);
-  }
-  if (!config.gpgPublicKey) {
-    throw new Error('Public key is not provided');
+  const isKeysEncryption =
+    config.encrypt === HandlersCreatingNote.EncryptedEnum.Gpg;
+  const isPasswordEncryption =
+    config.encrypt === HandlersCreatingNote.EncryptedEnum.Password;
+
+  if (isKeysEncryption && !config.gpgPublicKey) {
+    throw new GpgPublicKeyIsNotProvidedError();
   }
 
-  if (!config.gpgPrivateKey) {
-    throw new Error('Private key is not provided');
+  if (isKeysEncryption && !config.gpgPrivateKey) {
+    throw new GpgPrivateKeyIsNotProvidedError();
+  }
+
+  if (isPasswordEncryption && !config.gpgPassword) {
+    throw new GpgPasswordIsNotProvidedError();
+  }
+
+  if (!isKeysEncryption && !isPasswordEncryption) {
+    throw new UnsupportedEncryptionMethodError(
+      config.encrypt as unknown as string
+    );
   }
 }

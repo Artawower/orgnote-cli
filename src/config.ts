@@ -21,6 +21,8 @@ export interface OrgNotePublishedConfig {
   backupCount?: number;
   backupDir?: string;
   encrypt?: HandlersCreatingNote.EncryptedEnum;
+
+  gpgPassword?: string;
   gpgPublicKeyPath?: string;
   gpgPrivateKeyPath?: string;
   gpgPrivateKeyPassphrase?: string;
