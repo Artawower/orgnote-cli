@@ -14,7 +14,7 @@ import { RequestFile } from './models.js';
 import { ModelsNoteMeta } from './modelsNoteMeta.js';
 
 export class HandlersCreatingNote {
-    'content'?: string;
+    'content': string;
     'createdAt'?: string;
     'encrypted'?: HandlersCreatingNote.EncryptedEnum;
     'filePath'?: Array<string>;

@@ -1,99 +1,73 @@
 import { OrgNotePublishedConfig } from '../config.js';
-import { encrypt, createMessage, readMessage, decrypt } from 'openpgp';
-import { HandlersCreatingNote } from '../generated/api/api.js';
+import {
+  encryptNote as _encryptNote,
+  decryptNote as _decryptNote,
+} from 'orgnote-api';
+import type { AbstractEncryptedNote } from 'orgnote-api';
+import { ModelsPublicNote } from '../generated/api/api.js';
+import { OrgNoteEncryption } from 'orgnote-api/models';
 
-export async function encryptText(
-  content: string,
+export async function encryptNote(
+  note: ModelsPublicNote,
   config: OrgNotePublishedConfig
-): Promise<string> {
+): Promise<ModelsPublicNote> {
   validateEncryptionConfig(config);
-  if (config.encrypt === HandlersCreatingNote.EncryptedEnum.Password) {
-    return encryptViaPassword(content, config);
+  if (
+    !config.encrypt ||
+    config.encrypt === ModelsPublicNote.EncryptedEnum.Disabled
+  ) {
+    return note;
   }
-  if (config.encrypt === HandlersCreatingNote.EncryptedEnum.Gpg) {
-    return encryptViaKeys(content, config);
-  }
+  const encryptParams: OrgNoteEncryption =
+    config.encrypt === ModelsPublicNote.EncryptedEnum.GpgPassword
+      ? {
+          type: 'gpgPassword',
+          password: config.gpgPassword,
+        }
+      : {
+          type: 'gpgKeys',
+          publicKey: config.gpgPublicKey,
+          privateKey: config.gpgPrivateKey,
+          privateKeyPassphrase: config.gpgPrivateKeyPassphrase,
+        };
+
+  const encryptedNote = (await _encryptNote(
+    note as unknown as AbstractEncryptedNote,
+    encryptParams
+  )) as unknown as ModelsPublicNote;
+
+  return encryptedNote;
 }
 
-async function encryptViaPassword(
-  content: string,
+export async function decryptNote(
+  note: ModelsPublicNote,
   config: OrgNotePublishedConfig
-): Promise<string> {
-  const message = await createMessage({
-    text: content,
-  });
-
-  const encryptedMessage = await encrypt({
-    message,
-    format: 'armored',
-    passwords: config.gpgPassword,
-  });
-
-  return encryptedMessage.toString();
-}
-
-async function encryptViaKeys(
-  content: string,
-  config: OrgNotePublishedConfig
-): Promise<string> {
-  try {
-    const message = await createMessage({
-      text: content,
-    });
-
-    const encryptedMessage = await encrypt({
-      message,
-      format: 'armored',
-      encryptionKeys: config.gpgPublicKey,
-      signingKeys: config.gpgPrivateKey,
-    });
-
-    return encryptedMessage.toString();
-  } catch (e) {
-    // TODO: master check incorrect passphrase
-    throw e;
-  }
-}
-
-export async function decryptText(
-  content: string,
-  config: OrgNotePublishedConfig
-): Promise<string> {
+): Promise<ModelsPublicNote> {
   validateEncryptionConfig(config);
-
-  if (config.encrypt === HandlersCreatingNote.EncryptedEnum.Password) {
-    return decryptViaPassword(content, config);
+  if (
+    !config.encrypt ||
+    config.encrypt === ModelsPublicNote.EncryptedEnum.Disabled
+  ) {
+    return note;
   }
 
-  if (config.encrypt === HandlersCreatingNote.EncryptedEnum.Gpg) {
-    return decryptViaKeys(content, config);
-  }
-}
+  const decryptParams: OrgNoteEncryption =
+    config.encrypt === ModelsPublicNote.EncryptedEnum.GpgPassword
+      ? {
+          type: 'gpgPassword',
+          password: config.gpgPassword,
+        }
+      : {
+          type: 'gpgKeys',
+          publicKey: config.gpgPublicKey,
+          privateKey: config.gpgPrivateKey,
+          privateKeyPassphrase: config.gpgPrivateKeyPassphrase,
+        };
 
-async function decryptViaPassword(
-  content: string,
-  config: OrgNotePublishedConfig
-): Promise<string> {
-  const message = await readMessage({ armoredMessage: content });
-
-  const { data: decryptedText } = await decrypt({
-    message,
-    passwords: config.gpgPassword,
-  });
-  return decryptedText.toString();
-}
-
-async function decryptViaKeys(
-  content: string,
-  config: OrgNotePublishedConfig
-): Promise<string> {
-  const message = await readMessage({ armoredMessage: content });
-
-  const { data: decryptedText } = await decrypt({
-    message,
-    decryptionKeys: config.gpgPrivateKey,
-  });
-  return decryptedText.toString();
+  return (await _decryptNote(
+    note as unknown as AbstractEncryptedNote,
+    decryptParams
+  )) as unknown as ModelsPublicNote;
 }
 
 export class GpgPublicKeyIsNotProvidedError extends Error {
@@ -123,10 +97,13 @@ export class UnsupportedEncryptionMethodError extends Error {
 function validateEncryptionConfig(
   config: OrgNotePublishedConfig
 ): void | never {
+  if (!config.encrypt) {
+    return;
+  }
   const isKeysEncryption =
-    config.encrypt === HandlersCreatingNote.EncryptedEnum.Gpg;
+    config.encrypt === ModelsPublicNote.EncryptedEnum.GpgKeys;
   const isPasswordEncryption =
-    config.encrypt === HandlersCreatingNote.EncryptedEnum.Password;
+    config.encrypt === ModelsPublicNote.EncryptedEnum.GpgPassword;
 
   if (isKeysEncryption && !config.gpgPublicKey) {
     throw new GpgPublicKeyIsNotProvidedError();

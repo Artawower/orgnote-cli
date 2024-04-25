@@ -16,7 +16,7 @@ import { ModelsPublicUser } from './modelsPublicUser.js';
 
 export class ModelsPublicNote {
     'author'?: ModelsPublicUser;
-    'content'?: string;
+    'content': string;
     'createdAt'?: string;
     /**
     * Encrypted note content
@@ -28,7 +28,7 @@ export class ModelsPublicNote {
     */
     'id'?: string;
     'isMy'?: boolean;
-    'meta'?: ModelsNoteMeta;
+    'meta': ModelsNoteMeta;
     'size'?: number;
     'touchedAt'?: string;
     'updatedAt'?: string;
@@ -99,7 +99,8 @@ export class ModelsPublicNote {
 
 export namespace ModelsPublicNote {
     export enum EncryptedEnum {
-        Gpg = <any> 'gpg',
-        Password = <any> 'password'
+        GpgKeys = <any> 'gpgKeys',
+        GpgPassword = <any> 'gpgPassword',
+        Disabled = <any> 'disabled'
     }
 }

@@ -8,7 +8,7 @@ import {
   PrivateKey,
   PublicKey,
 } from 'openpgp';
-import { HandlersCreatingNote } from './generated/api/api.js';
+import { ModelsPublicNote } from './generated/api/api.js';
 
 export interface OrgNotePublishedConfig {
   remoteAddress: string;
@@ -20,16 +20,15 @@ export interface OrgNotePublishedConfig {
   logPath?: string;
   backupCount?: number;
   backupDir?: string;
-  encrypt?: HandlersCreatingNote.EncryptedEnum;
-
+  encrypt?: ModelsPublicNote.EncryptedEnum;
   gpgPassword?: string;
   gpgPublicKeyPath?: string;
   gpgPrivateKeyPath?: string;
   gpgPrivateKeyPassphrase?: string;
 
   // TODO: Configurations after init. Move to class
-  gpgPublicKey?: PublicKey;
-  gpgPrivateKey?: PrivateKey;
+  gpgPublicKey?: string;
+  gpgPrivateKey?: string;
 }
 
 const defaultUrl = process.env.OrgNote_SERVER_URL || 'http://localhost:8000/v1';
@@ -65,7 +64,7 @@ export async function getConfig(
     console.error('[file read error] %o', e);
   }
 
-  if (defaultConfigs.encrypt === HandlersCreatingNote.EncryptedEnum.Gpg) {
+  if (defaultConfigs.encrypt === ModelsPublicNote.EncryptedEnum.GpgKeys) {
     const { gpgPrivateKey, gpgPublicKey } = await readGpgKeys(defaultConfigs);
     defaultConfigs.gpgPrivateKey = gpgPrivateKey;
     defaultConfigs.gpgPublicKey = gpgPublicKey;
@@ -79,33 +78,21 @@ export async function getConfig(
 }
 
 async function readGpgKeys(config: OrgNotePublishedConfig): Promise<{
-  gpgPrivateKey: PrivateKey;
-  gpgPublicKey: PublicKey;
+  gpgPrivateKey: string;
+  gpgPublicKey: string;
 }> {
   const privateArmoredKey = readFileSync(
     resolveHome(config.gpgPrivateKeyPath),
     'utf8'
   );
 
-  const encryptedPrivateKey = await readPrivateKey({
-    armoredKey: privateArmoredKey,
-  });
-
   const publicArmoredKey = readFileSync(
     resolveHome(config.gpgPublicKeyPath),
     'utf8'
   );
-  const gpgPublicKey = await readKey({ armoredKey: publicArmoredKey });
-
-  const gpgPrivateKey = config.gpgPrivateKeyPassphrase
-    ? await decryptKey({
-        privateKey: encryptedPrivateKey,
-        passphrase: config.gpgPrivateKeyPassphrase,
-      })
-    : encryptedPrivateKey;
 
   return {
-    gpgPrivateKey,
-    gpgPublicKey,
+    gpgPrivateKey: privateArmoredKey,
+    gpgPublicKey: publicArmoredKey,
   };
 }

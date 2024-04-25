@@ -16,7 +16,7 @@ import { join } from 'path';
 import { removeRenamedNotes } from '../tools/remove-renamed-notes.js';
 import { sendNotesFiles } from './send-notes-files.js';
 import { initStore } from '../store/store.js';
-import { decryptText } from '../tools/encryption.js';
+import { decryptNote } from '../tools/encryption.js';
 
 const logger = getLogger();
 export async function syncNotes(config: OrgNotePublishedConfig): Promise<void> {
@@ -63,7 +63,6 @@ export async function syncNotes(config: OrgNotePublishedConfig): Promise<void> {
   );
 
   set('lastSync', new Date());
-  return;
 }
 
 async function decryptNotes(
@@ -75,10 +74,7 @@ async function decryptNotes(
       if (n.meta.published) {
         return n;
       }
-      return {
-        ...n,
-        content: await decryptText(n.content, config),
-      };
+      return decryptNote(n, config);
     })
   );
 }
