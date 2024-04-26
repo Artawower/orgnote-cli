@@ -1,11 +1,12 @@
 import { OrgNotePublishedConfig } from '../config.js';
 import { readFileSync, statSync } from 'fs';
-import { parse, withMetaInfo } from 'org-mode-ast';
+import { NodeType, parse, withMetaInfo } from 'org-mode-ast';
 import { getRelativeNotePath } from './relative-file-path.js';
 import { getLogger } from '../logger.js';
 import { getOrgFilesRecursively } from './read-orf-files-recursively.js';
 import {
   HandlersCreatingNote,
+  ModelsNoteMeta,
   ModelsPublicNote,
 } from '../generated/api/api.js';
 import { encryptNote } from 'orgnote-api/encryption';
@@ -27,14 +28,9 @@ export async function prepareNote(
     const noteCreatedTime = stat.ctime;
     const lastTouched = stat.atime;
 
-    // TODO: feat/gpg-encryption удаление меты в апи.
-    const meta = (nodeTree.meta.published || !config.encrypt
-      ? nodeTree.meta
-      : { id: nodeTree.meta.id }) as unknown as ModelsPublicNote['meta'];
-
     const note: HandlersCreatingNote = {
       id: nodeTree.meta.id,
-      meta,
+      meta: nodeTree.meta as unknown as ModelsNoteMeta,
       filePath: relativeNotePath,
       content: fileContent,
       touchedAt: lastTouched.toISOString(),
@@ -50,7 +46,7 @@ export async function prepareNote(
       );
       return;
     }
-    // TODO: feat/gpg-encryption fix types after changing codegeneration
+    // TODO: fix types after changing codegeneration
     const encryptedNote = await encryptNote(note as any, {
       type: config.encrypt as unknown as ModelsPublicNoteEncryptedEnum,
       password: config.gpgPassword,
