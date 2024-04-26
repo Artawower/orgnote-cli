@@ -14,8 +14,9 @@ import { RequestFile } from './models.js';
 import { ModelsNoteMeta } from './modelsNoteMeta.js';
 
 export class HandlersCreatingNote {
-    'content'?: string;
+    'content': string;
     'createdAt'?: string;
+    'encrypted'?: HandlersCreatingNote.EncryptedEnum;
     'filePath'?: Array<string>;
     'id'?: string;
     'meta'?: ModelsNoteMeta;
@@ -34,6 +35,11 @@ export class HandlersCreatingNote {
             "name": "createdAt",
             "baseName": "createdAt",
             "type": "string"
+        },
+        {
+            "name": "encrypted",
+            "baseName": "encrypted",
+            "type": "HandlersCreatingNote.EncryptedEnum"
         },
         {
             "name": "filePath",
@@ -66,3 +72,9 @@ export class HandlersCreatingNote {
     }
 }
 
+export namespace HandlersCreatingNote {
+    export enum EncryptedEnum {
+        Gpg = <any> 'gpg',
+        Password = <any> 'password'
+    }
+}

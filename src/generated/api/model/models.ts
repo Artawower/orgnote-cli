@@ -80,7 +80,9 @@ let primitives = [
                  ];
 
 let enumsMap: {[index: string]: any} = {
+        "HandlersCreatingNote.EncryptedEnum": HandlersCreatingNote.EncryptedEnum,
         "ModelsCategory": ModelsCategory,
+        "ModelsPublicNote.EncryptedEnum": ModelsPublicNote.EncryptedEnum,
 }
 
 let typeMap: {[index: string]: any} = {

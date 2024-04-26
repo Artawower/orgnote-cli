@@ -16,15 +16,19 @@ import { ModelsPublicUser } from './modelsPublicUser.js';
 
 export class ModelsPublicNote {
     'author'?: ModelsPublicUser;
-    'content'?: string;
+    'content': string;
     'createdAt'?: string;
+    /**
+    * Encrypted note content
+    */
+    'encrypted'?: ModelsPublicNote.EncryptedEnum;
     'filePath'?: Array<string>;
     /**
     * It\'s externalID from original note
     */
     'id'?: string;
     'isMy'?: boolean;
-    'meta'?: ModelsNoteMeta;
+    'meta': ModelsNoteMeta;
     'size'?: number;
     'touchedAt'?: string;
     'updatedAt'?: string;
@@ -46,6 +50,11 @@ export class ModelsPublicNote {
             "name": "createdAt",
             "baseName": "createdAt",
             "type": "string"
+        },
+        {
+            "name": "encrypted",
+            "baseName": "encrypted",
+            "type": "ModelsPublicNote.EncryptedEnum"
         },
         {
             "name": "filePath",
@@ -88,3 +97,10 @@ export class ModelsPublicNote {
     }
 }
 
+export namespace ModelsPublicNote {
+    export enum EncryptedEnum {
+        GpgKeys = <any> 'gpgKeys',
+        GpgPassword = <any> 'gpgPassword',
+        Disabled = <any> 'disabled'
+    }
+}

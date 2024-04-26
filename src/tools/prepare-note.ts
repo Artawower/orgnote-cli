@@ -1,21 +1,28 @@
 import { OrgNotePublishedConfig } from '../config.js';
 import { readFileSync, statSync } from 'fs';
-import { parse, withMetaInfo } from 'org-mode-ast';
+import { NodeType, parse, withMetaInfo } from 'org-mode-ast';
 import { getRelativeNotePath } from './relative-file-path.js';
 import { getLogger } from '../logger.js';
 import { getOrgFilesRecursively } from './read-orf-files-recursively.js';
-import { HandlersCreatingNote, ModelsPublicNote } from 'generated/api/api.js';
+import {
+  HandlersCreatingNote,
+  ModelsNoteMeta,
+  ModelsPublicNote,
+} from '../generated/api/api.js';
+import { encryptNote } from 'orgnote-api/encryption';
+import { ModelsPublicNoteEncryptedEnum } from 'orgnote-api/remote-api';
 
 const logger = getLogger();
-export function prepareNote(
+export async function prepareNote(
   filePath: string,
   config: OrgNotePublishedConfig
-): ModelsPublicNote {
+): Promise<HandlersCreatingNote> {
   try {
     const relativeNotePath = getRelativeNotePath(config.rootFolder, filePath);
     const fileContent = readFileSync(filePath, 'utf8');
     const parsedDoc = parse(fileContent);
     const nodeTree = withMetaInfo(parsedDoc);
+
     const stat = statSync(filePath);
     const lastUpdatedTime = stat.mtime;
     const noteCreatedTime = stat.ctime;
@@ -23,9 +30,9 @@ export function prepareNote(
 
     const note: HandlersCreatingNote = {
       id: nodeTree.meta.id,
-      meta: nodeTree.meta as any,
-      content: fileContent,
+      meta: nodeTree.meta as unknown as ModelsNoteMeta,
       filePath: relativeNotePath,
+      content: fileContent,
       touchedAt: lastTouched.toISOString(),
       updatedAt: new Date(
         Math.max(lastUpdatedTime.getTime(), noteCreatedTime.getTime())
@@ -39,38 +46,50 @@ export function prepareNote(
       );
       return;
     }
-    return note;
+    // TODO: fix types after changing codegeneration
+    const encryptedNote = await encryptNote(note as any, {
+      type: config.encrypt as unknown as ModelsPublicNoteEncryptedEnum,
+      password: config.gpgPassword,
+      publicKey: config.gpgPublicKey,
+      privateKey: config.gpgPrivateKey,
+      privateKeyPassphrase: config.gpgPrivateKeyPassphrase,
+    });
+    logger.info(`Note encrypted: %o`, encryptedNote);
+    return encryptedNote;
   } catch (e) {
     logger.error("Can't parse file: %o", filePath);
     throw e;
   }
 }
 
-export function prepareNotesRecursively(
+export async function prepareNotesRecursively(
   dirPath: string,
   config: OrgNotePublishedConfig
-): ModelsPublicNote[] {
+): Promise<HandlersCreatingNote[]> {
   const files = getOrgFilesRecursively(dirPath);
 
-  return files.reduce((notes: ModelsPublicNote[], fileName: string) => {
-    const collectedNote = prepareNote(fileName, config);
+  return await files.reduce(
+    async (notes: Promise<HandlersCreatingNote[]>, fileName: string) => {
+      const collectedNote = await prepareNote(fileName, config);
 
-    if (collectedNote) {
-      return [...notes, collectedNote];
-    }
+      if (collectedNote) {
+        return [...(await notes), collectedNote];
+      }
 
-    return notes;
-  }, []);
+      return await notes;
+    },
+    Promise.resolve([])
+  );
 }
 
-export function prepareNotes(
+export async function prepareNotes(
   path: string,
   config: OrgNotePublishedConfig
-): ModelsPublicNote[] {
+): Promise<HandlersCreatingNote[]> {
   const stats = statSync(path);
   if (stats.isDirectory()) {
-    return prepareNotesRecursively(path, config);
+    return await prepareNotesRecursively(path, config);
   }
-  const preparedNote = prepareNote(path, config);
+  const preparedNote = await prepareNote(path, config);
   return preparedNote ? [preparedNote] : [];
 }

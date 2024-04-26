@@ -1,6 +1,14 @@
 import { readFileSync } from 'fs';
 import os from 'os';
 import { resolveHome } from './tools/with-home-dir.js';
+import {
+  readKey,
+  readPrivateKey,
+  decryptKey,
+  PrivateKey,
+  PublicKey,
+} from 'openpgp';
+import { ModelsPublicNote } from './generated/api/api.js';
 
 export interface OrgNotePublishedConfig {
   remoteAddress: string;
@@ -12,6 +20,15 @@ export interface OrgNotePublishedConfig {
   logPath?: string;
   backupCount?: number;
   backupDir?: string;
+  encrypt?: ModelsPublicNote.EncryptedEnum;
+  gpgPassword?: string;
+  gpgPublicKeyPath?: string;
+  gpgPrivateKeyPath?: string;
+  gpgPrivateKeyPassphrase?: string;
+
+  // TODO: Configurations after init. Move to class
+  gpgPublicKey?: string;
+  gpgPrivateKey?: string;
 }
 
 const defaultUrl = process.env.OrgNote_SERVER_URL || 'http://localhost:8000/v1';
@@ -22,10 +39,10 @@ const configPath =
   `${os.homedir()}/.config/orgnote/config.json`;
 
 const rootFolder = process.env.OrgNote_BASE_DIR || '';
-export function getConfig(
+export async function getConfig(
   override: Partial<OrgNotePublishedConfig>,
   accountName?: string
-): OrgNotePublishedConfig {
+): Promise<OrgNotePublishedConfig> {
   let defaultConfigs: OrgNotePublishedConfig = {
     remoteAddress: defaultUrl,
     token: process.env.OrgNote_TOKEN || '',
@@ -46,9 +63,36 @@ export function getConfig(
   } catch (e) {
     console.error('[file read error] %o', e);
   }
+
+  if (defaultConfigs.encrypt === ModelsPublicNote.EncryptedEnum.GpgKeys) {
+    const { gpgPrivateKey, gpgPublicKey } = await readGpgKeys(defaultConfigs);
+    defaultConfigs.gpgPrivateKey = gpgPrivateKey;
+    defaultConfigs.gpgPublicKey = gpgPublicKey;
+  }
+
   return {
     ...defaultConfigs,
     backupDir: resolveHome(defaultConfigs.backupDir || ''),
     rootFolder: resolveHome(defaultConfigs.rootFolder || ''),
+  };
+}
+
+async function readGpgKeys(config: OrgNotePublishedConfig): Promise<{
+  gpgPrivateKey: string;
+  gpgPublicKey: string;
+}> {
+  const privateArmoredKey = readFileSync(
+    resolveHome(config.gpgPrivateKeyPath),
+    'utf8'
+  );
+
+  const publicArmoredKey = readFileSync(
+    resolveHome(config.gpgPublicKeyPath),
+    'utf8'
+  );
+
+  return {
+    gpgPrivateKey: privateArmoredKey,
+    gpgPublicKey: publicArmoredKey,
   };
 }

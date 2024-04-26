@@ -13,11 +13,17 @@
 import { RequestFile } from './models.js';
 
 export class HandlersSubscribeBody {
+    'email'?: string;
     'token'?: string;
 
     static discriminator: string | undefined = undefined;
 
     static attributeTypeMap: Array<{name: string, baseName: string, type: string}> = [
+        {
+            "name": "email",
+            "baseName": "email",
+            "type": "string"
+        },
         {
             "name": "token",
             "baseName": "token",
