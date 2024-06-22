@@ -89,7 +89,7 @@ Example
   ~orgnote-cli publish  --remote-address http://url-here/ --token api-token /file/path~
 - ~collect~ -  forces loading of all notes from a remote resource. *WARNING*: this operation could override your local notes! 
   /Unsupported yet/
-- orces publishing of all notes from the root folder. *WARNING*: this operation could overwrite remote notes.
+- =publish-all= force publishing of all notes from the root folder. *WARNING*: this operation could overwrite remote notes.
 - ~sync~ - syncs all notes from the root folder into the remote service and vice versa. *WARNING*: this operation could override local and remote notes depens on timezone.
 
 
