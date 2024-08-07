@@ -4,9 +4,9 @@ import { dirname } from 'path';
 import { prepareNotes } from '../tools/prepare-note.js';
 import { getApi } from './sdk.js';
 import { statSync } from 'fs';
-import { HandlersCreatingNote } from '../generated/api/api.js';
 import { preserveNotesInfo } from '../store/persistent-notes.js';
 import { sendNotesFiles } from './send-notes-files.js';
+import { HandlersCreatingNote } from 'orgnote-api/remote-api';
 
 const logger = getLogger();
 

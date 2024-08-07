@@ -1,9 +1,9 @@
 import { getPreservedNotesInfo } from '../store/persistent-notes.js';
 import { getLogger } from '../logger.js';
 import { join } from 'path';
-import { ModelsPublicNote } from 'generated/api/api.js';
 import { removeNoteLocally } from './remove-notes-locally.js';
 import { OrgNotePublishedConfig } from '../config.js';
+import { ModelsPublicNote } from 'orgnote-api/remote-api';
 
 const logger = getLogger();
 export function removeRenamedNotes(

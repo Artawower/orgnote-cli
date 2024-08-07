@@ -1,16 +1,11 @@
 import { OrgNotePublishedConfig } from '../config.js';
 import { readFileSync, statSync } from 'fs';
-import { NodeType, parse, withMetaInfo } from 'org-mode-ast';
+import { parse, withMetaInfo } from 'org-mode-ast';
 import { getRelativeNotePath } from './relative-file-path.js';
 import { getLogger } from '../logger.js';
 import { getOrgFilesRecursively } from './read-orf-files-recursively.js';
-import {
-  HandlersCreatingNote,
-  ModelsNoteMeta,
-  ModelsPublicNote,
-} from '../generated/api/api.js';
 import { encryptNote } from 'orgnote-api/encryption';
-import { ModelsPublicNoteEncryptedEnum } from 'orgnote-api/remote-api';
+import { HandlersCreatingNote, ModelsNoteMeta } from 'orgnote-api/remote-api';
 
 const logger = getLogger();
 export async function prepareNote(
@@ -27,6 +22,7 @@ export async function prepareNote(
     const lastUpdatedTime = stat.mtime;
     const noteCreatedTime = stat.ctime;
     const lastTouched = stat.atime;
+    const images = nodeTree.meta.images;
 
     const note: HandlersCreatingNote = {
       id: nodeTree.meta.id,
@@ -38,6 +34,7 @@ export async function prepareNote(
         Math.max(lastUpdatedTime.getTime(), noteCreatedTime.getTime())
       ).toISOString(),
       createdAt: noteCreatedTime.toISOString(),
+      encryptionType: config.encrypt,
     };
 
     if (!note.id) {
@@ -48,13 +45,15 @@ export async function prepareNote(
     }
     // TODO: fix types after changing codegeneration
     const encryptedNote = await encryptNote(note as any, {
-      type: config.encrypt as unknown as ModelsPublicNoteEncryptedEnum,
+      type: config.encrypt,
       password: config.gpgPassword,
       publicKey: config.gpgPublicKey,
       privateKey: config.gpgPrivateKey,
       privateKeyPassphrase: config.gpgPrivateKeyPassphrase,
     });
-    logger.info(`Note encrypted: %o`, encryptedNote);
+    // TODO: 0.21 master tmp solution till we have not sync method through raw files.
+    // Delete redundant logic in the next release
+    encryptedNote.meta.images = images;
     return encryptedNote;
   } catch (e) {
     logger.error("Can't parse file: %o", filePath);

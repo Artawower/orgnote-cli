@@ -2,10 +2,10 @@ import { join } from 'path';
 import { writeContent } from './write-file.js';
 import { touch } from './touch.js';
 import { getLogger } from '../logger.js';
-import { ModelsPublicNote } from '../generated/api/api.js';
 import { getApi } from '../commands/sdk.js';
 import { OrgNotePublishedConfig } from 'config.js';
 import { createWriteStream } from 'fs';
+import { ModelsPublicNote } from 'orgnote-api/remote-api/api';
 
 const logger = getLogger();
 
@@ -40,6 +40,7 @@ export async function saveNotesLocally(
   notes: ModelsPublicNote[]
 ): Promise<void> {
   for (const n of notes) {
+    logger.info(`✎: [save-note.ts][${new Date().toString()}] note %o`, n);
     await saveNoteLocally(config.rootFolder, n);
     await saveNoteFiles(n, config);
   }

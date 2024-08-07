@@ -1,9 +1,9 @@
 import { deleteNotesInfo } from '../store/persistent-notes.js';
-import { HandlersDeletedNote } from '../generated/api/api';
 import { getLogger } from '../logger.js';
 import { join } from 'path';
 import { unlinkSync } from 'fs';
 import { OrgNotePublishedConfig } from '../config.js';
+import { HandlersDeletedNote } from 'orgnote-api/remote-api';
 
 const logger = getLogger();
 

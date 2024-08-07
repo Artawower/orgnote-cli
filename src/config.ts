@@ -1,14 +1,7 @@
 import { readFileSync } from 'fs';
+import { ModelsPublicNoteEncryptionTypeEnum } from 'orgnote-api/remote-api';
 import os from 'os';
 import { resolveHome } from './tools/with-home-dir.js';
-import {
-  readKey,
-  readPrivateKey,
-  decryptKey,
-  PrivateKey,
-  PublicKey,
-} from 'openpgp';
-import { ModelsPublicNote } from './generated/api/api.js';
 
 export interface OrgNotePublishedConfig {
   remoteAddress: string;
@@ -20,7 +13,7 @@ export interface OrgNotePublishedConfig {
   logPath?: string;
   backupCount?: number;
   backupDir?: string;
-  encrypt?: ModelsPublicNote.EncryptedEnum;
+  encrypt?: ModelsPublicNoteEncryptionTypeEnum;
   gpgPassword?: string;
   gpgPublicKeyPath?: string;
   gpgPrivateKeyPath?: string;
@@ -64,7 +57,7 @@ export async function getConfig(
     console.error('[file read error] %o', e);
   }
 
-  if (defaultConfigs.encrypt === ModelsPublicNote.EncryptedEnum.GpgKeys) {
+  if (defaultConfigs.encrypt === ModelsPublicNoteEncryptionTypeEnum.GpgKeys) {
     const { gpgPrivateKey, gpgPublicKey } = await readGpgKeys(defaultConfigs);
     defaultConfigs.gpgPrivateKey = gpgPrivateKey;
     defaultConfigs.gpgPublicKey = gpgPublicKey;

@@ -4,7 +4,6 @@ import { getOrgFilesRecursively } from '../tools/read-orf-files-recursively.js';
 import { prepareNotes } from '../tools/prepare-note.js';
 import { getApi } from './sdk.js';
 import { saveNotesLocally } from '../tools/save-note.js';
-import { HandlersCreatingNote, ModelsPublicNote } from 'generated/api/api.js';
 import { getLogger } from '../logger.js';
 import { removeNotesLocally } from '../tools/remove-notes-locally.js';
 import {
@@ -17,6 +16,7 @@ import { removeRenamedNotes } from '../tools/remove-renamed-notes.js';
 import { sendNotesFiles } from './send-notes-files.js';
 import { initStore } from '../store/store.js';
 import { decryptNote } from '../tools/encryption.js';
+import { ModelsPublicNote, HandlersCreatingNote } from 'orgnote-api/remote-api';
 
 const logger = getLogger();
 export async function syncNotes(config: OrgNotePublishedConfig): Promise<void> {
@@ -43,19 +43,19 @@ export async function syncNotes(config: OrgNotePublishedConfig): Promise<void> {
 
   logger.info(
     `✎: [sync-notes.ts][${new Date().toString()}] \n  notes updated from remote:\n\t%o\n  notes ids to delete:\n\t%o`,
-    rspns.body.data.notes.map((n) => `[id:${n.id}]: ${n.meta.title}`),
-    rspns.body.data.deletedNotes.map(
+    rspns.data.data.notes.map((n) => `[id:${n.id}]: ${n.meta.title}`),
+    rspns.data.data.deletedNotes.map(
       (n) => `[id:${n.id}]: ${n.filePath.join('/')}`
     )
   );
 
-  const decryptedNotes = await decryptNotes(rspns.body.data.notes, config);
-  removeNotesLocally(config, rspns.body.data.deletedNotes);
+  const decryptedNotes = await decryptNotes(rspns.data.data.notes, config);
+  removeNotesLocally(config, rspns.data.data.deletedNotes);
   removeRenamedNotes(config, decryptedNotes);
   saveNotesLocally(config, decryptedNotes);
   preserveNotesInfo(
     config,
-    rspns.body.data.notes.map((n) => ({
+    rspns.data.data.notes.map((n) => ({
       filePath: n.filePath,
       id: n.id,
       updatedAt: n.updatedAt,

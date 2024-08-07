@@ -1,9 +1,9 @@
 import { OrgNotePublishedConfig } from '../config.js';
 import { getApi } from './sdk.js';
 import { backupDirectory } from '../backup.js';
-import { ModelsPublicNote } from '../generated/api/api.js';
 import { initStore } from '../store/store.js';
 import { saveNoteLocally } from '../tools/save-note.js';
+import { ModelsPublicNote } from 'orgnote-api/remote-api';
 
 const notesLimit = 100;
 
@@ -30,8 +30,8 @@ async function getNotes(
       true
     );
     offset += notesLimit;
-    notes.push(...rspns.body.data);
-    if (notes.length === rspns.body.meta.total) {
+    notes.push(...rspns.data.data);
+    if (notes.length === rspns.data.meta.total) {
       break;
     }
   }

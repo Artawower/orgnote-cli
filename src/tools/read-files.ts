@@ -4,9 +4,7 @@ import { getLogger } from '../logger.js';
 
 const logger = getLogger();
 
-export const readFiles = (
-  filePaths: string[]
-): Array<{ blob: Buffer; fileName: string }> => {
+export const readFiles = (filePaths: string[]): Array<File> => {
   const files = filePaths.reduce((files, filePath) => {
     if (!existsSync(filePath)) {
       logger.warn(
@@ -15,13 +13,8 @@ export const readFiles = (
       );
       return files;
     }
-    return [
-      ...files,
-      {
-        blob: readFileSync(filePath),
-        fileName: extractFilenameFromPath(filePath),
-      },
-    ];
+    const blob = new Blob([readFileSync(filePath)]);
+    return [...files, new File([blob], extractFilenameFromPath(filePath))];
   }, []);
   return files;
 };

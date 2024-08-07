@@ -4,8 +4,12 @@ import {
   decryptNote as _decryptNote,
 } from 'orgnote-api';
 import type { AbstractEncryptedNote } from 'orgnote-api';
-import { ModelsPublicNote } from '../generated/api/api.js';
 import { OrgNoteEncryption } from 'orgnote-api/models';
+import {
+  ModelsPublicNote,
+  ModelsPublicNoteEncryptionTypeEnum,
+} from 'orgnote-api/remote-api';
+import { getLogger } from 'logger';
 
 export async function encryptNote(
   note: ModelsPublicNote,
@@ -14,12 +18,12 @@ export async function encryptNote(
   validateEncryptionConfig(config);
   if (
     !config.encrypt ||
-    config.encrypt === ModelsPublicNote.EncryptedEnum.Disabled
+    config.encrypt === ModelsPublicNoteEncryptionTypeEnum.Disabled
   ) {
     return note;
   }
   const encryptParams: OrgNoteEncryption =
-    config.encrypt === ModelsPublicNote.EncryptedEnum.GpgPassword
+    config.encrypt === ModelsPublicNoteEncryptionTypeEnum.GpgPassword
       ? {
           type: 'gpgPassword',
           password: config.gpgPassword,
@@ -46,13 +50,13 @@ export async function decryptNote(
   validateEncryptionConfig(config);
   if (
     !config.encrypt ||
-    config.encrypt === ModelsPublicNote.EncryptedEnum.Disabled
+    config.encrypt === ModelsPublicNoteEncryptionTypeEnum.Disabled
   ) {
     return note;
   }
 
   const decryptParams: OrgNoteEncryption =
-    config.encrypt === ModelsPublicNote.EncryptedEnum.GpgPassword
+    config.encrypt === ModelsPublicNoteEncryptionTypeEnum.GpgPassword
       ? {
           type: 'gpgPassword',
           password: config.gpgPassword,
@@ -101,9 +105,9 @@ function validateEncryptionConfig(
     return;
   }
   const isKeysEncryption =
-    config.encrypt === ModelsPublicNote.EncryptedEnum.GpgKeys;
+    config.encrypt === ModelsPublicNoteEncryptionTypeEnum.GpgKeys;
   const isPasswordEncryption =
-    config.encrypt === ModelsPublicNote.EncryptedEnum.GpgPassword;
+    config.encrypt === ModelsPublicNoteEncryptionTypeEnum.GpgPassword;
 
   if (isKeysEncryption && !config.gpgPublicKey) {
     throw new GpgPublicKeyIsNotProvidedError();
