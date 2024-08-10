@@ -19,13 +19,20 @@ async function saveNoteFiles(
     note.meta.images
   );
   for (const f of note.meta?.images ?? []) {
-    const remoteFilePath = `${note.author.id}/${f}`;
-    const fileStream = await sdk.files.downloadFile(remoteFilePath);
-    const fileDir = note.filePath?.slice(0, -1) || [];
-    const savePath = join(config.rootFolder, ...fileDir, f);
-    fileStream?.pipe(createWriteStream(savePath));
+    try {
+      const remoteFilePath = `${note.author.id}/${f}`;
+      const fileStream = await sdk.files.downloadFile(remoteFilePath);
+      const fileDir = note.filePath?.slice(0, -1) || [];
+      const savePath = join(config.rootFolder, ...fileDir, f);
+      fileStream?.pipe(createWriteStream(savePath));
+    } catch (e) {
+      logger.error(
+        `✎: [save-note.ts][${new Date().toString()}] error downloading image %`
+      );
+    }
   }
 }
+
 export async function saveNoteLocally(
   rootFolder: string,
   n: ModelsPublicNote
