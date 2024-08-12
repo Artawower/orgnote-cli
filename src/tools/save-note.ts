@@ -14,10 +14,6 @@ async function saveNoteFiles(
   config: OrgNotePublishedConfig
 ): Promise<void> {
   const sdk = getApi(config);
-  logger.info(
-    `✎: [save-note.ts][${new Date().toString()}] save notes images %o`,
-    note.meta.images
-  );
   for (const f of note.meta?.images ?? []) {
     try {
       const remoteFilePath = `${note.author.id}/${f}`;
@@ -47,7 +43,6 @@ export async function saveNotesLocally(
   notes: ModelsPublicNote[]
 ): Promise<void> {
   for (const n of notes) {
-    logger.info(`✎: [save-note.ts][${new Date().toString()}] note %o`, n);
     await saveNoteLocally(config.rootFolder, n);
     await saveNoteFiles(n, config);
   }

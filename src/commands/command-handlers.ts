@@ -1,10 +1,7 @@
-import { getLogger } from '../logger.js';
 import { OrgNotePublishedConfig } from '../config.js';
 import { publishNotes } from './publish-notes.js';
 import { loadNotes } from './load-notes.js';
 import { syncNotes } from './sync-notes.js';
-
-const logger = getLogger();
 
 export enum CliCommand {
   Load = 'load',

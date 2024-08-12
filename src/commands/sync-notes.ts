@@ -21,13 +21,32 @@ import { ModelsPublicNote, HandlersCreatingNote } from 'orgnote-api/remote-api';
 const logger = getLogger();
 export async function syncNotes(config: OrgNotePublishedConfig): Promise<void> {
   const { get, set } = initStore(config.name);
-  const lastSync = new Date(get('lastSync') ?? 0);
-  const notesFromLastSync = await getNotesFromLastSync(config, lastSync);
+  const lastEncryptionMethod = get('lastEncryptionMethod');
+  const encryptionChanged =
+    !lastEncryptionMethod || lastEncryptionMethod !== config.encrypt;
+  const lastSync = new Date(
+    encryptionChanged || !get('lastSync') ? 0 : get('lastSync')
+  );
+  logger.info(
+    `✎: [sync-notes.ts][${new Date().toString()}] last sync from %o`,
+    lastSync
+  );
+  logger.info(
+    `✎: [sync-notes.ts][${new Date().toString()}] encryption changed from the last sync %o`,
+    encryptionChanged
+  );
+  const notesFromLastSync = await getNotesFromLastSync(
+    config,
+    lastSync,
+    encryptionChanged
+  );
+
   const notesIdsFromLastSync = notesFromLastSync.map((n) => n.id);
   const deletedNotesIds = getDeletedNotesIds(config);
   const deletedNotesIdsWithoutRename = deletedNotesIds.filter(
     (id) => !notesIdsFromLastSync.includes(id)
   );
+
   preserveNotesInfo(config, notesFromLastSync);
   deleteNotesInfo(config, deletedNotesIds);
 
@@ -63,6 +82,7 @@ export async function syncNotes(config: OrgNotePublishedConfig): Promise<void> {
   );
 
   set('lastSync', new Date());
+  set('lastEncryptionMethod', config.encrypt);
 }
 
 async function decryptNotes(
@@ -81,7 +101,8 @@ async function decryptNotes(
 
 async function getNotesFromLastSync(
   config: OrgNotePublishedConfig,
-  lastSync: Date
+  lastSync: Date,
+  forceSetCurrentType = false
 ): Promise<HandlersCreatingNote[]> {
   const orgFiles = getOrgFilesRecursively(config.rootFolder);
 
@@ -91,12 +112,25 @@ async function getNotesFromLastSync(
     const fileLastRenamed = fileStat.ctime;
     return fileLastModified > lastSync || fileLastRenamed > lastSync;
   });
+
   const nestedNotes = await Promise.all(
     notesFilesFromLastSync.map(
       async (filePath) => await prepareNotes(filePath, config)
     )
   );
-  const notes = nestedNotes.flat();
+
+  const notes = forceSetCurrentType
+    ? nestedNotes.flat().map<HandlersCreatingNote>((n) => ({
+        ...n,
+        updatedAt: new Date().toISOString(),
+        touchedAt: new Date().toISOString(),
+      }))
+    : nestedNotes.flat();
+
+  logger.info(
+    `✎: [sync-notes.ts][${new Date().toString()}] files found to sync %o`,
+    notes.length
+  );
   if (config.debug) {
     logger.info(
       `✎: [sync-notes.ts][${new Date().toString()}] notes from last sync:\n %o`,

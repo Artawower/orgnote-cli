@@ -9,9 +9,5 @@ export function writeContent(filePath: string, content: string): void {
   if (!existsSync(filePathDir)) {
     mkdirSync(filePathDir, { recursive: true });
   }
-  logger.info(
-    `✎: [write-file.ts][${new Date().toString()}] File path to write content %o`,
-    filePath
-  );
   writeFileSync(filePath, content);
 }
