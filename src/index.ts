@@ -48,10 +48,10 @@ let logger: Logger;
   try {
     await handleCommand(command, config, path)
   } catch (e) {
-    logger.error('Unexpected error', e.toString());
-    // write an error to the lof file from config
-    // writeFileSync(config.logPath, e.toString());
-    throw e;
+    logger.error('Unexpected error: %o', e);
+    if (config.logPath) {
+      writeFileSync(config.logPath, e);
+    }
   }
 })();
 

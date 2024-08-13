@@ -2,12 +2,15 @@ import { OrgNotePublishedConfig } from '../config.js';
 import { publishNotes } from './publish-notes.js';
 import { loadNotes } from './load-notes.js';
 import { syncNotes } from './sync-notes.js';
+import { repairEncryptedNotes } from './repair-encrypted-notes.js';
+import { backupDirectory } from '../backup.js';
 
 export enum CliCommand {
   Load = 'load',
   Publish = 'publish',
   PublishAll = 'publish-all',
   Sync = 'sync',
+  RepairEncryptedNotes = 'repair',
 }
 
 type CommandHandlerFn = (
@@ -32,17 +35,13 @@ registerCommand(CliCommand.Publish, async (config, path): Promise<void> => {
   await publishNotes(config, path);
 });
 
-registerCommand(CliCommand.Load, async (config): Promise<void> => {
-  await loadNotes(config);
-});
+registerCommand(CliCommand.Load, loadNotes);
 
-registerCommand(CliCommand.PublishAll, async (config): Promise<void> => {
-  await publishNotes(config);
-});
+registerCommand(CliCommand.PublishAll, publishNotes);
 
-registerCommand(CliCommand.Sync, async (config): Promise<void> => {
-  await syncNotes(config);
-});
+registerCommand(CliCommand.Sync, syncNotes);
+
+registerCommand(CliCommand.RepairEncryptedNotes, repairEncryptedNotes);
 
 export async function handleCommand(
   command: CliCommand,
@@ -54,5 +53,6 @@ export async function handleCommand(
     throw `Command ${command} is not supported`;
   }
 
+  await backupDirectory(config.rootFolder, config.backupDir);
   return await commandExecutor(config, path);
 }
