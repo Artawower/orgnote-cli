@@ -6,8 +6,8 @@ import { zip } from 'zip-a-folder';
 const logger = getLogger();
 export async function backupDirectory(
   dirPath: string,
-  backupCount: number = 3,
-  backupDir?: string
+  backupDir?: string,
+  backupCount: number = 20
 ): Promise<void> {
   backupDir ??= path.basename(path.dirname(dirPath));
   createBackupDir(backupDir);
