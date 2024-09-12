@@ -33,12 +33,13 @@ export async function repairEncryptedNotes(
     try {
       const decryptedContent =
         config.encrypt === ModelsPublicNoteEncryptionTypeEnum.GpgKeys
-          ? await decryptViaKeys(
+          ? await decryptViaKeys({
               content,
-              config.gpgPrivateKey,
-              config.gpgPrivateKeyPassphrase
-            )
-          : await decryptViaPassword(content, config.gpgPassword);
+              publicKey: config.gpgPublicKey,
+              privateKey: config.gpgPrivateKey,
+              privateKeyPassphrase: config.gpgPrivateKeyPassphrase,
+            })
+          : await decryptViaPassword({ content, password: config.gpgPassword });
       writeFileSync(file, decryptedContent, 'utf8');
       logger.info(`${file} note decrypted`);
     } catch (e) {

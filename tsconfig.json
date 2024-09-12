@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "es6",
     "rootDir": "./",
     "baseUrl": "./src",
     "module": "es2022",
@@ -15,7 +15,7 @@
     "experimentalDecorators": true,
     "sourceMap": true,
     "skipLibCheck": true,
-    "types": ["node", "jest", "org-mode-ast"]
+    "types": ["node", "org-mode-ast", "vitest/importMeta"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "**/*.spec.ts"]

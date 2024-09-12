@@ -31,19 +31,20 @@ async function saveNoteFiles(
 
 export async function saveNoteLocally(
   rootFolder: string,
-  n: ModelsPublicNote
+  n: ModelsPublicNote,
+  content: string
 ): Promise<void> {
   const savePath = join(rootFolder, ...n.filePath);
-  writeContent(savePath, n.content);
+  writeContent(savePath, content);
   touch(savePath, new Date(n.updatedAt));
 }
 
 export async function saveNotesLocally(
   config: OrgNotePublishedConfig,
-  notes: ModelsPublicNote[]
+  notes: [ModelsPublicNote, string][]
 ): Promise<void> {
-  for (const n of notes) {
-    await saveNoteLocally(config.rootFolder, n);
+  for (const [n, content] of notes) {
+    await saveNoteLocally(config.rootFolder, n, content);
     await saveNoteFiles(n, config);
   }
 }

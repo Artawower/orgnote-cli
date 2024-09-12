@@ -1,4 +1,4 @@
-import { isOrgFile } from './is-org-file.js';
+import { isOrgFile } from 'orgnote-api';
 import { readFilesRecursively } from './read-files-recursively.js';
 
 export function getOrgFilesRecursively(dirPath: string): string[] {
