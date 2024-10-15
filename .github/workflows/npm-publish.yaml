@@ -2,14 +2,17 @@ name: Publish Package to npmjs
 on:
   release:
     types: [published]
+    branches:
+      - master
 jobs:
   build:
     runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: '16.x'
+          node-version: '18.x'
           registry-url: 'https://registry.npmjs.org'
           # Defaults to the user or organization that owns the workflow file
           scope: 'darkawower'

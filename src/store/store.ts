@@ -1,10 +1,6 @@
 import { readFileSync, writeFileSync } from 'fs';
-import { getLogger } from '../logger.js';
 import os from 'os';
 import { join } from 'path/posix';
-import { ModelsPublicNoteEncryptionTypeEnum } from 'orgnote-api/remote-api';
-
-const logger = getLogger();
 
 export interface StoredNoteInfo {
   filePath: string[];
@@ -14,7 +10,6 @@ export interface StoredNoteInfo {
 
 interface Store {
   lastSync?: Date;
-  lastEncryptionMethod?: ModelsPublicNoteEncryptionTypeEnum;
   notes?: { [filePath: string]: StoredNoteInfo };
 }
 

@@ -15,31 +15,19 @@ import { join } from 'path';
 import { removeRenamedNotes } from '../tools/remove-renamed-notes.js';
 import { sendNotesFiles } from './send-notes-files.js';
 import { initStore } from '../store/store.js';
-import { decryptNote } from '../tools/encryption.js';
-import { ModelsPublicNote, HandlersCreatingNote } from 'orgnote-api/remote-api';
+import { HandlersCreatingNote } from 'orgnote-api/remote-api';
+import { decryptNotes } from './decrypt-notes.js';
 
 const logger = getLogger();
 export async function syncNotes(config: OrgNotePublishedConfig): Promise<void> {
   const { get, set } = initStore(config.name);
-  const lastEncryptionMethod = get('lastEncryptionMethod');
-  const encryptionChanged =
-    !lastEncryptionMethod || lastEncryptionMethod !== config.encrypt;
-  const lastSync = new Date(
-    encryptionChanged || !get('lastSync') ? 0 : get('lastSync')
-  );
+  const lastSync = new Date(!get('lastSync') ? 0 : get('lastSync'));
   logger.info(
     `✎: [sync-notes.ts][${new Date().toString()}] last sync from %o`,
     lastSync
   );
-  logger.info(
-    `✎: [sync-notes.ts][${new Date().toString()}] encryption changed from the last sync %o`,
-    encryptionChanged
-  );
-  const notesFromLastSync = await getNotesFromLastSync(
-    config,
-    lastSync,
-    encryptionChanged
-  );
+  // TODO: master reuse findNotesFilesDiff from orgnote-api
+  const notesFromLastSync = await getNotesFromLastSync(config, lastSync);
 
   const notesIdsFromLastSync = notesFromLastSync.map((n) => n.id);
   const deletedNotesIds = getDeletedNotesIds(config);
@@ -70,7 +58,10 @@ export async function syncNotes(config: OrgNotePublishedConfig): Promise<void> {
 
   const decryptedNotes = await decryptNotes(rspns.data.data.notes, config);
   removeNotesLocally(config, rspns.data.data.deletedNotes);
-  removeRenamedNotes(config, decryptedNotes);
+  removeRenamedNotes(
+    config,
+    decryptedNotes.map((n) => n[0])
+  );
   saveNotesLocally(config, decryptedNotes);
   preserveNotesInfo(
     config,
@@ -82,27 +73,11 @@ export async function syncNotes(config: OrgNotePublishedConfig): Promise<void> {
   );
 
   set('lastSync', new Date());
-  set('lastEncryptionMethod', config.encrypt);
-}
-
-async function decryptNotes(
-  notes: ModelsPublicNote[],
-  config: OrgNotePublishedConfig
-): Promise<ModelsPublicNote[]> {
-  return await Promise.all(
-    notes.map(async (n) => {
-      if (n.meta.published) {
-        return n;
-      }
-      return decryptNote(n, config);
-    })
-  );
 }
 
 async function getNotesFromLastSync(
   config: OrgNotePublishedConfig,
-  lastSync: Date,
-  forceSetCurrentType = false
+  lastSync: Date
 ): Promise<HandlersCreatingNote[]> {
   const orgFiles = getOrgFilesRecursively(config.rootFolder);
 
@@ -119,18 +94,13 @@ async function getNotesFromLastSync(
     )
   );
 
-  const notes = forceSetCurrentType
-    ? nestedNotes.flat().map<HandlersCreatingNote>((n) => ({
-        ...n,
-        updatedAt: new Date().toISOString(),
-        touchedAt: new Date().toISOString(),
-      }))
-    : nestedNotes.flat();
+  const notes = nestedNotes.flat();
 
   logger.info(
     `✎: [sync-notes.ts][${new Date().toString()}] files found to sync %o`,
     notes.length
   );
+
   if (config.debug) {
     logger.info(
       `✎: [sync-notes.ts][${new Date().toString()}] notes from last sync:\n %o`,
