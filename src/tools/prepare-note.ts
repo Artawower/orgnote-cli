@@ -9,7 +9,7 @@ import {
   ModelsNoteMeta,
   ModelsPublicNote,
 } from 'orgnote-api/remote-api';
-import { decrypt, encryptNote } from './encryption';
+import { decrypt, encryptNote } from './encryption.js';
 import { isOrgGpgFile } from 'orgnote-api';
 
 const logger = getLogger();

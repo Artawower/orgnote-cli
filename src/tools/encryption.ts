@@ -3,6 +3,7 @@ import {
   encryptNote as _encryptNote,
   decryptNote as _decryptNote,
   decrypt as _decrypt,
+  encrypt as _encrypt,
 } from 'orgnote-api';
 import {
   OrgNoteEncryption,
@@ -75,7 +76,33 @@ export async function decryptNote(
         };
 
   const [decryptedNote, content] = await _decryptNote(note, decryptParams);
-  return [decryptedNote, content];
+  return [decryptedNote, content as string];
+}
+
+export async function encrypt(
+  content: string,
+  config: OrgNotePublishedConfig
+): Promise<Uint8Array> {
+  const encryptParams: WithEncryptionContent<OrgNoteEncryption> =
+    config.encrypt === ModelsPublicNoteEncryptionTypeEnum.GpgPassword
+      ? {
+          type: 'gpgPassword',
+          password: config.gpgPassword,
+          content: content,
+        }
+      : {
+          type: 'gpgKeys',
+          publicKey: config.gpgPublicKey,
+          privateKey: config.gpgPrivateKey,
+          privateKeyPassphrase: config.gpgPrivateKeyPassphrase,
+          content: content,
+        };
+
+  const ecnryptedContent = await _encrypt({
+    ...encryptParams,
+    format: 'binary',
+  });
+  return ecnryptedContent;
 }
 
 export async function decrypt(

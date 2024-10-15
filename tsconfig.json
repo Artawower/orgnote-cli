@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
-    "target": "es6",
+    "target": "esnext",
     "rootDir": "./",
     "baseUrl": "./src",
-    "module": "es2022",
+    "module": "esnext",
     "outDir": "dist",
     "removeComments": true,
     "declaration": true,

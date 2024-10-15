@@ -26,6 +26,7 @@ export async function syncNotes(config: OrgNotePublishedConfig): Promise<void> {
     `✎: [sync-notes.ts][${new Date().toString()}] last sync from %o`,
     lastSync
   );
+  // TODO: master reuse findNotesFilesDiff from orgnote-api
   const notesFromLastSync = await getNotesFromLastSync(config, lastSync);
 
   const notesIdsFromLastSync = notesFromLastSync.map((n) => n.id);

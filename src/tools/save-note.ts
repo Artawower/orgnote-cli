@@ -6,6 +6,8 @@ import { getApi } from '../commands/sdk.js';
 import { OrgNotePublishedConfig } from 'config.js';
 import { createWriteStream } from 'fs';
 import { ModelsPublicNote } from 'orgnote-api/remote-api/api';
+import { encrypt } from './encryption';
+import { isGpgEncrypted, isOrgGpgFile } from 'orgnote-api';
 
 const logger = getLogger();
 
@@ -44,7 +46,10 @@ export async function saveNotesLocally(
   notes: [ModelsPublicNote, string][]
 ): Promise<void> {
   for (const [n, content] of notes) {
-    await saveNoteLocally(config.rootFolder, n, content);
+    const writeContent = isOrgGpgFile(n.filePath.at(-1))
+      ? await encrypt(content, config)
+      : content;
+    await saveNoteLocally(config.rootFolder, n, writeContent as any);
     await saveNoteFiles(n, config);
   }
 }

@@ -3,7 +3,7 @@ import { getApi } from './sdk.js';
 import { initStore } from '../store/store.js';
 import { saveNoteLocally } from '../tools/save-note.js';
 import { ModelsPublicNote } from 'orgnote-api/remote-api';
-import { decryptNotes } from './decrypt-notes';
+import { decryptNotes } from './decrypt-notes.js';
 
 const notesLimit = 100;
 
