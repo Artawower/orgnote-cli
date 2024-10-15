@@ -93,7 +93,6 @@ async function getNotesFromLastSync(
       async (filePath) => await prepareNotes(filePath, config)
     )
   );
-  console.log('✎: [line 95][sync-notes.ts] nestedNotes: ', nestedNotes);
 
   const notes = nestedNotes.flat();
 

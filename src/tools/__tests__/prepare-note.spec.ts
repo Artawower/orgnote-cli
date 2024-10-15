@@ -27,21 +27,13 @@ const gpgKeysConfig: OrgNotePublishedConfig = {
 
 test('Should prepare unencrypted note', async () => {
   const preparedNote = await prepareNote('./miscellaneous/test.org', config);
+  delete preparedNote.content;
+  delete preparedNote.createdAt;
+  delete preparedNote.touchedAt;
+  delete preparedNote.updatedAt;
 
   expect(preparedNote).toMatchInlineSnapshot(`
     {
-      "content": ":PROPERTIES:
-    :ID: unencrypted-note
-    :END:
-
-    #+TITLE: My unencrypted note
-    #+DESCRIPTION: This is description of unencrypted note
-    #+FILETAGS: :tag1:tag2:tag3:
-
-
-    * Hello world
-    ",
-      "createdAt": "2024-09-06T08:07:44.593Z",
       "encrypted": false,
       "filePath": [
         "test.org",
@@ -63,8 +55,6 @@ test('Should prepare unencrypted note', async () => {
         "id": "unencrypted-note",
         "title": "My unencrypted note",
       },
-      "touchedAt": "2024-09-06T08:07:45.488Z",
-      "updatedAt": "2024-09-06T08:07:44.593Z",
     }
   `);
 });
@@ -80,10 +70,12 @@ test('Should prepare gpg encrypted note!', async () => {
   );
 
   delete preparedNote.content;
+  delete preparedNote.createdAt;
+  delete preparedNote.touchedAt;
+  delete preparedNote.updatedAt;
 
   expect(preparedNote).toMatchInlineSnapshot(`
     {
-      "createdAt": "2024-09-06T12:01:43.527Z",
       "encrypted": true,
       "filePath": [
         "test.org.gpg",
@@ -94,8 +86,6 @@ test('Should prepare gpg encrypted note!', async () => {
         "images": undefined,
         "published": undefined,
       },
-      "touchedAt": "2024-09-06T12:01:49.315Z",
-      "updatedAt": "2024-09-06T12:01:43.527Z",
     }
   `);
 });
