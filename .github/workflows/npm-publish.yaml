@@ -4,19 +4,23 @@ on:
     types: [published]
     branches:
       - master
+  workflow_dispatch:
 jobs:
   build:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
         with:
           node-version: '18.x'
           registry-url: 'https://registry.npmjs.org'
           # Defaults to the user or organization that owns the workflow file
           scope: 'darkawower'
-      - run: yarn
-      - run: yarn publish
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      - name: install dependencies
+        run: bun install --frozen-lockfile
+      - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
