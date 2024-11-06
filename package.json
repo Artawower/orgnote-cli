@@ -32,6 +32,7 @@
     "@types/axios": "0.14.0",
     "@types/node": "22.5.4",
     "@types/request": "2.48.12",
+    "@types/yargs": "17.0.33",
     "@vercel/ncc": "0.38.1",
     "fix-esm-import-path": "1.10.0",
     "nyc": "17.0.0",

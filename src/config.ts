@@ -2,6 +2,7 @@ import { readFileSync } from 'fs';
 import { ModelsPublicNoteEncryptionTypeEnum } from 'orgnote-api/remote-api';
 import os from 'os';
 import { resolveHome } from './tools/with-home-dir.js';
+import { getLogger } from './logger.js';
 
 export interface OrgNotePublishedConfig {
   remoteAddress: string;
@@ -32,10 +33,24 @@ const configPath =
   `${os.homedir()}/.config/orgnote/config.json`;
 
 const rootFolder = process.env.OrgNote_BASE_DIR || '';
+
+function readConfigFile(): OrgNotePublishedConfig[] {
+  try {
+    const configs = JSON.parse(
+      readFileSync(configPath).toString()
+    ) as OrgNotePublishedConfig[];
+    return configs;
+  } catch (e) {
+    console.error('[file read error] %o', e);
+  }
+}
+
 export async function getConfig(
   override: Partial<OrgNotePublishedConfig>,
   accountName?: string
 ): Promise<OrgNotePublishedConfig> {
+  const logger = getLogger(override);
+
   let defaultConfigs: OrgNotePublishedConfig = {
     remoteAddress: defaultUrl,
     token: process.env.OrgNote_TOKEN || '',
@@ -45,17 +60,22 @@ export async function getConfig(
     backupCount: 3,
   };
 
-  try {
-    const configs = JSON.parse(
-      readFileSync(configPath).toString()
-    ) as OrgNotePublishedConfig[];
-    const config = accountName
-      ? configs.find((c) => c.name === accountName)
-      : configs?.[0];
-    defaultConfigs = { ...defaultConfigs, ...(config || {}), ...override };
-  } catch (e) {
-    console.error('[file read error] %o', e);
+  const configs = readConfigFile();
+  if (!configs && !accountName) {
+    logger.debug(
+      `[config.ts][function]: No config file found. Using default configs`
+    );
   }
+
+  const config = accountName
+    ? configs?.find((c) => c.name === accountName)
+    : configs?.[0];
+
+  if (!config && accountName) {
+    logger.error('[getConfig] No config found for account %o', accountName);
+    return;
+  }
+  defaultConfigs = { ...defaultConfigs, ...(config || {}), ...override };
 
   if (defaultConfigs.encrypt === ModelsPublicNoteEncryptionTypeEnum.GpgKeys) {
     const { gpgPrivateKey, gpgPublicKey } = await readGpgKeys(defaultConfigs);
@@ -67,6 +87,7 @@ export async function getConfig(
     ...defaultConfigs,
     backupDir: resolveHome(defaultConfigs.backupDir || ''),
     rootFolder: resolveHome(defaultConfigs.rootFolder || ''),
+    logPath: resolveHome(defaultConfigs.logPath || ''),
   };
 }
 

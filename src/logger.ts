@@ -1,21 +1,18 @@
 import { OrgNotePublishedConfig } from 'config';
 import { dirname } from 'path';
 import { resolveHome } from './tools/with-home-dir.js';
-import { createLogger, format, Logger, transports } from 'winston';
-
-const logFormat = format.printf(function (info) {
-  return `${new Date().toISOString()}-${info.level}: info.message`;
-});
+import { createLogger, format, Logger, transports, config } from 'winston';
 
 let logger: Logger;
 
 function initLogger(): void {
   logger = createLogger({
-    level: 'warning',
+    levels: config.cli.levels,
+    level: 'warn',
     format: format.combine(format.splat(), format.json()),
     transports: [
       new transports.Console({
-        format: format.combine(format.colorize(), logFormat),
+        format: format.combine(format.colorize({ all: true }), format.simple()),
       }),
     ],
   });
@@ -26,21 +23,18 @@ function configureLogger(config?: Partial<OrgNotePublishedConfig>): void {
     return;
   }
   if (!config.logPath) {
-    console.warn('No log path provded');
+    logger.debug(`[logger.ts][configureLogger]: no log path provided`);
     return;
   }
 
-  logger.level = 'info';
+  logger.level = 'debug';
   const dirName = dirname(config.logPath);
   const fileName = config.logPath.split('/').pop();
   [
     new transports.File({
       dirname: resolveHome(dirName),
       filename: fileName,
-      level: 'info',
-    }),
-    new transports.Console({
-      format: format.simple(),
+      level: 'debug',
     }),
   ].forEach((transport) => logger.add(transport));
 }

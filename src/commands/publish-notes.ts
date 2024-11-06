@@ -7,6 +7,7 @@ import { statSync } from 'fs';
 import { preserveNotesInfo } from '../store/persistent-notes.js';
 import { sendNotesFiles } from './send-notes-files.js';
 import { HandlersCreatingNote } from 'orgnote-api/remote-api';
+import { prettifyHttpError } from '../tools/prettify-http-error';
 
 const logger = getLogger();
 
@@ -24,12 +25,7 @@ const sendNotes = async (
   try {
     await api.notes.notesBulkUpsertPut(notes);
   } catch (e) {
-    const data = e.response?.data ?? e.body;
-    logger.error(`🦄: [http error] error while send http request:
-    | status: ${e.statusCode ?? ''}
-    | data: ${data ? JSON.stringify(data) : ''}
-    | message: ${e.message ?? ''}
-`);
+    logger.error(`[publish-notes.ts][sendNotes]: ${prettifyHttpError(e)} `);
     process.exit(1);
   }
 };
