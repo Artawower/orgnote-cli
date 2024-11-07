@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-import yargs from 'yargs';
 import { getLogger } from './logger.js';
 import { OrgNotePublishedConfig, getConfig } from './config.js';
 import { CliCommand, handleCommand } from './commands/command-handlers.js';
@@ -10,61 +9,30 @@ import { dirname } from 'path';
 import { resolveHome } from './tools/with-home-dir.js';
 import { prettifyHttpError } from './tools/prettify-http-error';
 import { AxiosError } from 'axios';
+import { CliArguments, run } from './cli';
 
-(async () => {
-  const yarg = yargs(process.argv.slice(2))
-    .usage('Usage: $0 <command> [options]')
-    .positional('command', {
-      type: 'string',
-      describe: 'Command to run',
-      choices: Object.values(CliCommand),
-    })
-    .demandCommand(1)
-    .example(
-      '$0 sync --force --accountName myAccountName',
-      'run sync command with force and accountName options'
-    )
-    .options({
-      debug: {
-        describe: 'Enable debug mode for verbose logging',
-        type: 'boolean',
-      },
-      rootFolder: {
-        describe:
-          'Root folder to sync, optional field when specified in config file',
-        type: 'string',
-      },
-      force: {
-        describe: 'Clear all cache and force sync notes',
-        type: 'boolean',
-      },
-      accountName: {
-        describe: 'Account name to use for sync',
-        type: 'string',
-      },
-    });
+run(commandHandler);
 
-  const argv = await yarg.parse();
-
-  const command = argv.command as CliCommand;
-
+async function commandHandler(
+  command: string,
+  options: CliArguments
+): Promise<void> {
   if (!command) {
     getLogger().error('No command provided');
-    yarg.showHelp();
     return;
   }
-  const accountName = argv.accountName;
+  const accountName = options.accountName;
 
-  const config = await getConfig(argv, accountName);
+  const config = await getConfig(options as any, accountName);
   if (!config) {
     return;
   }
 
-  const path = (argv._[argv._.length - 1] as string) || config.rootFolder;
+  const path = options.path || config.rootFolder;
   const logger = getLogger(config);
 
   const { clear } = initStore(config.name);
-  if (argv.force) {
+  if (options.force) {
     logger.warn('Force sync enabled. All cache will be cleared.');
     clear();
   }
@@ -74,7 +42,7 @@ import { AxiosError } from 'axios';
   createLogFile(config);
 
   try {
-    await handleCommand(command, config, path);
+    await handleCommand(command as CliCommand, config, path);
   } catch (e) {
     if (e instanceof AxiosError) {
       logger.error(`[index.ts] Unexpected error: ${prettifyHttpError(e)}`);
@@ -85,7 +53,7 @@ import { AxiosError } from 'axios';
       writeFileSync(config.logPath, e);
     }
   }
-})();
+}
 
 function getPrettyConfig(
   config: OrgNotePublishedConfig
