@@ -12,7 +12,7 @@ export function preserveNotesInfo(
   updatedNotesInfo.forEach((n) => {
     if (!n.id || !n.filePath) {
       logger.warn(
-        `✎: [persistent-notes.ts][${new Date().toString()}] file id or file path are not present %o`,
+        `[persistent-notes.ts][preserveNotesInfo]: file id or file path are not present  \n%o`,
         n
       );
       return;

@@ -20,7 +20,9 @@ export async function repairEncryptedNotes(
   const files = readFilesRecursively(config.rootFolder);
 
   if (config.encrypt === ModelsPublicNoteEncryptionTypeEnum.Disabled) {
-    logger.warn('Encryption is disabled. Skip repairing encrypted notes');
+    logger.warn(
+      `[repair-encrypted-notes.ts][function]: Encryption is disabled. Skip repairing encrypted notes`
+    );
     return;
   }
 
@@ -41,9 +43,14 @@ export async function repairEncryptedNotes(
             })
           : await decryptViaPassword({ content, password: config.gpgPassword });
       writeFileSync(file, decryptedContent, 'utf8');
-      logger.info(`${file} note decrypted`);
+      logger.debug(
+        `[repair-encrypted-notes.ts][function]: ${file} note decrypted`
+      );
     } catch (e) {
-      logger.warn(`Can't decrypt note: ${file} cause of %o`, e);
+      logger.error(
+        `[repair-encrypted-notes.ts][function]: can't decrypt note: ${file} due to the error \n%o`,
+        e
+      );
     }
   });
 }

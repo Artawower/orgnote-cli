@@ -4,6 +4,7 @@ import { getApi } from './sdk.js';
 import { OrgNotePublishedConfig } from '../config.js';
 import { getLogger } from '../logger.js';
 import { HandlersCreatingNote } from 'orgnote-api/remote-api';
+import { prettifyHttpError } from '../tools/prettify-http-error';
 
 const logger = getLogger();
 export async function sendNotesFiles(
@@ -27,19 +28,21 @@ export async function sendNotesFiles(
 
   const files = readFiles(filePaths.filter((i) => !!i));
 
-  logger.info(`Files to sync: ${files.map((f) => f.name).join(', ')}`);
-  logger.info(`Files length to send: ${files.length}`);
+  logger.info(
+    `[send-notes-files.ts][functionsendNotesFiles]: files to sync: %o`,
+    files.map((f) => f.name).join(', ')
+  );
+  logger.info(
+    `[send-notes-files.ts][function]: files length to send ${files.length}`
+  );
 
   files.forEach(async (file) => {
     try {
       await api.files.uploadFile(file);
     } catch (e) {
-      const data = e.response?.data ?? e.body;
-      logger.error(`🦄: [http error] error while send http request for file upload:
-    | status: ${e.statusCode ?? ''}
-    | data: ${data ? JSON.stringify(data) : ''}
-    | message: ${e.message ?? ''}
-`);
+      logger.error(
+        `[send-notes-files.ts][function]: http error while send http request for file upload: ${prettifyHttpError(e)} `
+      );
     }
   });
 }

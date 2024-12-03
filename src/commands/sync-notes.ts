@@ -23,8 +23,8 @@ export async function syncNotes(config: OrgNotePublishedConfig): Promise<void> {
   const { get, set } = initStore(config.name);
   const lastSync = new Date(!get('lastSync') ? 0 : get('lastSync'));
   logger.info(
-    `✎: [sync-notes.ts][${new Date().toString()}] last sync from %o`,
-    lastSync
+    `[sync-notes.ts][syncNotessyncNotes]: previous sync was at %o`,
+    lastSync.toISOString()
   );
   // TODO: master reuse findNotesFilesDiff from orgnote-api
   const notesFromLastSync = await getNotesFromLastSync(config, lastSync);
@@ -96,17 +96,14 @@ async function getNotesFromLastSync(
 
   const notes = nestedNotes.flat();
 
-  logger.info(
-    `✎: [sync-notes.ts][${new Date().toString()}] files found to sync %o`,
-    notes.length
+  logger.debug(
+    `[sync-notes.ts][getNotesFromLastSync]: files to sync ${notes.length}`
   );
 
-  if (config.debug) {
-    logger.info(
-      `✎: [sync-notes.ts][${new Date().toString()}] notes from last sync:\n %o`,
-      notes.map((n) => `${n.meta.title}`)
-    );
-  }
+  logger.debug(
+    `[sync-notes.ts][getNotesFromLastSync]: notes from last sync:\n %o`,
+    notes.map((n) => `${n.meta.title}`)
+  );
   return notes;
 }
 

@@ -25,12 +25,6 @@ export async function prepareNote(
       ? await decrypt(fileContent, config)
       : fileContent;
 
-    console.log(
-      '✎: [line 18][prepare-note.ts] fileContent: ',
-      encrypted,
-      decryptedContent,
-      typeof decryptedContent
-    );
     const parsedDoc = parse(decryptedContent);
     const nodeTree = withMetaInfo(parsedDoc);
 
@@ -47,15 +41,17 @@ export async function prepareNote(
 
     if (!note.id) {
       logger.warn(
-        `${filePath} is not a org roam file. Specify id in org PROPERTY keyword and make sure that file is *.org`
+        `[prepare-note.ts][function]: ${filePath} is not a org roam file. Specify id in org PROPERTY keyword and make sure that file is *.org`
       );
       return;
     }
 
     return note;
   } catch (e) {
-    logger.error("Can't parse file: %o", filePath);
-    throw e;
+    logger.error(
+      `[prepare-note.ts][function]: can't parse ${filePath} due to error:\n%o`,
+      e
+    );
   }
 }
 
@@ -104,7 +100,6 @@ async function getCreatingNote({
   );
   encryptedNote.content = encryptedContent;
   encryptedNote.meta.images = images;
-  console.log('✎: [line 103][prepare-note.ts] encryptedNote: ', encryptedNote);
   return encryptedNote;
 }
 

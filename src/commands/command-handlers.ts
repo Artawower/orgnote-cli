@@ -50,7 +50,9 @@ export async function handleCommand(
 ) {
   const commandExecutor = commands[command];
   if (!commandExecutor) {
-    throw `Command ${command} is not supported`;
+    throw command
+      ? `Command ${command} is not supported`
+      : 'No command provided, use --help option to check available commands';
   }
 
   await backupDirectory(config.rootFolder, config.backupDir);

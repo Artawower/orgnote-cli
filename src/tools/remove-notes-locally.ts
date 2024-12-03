@@ -13,14 +13,13 @@ export function removeNoteLocally(
 ): void {
   const fullPath = join(rootFolder, ...deletedNote.filePath);
   logger.info(
-    `✎: [remove-notes-locally.ts][${new Date().toString()}] remove note locally %o`,
-    fullPath
+    `[remove-notes-locally.ts][removeNoteLocally]: remove local note: %o`
   );
   try {
     unlinkSync(fullPath);
   } catch (e) {
-    logger.warn(
-      `✎: [remove-notes-locally.ts][${new Date().toString()}] note %o not found`,
+    logger.debug(
+      `[remove-notes-locally.ts][removeNoteLocally]: note %o was not found when attemptin to delete`,
       deletedNote.filePath.join('/')
     );
   }

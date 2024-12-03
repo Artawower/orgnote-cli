@@ -9,41 +9,63 @@ export async function backupDirectory(
   backupDir?: string,
   backupCount: number = 20
 ): Promise<void> {
-  backupDir ??= path.basename(path.dirname(dirPath));
+  if (!backupDir) {
+    logger.warn(
+      '\n' +
+        `WARN! YOUR NOTES ARE NOT BACKUPED CAUSE OF MISSING BACKUP FOLDER
+BE NOTICE. THE APP CURRENTLY IN THE BETA VERSION. YOU CAN LOOSE YOUR DATA AND NOTES!\n` +
+        '-'.repeat(80)
+    );
+    return;
+  }
   createBackupDir(backupDir);
   clearOldBackups(backupDir, backupCount);
   const zipName = `${new Date().toISOString()}.zip`;
   const zipPath = join(backupDir, zipName);
-  logger.info(
-    `✎: [backup.ts][${new Date().toString()}] backups stored into %o`,
-    zipPath
-  );
+  logger.info(`[backup.ts][function]: backups stored into %o`, zipPath);
   await zip(dirPath, zipPath);
 }
 
 function createBackupDir(backupDir: string): void {
-  if (existsSync(backupDir)) {
-    return;
+  try {
+    if (existsSync(backupDir)) {
+      return;
+    }
+    mkdirSync(backupDir, { recursive: true });
+  } catch (e) {
+    logger.error(
+      `[backup.ts][createBackupDir]: error while creating backup dir \n%o`,
+      e
+    );
   }
-  mkdirSync(backupDir, { recursive: true });
 }
 
 function clearOldBackups(dir: string, backupCount: number): void {
-  const files = readdirSync(dir)
-    .map((name) => ({
-      name,
-      time: statSync(join(dir, name)).mtime.getTime(),
-    }))
-    .filter((file) => /\.zip$/.test(file.name))
-    .sort((a, b) => b.time - a.time)
-    .map((v) => v.name);
-  const filesToDelete = files.slice(backupCount);
-  logger.info(
-    `✎: [backup.ts][${new Date().toString()}] old backups will be deleted %o`,
-    filesToDelete
-  );
+  if (!dir) {
+    return;
+  }
+  try {
+    const files = readdirSync(dir)
+      .map((name) => ({
+        name,
+        time: statSync(join(dir, name)).mtime.getTime(),
+      }))
+      .filter((file) => /\.zip$/.test(file.name))
+      .sort((a, b) => b.time - a.time)
+      .map((v) => v.name);
+    const filesToDelete = files.slice(backupCount);
+    logger.info(
+      `✎: [backup.ts][${new Date().toString()}] old backups will be deleted \n%o`,
+      JSON.stringify(filesToDelete)
+    );
 
-  filesToDelete.forEach((file) => {
-    unlinkSync(join(dir, file));
-  });
+    filesToDelete.forEach((file) => {
+      unlinkSync(join(dir, file));
+    });
+  } catch (e) {
+    logger.error(
+      `✎: [backup.ts][clearOldBackups] error when clear old backups %o`,
+      e
+    );
+  }
 }

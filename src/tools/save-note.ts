@@ -25,7 +25,8 @@ async function saveNoteFiles(
       fileStream?.pipe(createWriteStream(savePath));
     } catch (e) {
       logger.error(
-        `✎: [save-note.ts][${new Date().toString()}] error downloading image %`
+        `[save-note.ts][function]: error when downloading image %o`,
+        f
       );
     }
   }
