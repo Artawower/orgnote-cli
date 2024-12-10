@@ -7,7 +7,7 @@ import { OrgNotePublishedConfig } from 'config.js';
 import { createWriteStream } from 'fs';
 import { ModelsPublicNote } from 'orgnote-api/remote-api/api';
 import { encrypt } from './encryption';
-import { isGpgEncrypted, isOrgGpgFile } from 'orgnote-api';
+import { isOrgGpgFile } from 'orgnote-api';
 
 const logger = getLogger();
 
@@ -25,8 +25,9 @@ async function saveNoteFiles(
       fileStream?.pipe(createWriteStream(savePath));
     } catch (e) {
       logger.error(
-        `[save-note.ts][function]: error when downloading image %o`,
-        f
+        `[save-note.ts][saveNoteFiles]: error when downloading image %o, %o`,
+        f,
+        e
       );
     }
   }

@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, readdirSync, statSync, unlinkSync } from 'fs';
 import { getLogger } from './logger.js';
-import path, { join } from 'path';
+import { join } from 'path';
 import { zip } from 'zip-a-folder';
 
 const logger = getLogger();
@@ -22,7 +22,7 @@ BE NOTICE. THE APP CURRENTLY IN THE BETA VERSION. YOU CAN LOOSE YOUR DATA AND NO
   clearOldBackups(backupDir, backupCount);
   const zipName = `${new Date().toISOString()}.zip`;
   const zipPath = join(backupDir, zipName);
-  logger.info(`[backup.ts][function]: backups stored into %o`, zipPath);
+  logger.info(`[backup.ts][backupDirectory]: backups stored into %o`, zipPath);
   await zip(dirPath, zipPath);
 }
 

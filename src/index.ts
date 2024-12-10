@@ -58,6 +58,7 @@ async function commandHandler(
 function getPrettyConfig(
   config: OrgNotePublishedConfig
 ): OrgNotePublishedConfig {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { gpgPublicKey, gpgPrivateKey, ...rest } = config;
   rest.token = rest.token ? '********' : 'NO TOKEN PROVIDED';
   rest.gpgPrivateKeyPassphrase = rest.gpgPrivateKeyPassphrase

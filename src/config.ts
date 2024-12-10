@@ -35,13 +35,15 @@ const configPath =
 const rootFolder = process.env.OrgNote_BASE_DIR || '';
 
 function readConfigFile(): OrgNotePublishedConfig[] {
+  const logger = getLogger();
+
   try {
     const configs = JSON.parse(
       readFileSync(configPath).toString()
     ) as OrgNotePublishedConfig[];
     return configs;
   } catch (e) {
-    console.error('[file read error] %o', e);
+    logger.error(`[config.ts][readConfigFile]: read config %o`, e);
   }
 }
 
@@ -63,7 +65,7 @@ export async function getConfig(
   const configs = readConfigFile();
   if (!configs && !accountName) {
     logger.debug(
-      `[config.ts][function]: No config file found. Using default configs`
+      `[config.ts][getConfig]: No config file found. Using default configs`
     );
   }
 
