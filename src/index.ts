@@ -1,71 +1,86 @@
 #!/usr/bin/env node
 
-import yargs from 'yargs';
-import { hideBin } from 'yargs/helpers';
 import { getLogger } from './logger.js';
 import { OrgNotePublishedConfig, getConfig } from './config.js';
-import { Logger } from 'winston';
 import { CliCommand, handleCommand } from './commands/command-handlers.js';
 import { initStore } from './store/store.js';
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import { dirname } from 'path';
 import { resolveHome } from './tools/with-home-dir.js';
+import { prettifyHttpError } from './tools/prettify-http-error';
+import { AxiosError } from 'axios';
+import { CliArguments, run } from './cli';
 
-let logger: Logger;
+run(commandHandler);
 
-(async () => {
-  const argv = yargs(hideBin(process.argv)).options({
-    debug: {
-      describe: 'Enable debug mode for verbose logging',
-      type: 'boolean',
-    },
-    force: {
-      describe: 'Clear all cache and force sync notes',
-      type: 'boolean',
-    },
-    accountName: {
-      describe: 'Account name to use for sync',
-      type: 'string',
-    },
-  }).argv;
-  const command = argv._[0] as CliCommand;
-  const accountName = argv.accountName as string;
-  const config = await getConfig(argv, accountName);
+async function commandHandler(
+  command: string,
+  options: CliArguments
+): Promise<void> {
+  if (!command) {
+    getLogger().error('No command provided');
+    return;
+  }
+  const accountName = options.accountName;
 
-  const path = (argv._[argv._.length - 1] as string) || config.rootFolder;
-  logger = getLogger(config);
+  const config = await getConfig(options as any, accountName);
+  if (!config) {
+    return;
+  }
+
+  const path = options.path || config.rootFolder;
+  const logger = getLogger(config);
 
   const { clear } = initStore(config.name);
-  if (argv.force) {
+  if (options.force) {
     logger.warn('Force sync enabled. All cache will be cleared.');
     clear();
   }
 
-  logger.info('Current configuration: %o', config);
+  logger.debug('Current configuration: \n%o', getPrettyConfig(config));
 
   createLogFile(config);
 
   try {
-    await handleCommand(command, config, path)
+    await handleCommand(command as CliCommand, config, path);
   } catch (e) {
-    logger.error('Unexpected error: %o', e);
+    if (e instanceof AxiosError) {
+      logger.error(`[index.ts] Unexpected error: ${prettifyHttpError(e)}`);
+    } else {
+      logger.error(`[index.ts] Unexpected error: %o`, e);
+    }
     if (config.logPath) {
       writeFileSync(config.logPath, e);
     }
   }
-})();
+}
+
+function getPrettyConfig(
+  config: OrgNotePublishedConfig
+): OrgNotePublishedConfig {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { gpgPublicKey, gpgPrivateKey, ...rest } = config;
+  rest.token = rest.token ? '********' : 'NO TOKEN PROVIDED';
+  rest.gpgPrivateKeyPassphrase = rest.gpgPrivateKeyPassphrase
+    ? '********'
+    : 'NO GPG PASSPHRASE PROVIDED';
+  return rest;
+}
 
 function createLogFile(config: OrgNotePublishedConfig): void {
+  const logger = getLogger(config);
   if (!config.logPath) {
-    console.log('[line 60]: NO LOG FILE PROVIDED')
+    logger.debug(`✎: [index.ts][createLogFile] no log file provided`);
     return;
   }
   const logPath = resolveHome(config.logPath);
   if (existsSync(logPath)) {
-    console.log(`[line 64]: LOG FILE ALREADY EXISTS ${config.logPath}`)
+    logger.debug(
+      `✎: [index.ts][createLogFile] log file already exists %o, do nothing`,
+      config.logPath
+    );
     return;
   }
   mkdirSync(dirname(logPath), { recursive: true });
   writeFileSync(logPath, '');
-
 }

@@ -21,9 +21,8 @@ export function removeRenamedNotes(
     if (notesInfo[path] || !notesInfoById[n.id]) {
       return;
     }
-    logger.info(
-      `✎: [remove-renamed-notes.ts][${new Date().toString()}] remove renamed note %o`,
-      notesInfoById[n.id].filePath
+    logger.debug(
+      `[remove-renamed-notes.ts][removeRenamedNotes]: ${notesInfoById[n.id].filePath}`
     );
     removeNoteLocally(config.rootFolder, {
       filePath: notesInfoById[n.id].filePath,
