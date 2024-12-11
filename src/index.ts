@@ -63,7 +63,8 @@ function getPrettyConfig(
   rest.token = rest.token ? '********' : 'NO TOKEN PROVIDED';
   rest.gpgPrivateKeyPassphrase = rest.gpgPrivateKeyPassphrase
     ? '********'
-    : 'NO GPG PASSPHRASE PROVIDED';
+      : 'NO GPG PASSPHRASE PROVIDED';
+    rest.gpgPassword = rest.gpgPassword ? '********' : 'NO GPG PASSWORD';
   return rest;
 }
 
