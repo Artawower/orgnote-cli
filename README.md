@@ -1,15 +1,15 @@
 
 # Table of Contents
 
-1.  [Introduction](#orgaeb61d0)
-2.  [Connected links](#orgf421265)
-3.  [️ Install](#org7862b05)
-4.  [Usage](#org08400a0)
-    1.  [Configuration](#orga07d666)
-    2.  [Available commands](#org4596d4b)
-    3.  [Available flags](#org9a8820c)
-5.  [Encryption.](#orged5afb7)
-6.  [🍩 Contribute guide](#orga6ce78e)
+1.  [Introduction](#org90ba54d)
+2.  [Connected links](#org0cb9262)
+3.  [️ Install](#org53522a3)
+4.  [Usage](#orgc482a3f)
+    1.  [Configuration](#orgea6b538)
+    2.  [Available commands](#orgac72b2f)
+    3.  [Available flags](#org03fe654)
+5.  [Encryption.](#org2c5292b)
+6.  [🍩 Contribute guide](#org3b2c6b1)
 
 <div align='center'>
 
@@ -33,7 +33,7 @@
 
 </span>
 
-<a href='https://wakatime.com/badge/github/Artawower/orgnote-client'><img src='https://wakatime.com/badge/github/Artawower/orgnote-client.svg' alt='wakatime'></a>
+<a href="https://wakatime.com/badge/github/Artawower/orgnote-cli"><img src="https://wakatime.com/badge/github/Artawower/orgnote-cli.svg" alt="wakatime"></a>
 
 </div>
 
@@ -49,18 +49,8 @@
 
 </div>
 
-<div align='center'>
 
-<a href="https://play.google.com/store/apps/details?id=org.note.app" target="_blank">
-
-<img src="./images/google-play.svg" width="140px" height="auto">
-
-</a>
-
-</div>
-
-
-<a id="orgaeb61d0"></a>
+<a id="org90ba54d"></a>
 
 # Introduction
 
@@ -68,26 +58,26 @@ NPM binary script for synchronising and publishing notes from org roam. Closely 
 **WARNING**: This package doesn't provide a way to resolve conflicts and doesn't use CRDT yet! Be careful, and don't forget to backup your notes!
 
 
-<a id="orgf421265"></a>
+<a id="org0cb9262"></a>
 
 # Connected links
 
 -   [Org Note main repo.](https://github.com/Artawower/orgnote)
 
 
-<a id="org7862b05"></a>
+<a id="org53522a3"></a>
 
 # ️ Install
 
     npm install -g orgnote-cli
 
 
-<a id="org08400a0"></a>
+<a id="orgc482a3f"></a>
 
 # Usage
 
 
-<a id="orga07d666"></a>
+<a id="orgea6b538"></a>
 
 ## Configuration
 
@@ -141,7 +131,7 @@ Example
     ]
 
 
-<a id="org4596d4b"></a>
+<a id="orgac72b2f"></a>
 
 ## Available commands
 
@@ -153,7 +143,7 @@ Example
 -   `sync` - syncs all notes from the root folder into the remote service and vice versa. **WARNING**: this operation could override local and remote notes depens on timezone.
 
 
-<a id="org9a8820c"></a>
+<a id="org03fe654"></a>
 
 ## Available flags
 
@@ -161,7 +151,7 @@ Example
 `--force` clear local cache and last sync time
 
 
-<a id="orged5afb7"></a>
+<a id="org2c5292b"></a>
 
 # Encryption.
 
@@ -178,10 +168,10 @@ Export private key
     gpg --armor --export-secret-key <ID> > ~/.config/orgnote/private.key
 
 
-<a id="orga6ce78e"></a>
+<a id="org3b2c6b1"></a>
 
 # 🍩 Contribute guide
 
-Any contribution is very much appreciated! Please read the [style guide](./CONTRIBUTE.md) before contributing to avoid misunderstandings!
+Any contribution is very much appreciated! Please read the [style guide](https://github.com/Artawower/orgnote/wiki/Contribution-guide) before contributing to avoid misunderstandings!
 I would also appreciate it if you would consider becoming my [patron](https://www.patreon.com/artawower)
 
