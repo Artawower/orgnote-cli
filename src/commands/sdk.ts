@@ -1,12 +1,11 @@
 import { OrgNotePublishedConfig } from 'config.js';
-import { NotesApiFactory } from 'orgnote-api/remote-api';
+import { SyncApiFactory } from 'orgnote-api/remote-api';
 import axios from 'axios';
-import { initFilesApi } from 'orgnote-api';
 
 type Api = {
-  notes: ReturnType<typeof NotesApiFactory>;
-  files: ReturnType<typeof initFilesApi>;
+  sync: ReturnType<typeof SyncApiFactory>;
 };
+
 let api: Api;
 
 function initApi(c: OrgNotePublishedConfig): void {
@@ -18,10 +17,9 @@ function initApi(c: OrgNotePublishedConfig): void {
     },
   });
 
-  const notes = NotesApiFactory(null, '', axiosInstance);
-  const files = initFilesApi(axiosInstance);
+  const sync = SyncApiFactory(null, '', axiosInstance);
 
-  api = { notes, files };
+  api = { sync };
 }
 
 export function getApi(c: OrgNotePublishedConfig): Api {

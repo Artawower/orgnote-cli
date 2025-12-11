@@ -15,10 +15,16 @@
     "convert:api": "fix-esm-import-path src/generated"
   },
   "repository": "git+https://github.com/Artawower/orgnote-cli.git",
-  "keywords": ["org", "roam", "Org Note"],
+  "keywords": [
+    "org",
+    "roam",
+    "Org Note"
+  ],
   "author": "darkawower <app.orgnote@gmail.com> (https://about.org-note.com)",
   "license": "MIT",
-  "files": ["dist/**"],
+  "files": [
+    "dist/**"
+  ],
   "bin": {
     "orgnote-cli": "dist/index.js"
   },
@@ -55,7 +61,7 @@
     "commander": "12.1.0",
     "form-data": "4.0.0",
     "org-mode-ast": "0.11.7",
-    "orgnote-api": "0.19.3",
+    "orgnote-api": "file:.yalc/orgnote-api",
     "request": "2.88.2",
     "sqlite3": "5.1.7",
     "uuid": "10.0.0",

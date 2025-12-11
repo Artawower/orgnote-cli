@@ -28,7 +28,6 @@ async function commandHandler(
     return;
   }
 
-  const path = options.path || config.rootFolder;
   const logger = getLogger(config);
 
   const { clear } = initStore(config.name);
@@ -42,7 +41,7 @@ async function commandHandler(
   createLogFile(config);
 
   try {
-    await handleCommand(command as CliCommand, config, path);
+    await handleCommand(command as CliCommand, config, config.rootFolder);
   } catch (e) {
     if (e instanceof AxiosError) {
       logger.error(`[index.ts] Unexpected error: ${prettifyHttpError(e)}`);
@@ -50,22 +49,25 @@ async function commandHandler(
       logger.error(`[index.ts] Unexpected error: %o`, e);
     }
     if (config.logPath) {
-      writeFileSync(config.logPath, e);
+      writeFileSync(config.logPath, String(e));
     }
   }
 }
 
 function getPrettyConfig(
   config: OrgNotePublishedConfig
-): OrgNotePublishedConfig {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+): Partial<OrgNotePublishedConfig> {
   const { gpgPublicKey, gpgPrivateKey, ...rest } = config;
-  rest.token = rest.token ? '********' : 'NO TOKEN PROVIDED';
-  rest.gpgPrivateKeyPassphrase = rest.gpgPrivateKeyPassphrase
-    ? '********'
-      : 'NO GPG PASSPHRASE PROVIDED';
-    rest.gpgPassword = rest.gpgPassword ? '********' : 'NO GPG PASSWORD';
-  return rest;
+  void gpgPublicKey;
+  void gpgPrivateKey;
+  return {
+    ...rest,
+    token: rest.token ? '********' : 'NO TOKEN PROVIDED',
+    gpgPrivateKeyPassphrase: rest.gpgPrivateKeyPassphrase
+      ? '********'
+      : 'NO GPG PASSPHRASE PROVIDED',
+    gpgPassword: rest.gpgPassword ? '********' : 'NO GPG PASSWORD',
+  };
 }
 
 function createLogFile(config: OrgNotePublishedConfig): void {

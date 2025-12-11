@@ -2,20 +2,13 @@ import { readFileSync, writeFileSync } from 'fs';
 import os from 'os';
 import { join } from 'path/posix';
 
-export interface StoredNoteInfo {
-  filePath: string[];
-  id: string;
-  updatedAt: string;
-}
-
 interface Store {
-  lastSync?: Date;
-  notes?: { [filePath: string]: StoredNoteInfo };
+  lastSync?: string;
 }
 
 let store: Store;
 
-const getDefaultStore = (): Store => ({ notes: {} });
+const getDefaultStore = (): Store => ({});
 
 export const initStore = (userName: string) => {
   const storeFile = join(
@@ -47,7 +40,7 @@ export const initStore = (userName: string) => {
     try {
       store = JSON.parse(readFileSync(storeFile).toString());
     } catch (e) {
-      if (e.code === 'ENOENT') {
+      if ((e as NodeJS.ErrnoException).code === 'ENOENT') {
         store = getDefaultStore();
         return;
       }

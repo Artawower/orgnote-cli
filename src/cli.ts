@@ -7,15 +7,10 @@ export interface CliArguments {
   rootFolder: string;
   force: boolean;
   accountName: string;
-  path: string;
 }
 
 const commandDescriptionMan: { [key in CliCommand]: string } = {
-  [CliCommand.Sync]: 'Synchronize notes with remote server',
-  [CliCommand.Load]: 'Load notes from remote server',
-  [CliCommand.Publish]: 'Publish notes to remote server',
-  [CliCommand.PublishAll]: 'Publish all notes to remote server',
-  [CliCommand.RepairEncryptedNotes]: 'Repair encrypted notes (deprecated)',
+  [CliCommand.Sync]: 'Synchronize files with remote server',
 };
 
 export function run(
@@ -34,13 +29,12 @@ export function run(
       .option('-r, --rootFolder <string>', 'Root folder for notes (optional)')
       .option(
         '-f, --force',
-        'Force operation, be careful, it will override all remote notes (optional)'
+        'Force operation, clear local cache before sync (optional)'
       )
       .option(
         '-a, --accountName <string>',
         'Account name stored in the config file (optional)'
       )
-      .option('-p, --path <string>', 'Path to the file or directory (optional)')
       .description(description)
       .action(async (args) => await fn(command, args as CliArguments));
   });

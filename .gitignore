@@ -107,3 +107,6 @@ dist
 dist/*
 
 mdeia/*
+
+.yalc
+yalc.lock
