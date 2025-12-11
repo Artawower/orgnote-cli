@@ -21,9 +21,20 @@ async function commandHandler(
     getLogger().error('No command provided');
     return;
   }
-  const accountName = options.accountName;
 
-  const config = await getConfig(options as any, accountName);
+  if (command === CliCommand.ValidateConfig) {
+    await handleCommand(CliCommand.ValidateConfig, null, '');
+    return;
+  }
+
+  const config = await getConfig(
+    {
+      debug: options.debug,
+      rootFolder: options.rootFolder,
+    },
+    options.account
+  );
+
   if (!config) {
     return;
   }
@@ -65,23 +76,19 @@ function getPrettyConfig(
     token: rest.token ? '********' : 'NO TOKEN PROVIDED',
     gpgPrivateKeyPassphrase: rest.gpgPrivateKeyPassphrase
       ? '********'
-      : 'NO GPG PASSPHRASE PROVIDED',
-    gpgPassword: rest.gpgPassword ? '********' : 'NO GPG PASSWORD',
+      : 'NOT SET',
+    gpgPassword: rest.gpgPassword ? '********' : 'NOT SET',
   };
 }
 
 function createLogFile(config: OrgNotePublishedConfig): void {
   const logger = getLogger(config);
   if (!config.logPath) {
-    logger.debug(`✎: [index.ts][createLogFile] no log file provided`);
+    logger.debug(`No log file provided`);
     return;
   }
   const logPath = resolveHome(config.logPath);
   if (existsSync(logPath)) {
-    logger.debug(
-      `✎: [index.ts][createLogFile] log file already exists %o, do nothing`,
-      config.logPath
-    );
     return;
   }
   mkdirSync(dirname(logPath), { recursive: true });
