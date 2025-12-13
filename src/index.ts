@@ -68,16 +68,9 @@ async function commandHandler(
 function getPrettyConfig(
   config: OrgNotePublishedConfig
 ): Partial<OrgNotePublishedConfig> {
-  const { gpgPublicKey, gpgPrivateKey, ...rest } = config;
-  void gpgPublicKey;
-  void gpgPrivateKey;
   return {
-    ...rest,
-    token: rest.token ? '********' : 'NO TOKEN PROVIDED',
-    gpgPrivateKeyPassphrase: rest.gpgPrivateKeyPassphrase
-      ? '********'
-      : 'NOT SET',
-    gpgPassword: rest.gpgPassword ? '********' : 'NOT SET',
+    ...config,
+    token: config.token ? '********' : 'NO TOKEN PROVIDED',
   };
 }
 

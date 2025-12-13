@@ -38,84 +38,64 @@ npm install -g orgnote-cli
 #+END_SRC
 * Usage
 ** Configuration
-Create ~~/.config/orgnote/config.json~ with next schema:
-#+BEGIN_SRC typescript
-export interface OrgNotePublishedConfig {
-  remoteAddress: string;
-  token: string;
-  rootFolder: string;
-  version: string;
-  name?: string;
-  debug?: boolean;
-  logPath?: string;
-  backupCount?: number;
-  backupDir?: string;
-  encrypt?: 'gpgPassword' | 'gpgKeys' | 'disabled';
+Create ~~/.config/orgnote/config.toml~ with the following structure:
 
-  gpgPassword?: string;
-  gpgPublicKeyPath?: string;
-  gpgPrivateKeyPath?: string;
-  gpgPrivateKeyPassphrase?: string;
+#+BEGIN_SRC toml
+[[accounts]]
+name = "Local"
+remoteAddress = "http://localhost:8000/v1"
+token = "your-api-token-here"
+rootFolder = "~/org-roam"
+logPath = "~/tmp/logs/orgnote.log"
+debug = false
+backupDir = "/tmp/orgnote/backups"
+backupCount = 3
 
-}
+[[accounts]]
+name = "Production"
+remoteAddress = "https://org-note.com/api/v1"
+token = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+rootFolder = "~/org-roam"
 #+END_SRC
-Example
-#+BEGIN_SRC json
-[
-  {
-    "name": "User 1",
-    "remoteAddress": "http://localhost:8000/v1",
-    "token": "289cd69d-e9fb-4ad0-a907-d44e46cac786",
-    "rootFolder": "~/tmp/org-roam",
-    "logPath": "~/tmp/logs/orgnote.log",
-    "encrypt": "gpgPassword",
-    "gpgPassword": "password"
-  },
-  {
-    "name": "Local development",
-    "remoteAddress": "http://localhost:8000/v1",
-    "token": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-    "rootFolder": "~/some/path/",
-    "backupDir": "/tmp/orgnote/backups",
-    "backupCount": 2
-  },
-  {
-    "name": "Remote development",
-    "remoteAddress": "http://<address>/api/v1",
-    "token": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-    "rootFolder": "~/some/path/"
-  },
-]
+
+*** Available options
+| Option        | Required | Default                  | Description                     |
+|---------------+----------+--------------------------+---------------------------------|
+| name          | yes      |                          | Account identifier              |
+| remoteAddress | no       | http://localhost:8000/v1 | OrgNote server URL              |
+| token         | yes      |                          | API token from OrgNote settings |
+| rootFolder    | yes      |                          | Path to org-roam directory      |
+| logPath       | no       | /tmp/log/orgnote         | Log file path                   |
+| debug         | no       | false                    | Enable debug logging            |
+| backupDir     | no       |                          | Backup directory path           |
+| backupCount   | no       | 3                        | Number of backups to keep       |
+
+*** Selecting account
+Use ~--account~ flag to select specific account:
+#+BEGIN_SRC bash
+orgnote-cli sync --account Production
 #+END_SRC
+If not specified, the first account in config will be used.
 
 
 ** Available commands
-- ~publish~ - publish single note
-  ~orgnote-cli publish  --remote-address http://url-here/ --token api-token /file/path~
-- ~collect~ -  forces loading of all notes from a remote resource. *WARNING*: this operation could override your local notes! 
-  /Unsupported yet/
-- =publish-all= force publishing of all notes from the root folder. *WARNING*: this operation could overwrite remote notes.
-- ~sync~ - syncs all notes from the root folder into the remote service and vice versa. *WARNING*: this operation could override local and remote notes depens on timezone.
-
+- ~sync~ - synchronize files between local folder and remote server
+  #+BEGIN_SRC bash
+  orgnote-cli sync
+  orgnote-cli sync --account Production
+  orgnote-cli sync --force  # clear local cache before sync
+  #+END_SRC
+- ~validate-config~ - validate configuration file
+  #+BEGIN_SRC bash
+  orgnote-cli validate-config
+  #+END_SRC
 
 ** Available flags
-~--debug~ enable additional info logging messages
-~--force~ clear local cache and last sync time
-* Encryption.
-For exporting keys use next commands ([[https://www.gnupg.org/documentation/][check official doc]]). Make sure you have orgnote folder inside your =.config=
-#+BEGIN_SRC bash
-mkdir -p ~/.config/orgnote
-#+END_SRC
-
-Export public key:
-#+BEGIN_SRC bash
-gpg --armor --export <ID> > ~/.config/orgnote/public.key
-#+END_SRC
-
-Export private key
-#+BEGIN_SRC bash
-gpg --armor --export-secret-key <ID> > ~/.config/orgnote/private.key
-#+END_SRC
+| Flag              | Description                              |
+|-------------------+------------------------------------------|
+| ~--debug~, ~-d~   | Enable debug logging                     |
+| ~--force~, ~-f~   | Clear local cache and last sync time     |
+| ~--account~, ~-a~ | Select specific account from config file |
 
 * 🍩 Contribute guide
 Any contribution is very much appreciated! Please read the [[https://github.com/Artawower/orgnote/wiki/Contribution-guide][style guide]] before contributing to avoid misunderstandings!

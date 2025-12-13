@@ -1,24 +1,34 @@
-import { readFileSync, writeFileSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import os from 'os';
-import { join } from 'path/posix';
+import { join, dirname } from 'path';
+import type { SyncedFile } from 'orgnote-api';
 
 interface Store {
-  lastSync?: string;
+  lastSyncTime?: string;
+  files?: Record<string, SyncedFile>;
 }
 
 let store: Store;
 
-const getDefaultStore = (): Store => ({});
+const getDefaultStore = (): Store => ({ files: {} });
 
-export const initStore = (userName: string) => {
+export const initStore = (accountName: string) => {
   const storeFile = join(
     os.homedir(),
-    '.config/orgnote',
-    `store-${userName}.json`
+    '.config/orgnote/store',
+    `${accountName}.json`
   );
 
+  const ensureStoreDir = (): void => {
+    const dir = dirname(storeFile);
+    if (!existsSync(dir)) {
+      mkdirSync(dir, { recursive: true });
+    }
+  };
+
   const preserveStore = (): void => {
-    writeFileSync(storeFile, JSON.stringify(store));
+    ensureStoreDir();
+    writeFileSync(storeFile, JSON.stringify(store, null, 2));
   };
 
   const get = <K extends keyof Store>(key: K): Store[K] => {

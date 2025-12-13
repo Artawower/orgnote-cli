@@ -8,7 +8,7 @@ let logger: Logger;
 function initLogger(): void {
   logger = createLogger({
     levels: config.cli.levels,
-    level: 'warn',
+    level: 'info',
     format: format.combine(format.splat(), format.json()),
     transports: [
       new transports.Console({
