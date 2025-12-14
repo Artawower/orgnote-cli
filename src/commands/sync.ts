@@ -19,6 +19,7 @@ import {
   scanLocalFiles,
   findDeletedLocally,
   toRelativePath,
+  getOldestSyncedAt,
 } from 'orgnote-api';
 import type { OrgNotePublishedConfig } from '../config.js';
 import { createNodeFileSystem } from '../adapters/node-file-system.js';
@@ -261,7 +262,8 @@ const initDependencies = (config: OrgNotePublishedConfig): SyncDependencies => (
 
 const buildSyncPlan = async (deps: SyncDependencies): Promise<{ plan: SyncPlan; serverTime: string }> => {
   const stateData = await deps.state.get();
-  const { files: remoteFiles, serverTime } = await fetchRemoteChanges(deps.api.sync, stateData.lastSyncTime);
+  const since = getOldestSyncedAt(stateData);
+  const { files: remoteFiles, serverTime } = await fetchRemoteChanges(deps.api.sync, since);
   const localFiles = await scanLocalFiles(deps.fs, '/');
   const deletedLocally = findDeletedLocally(localFiles, stateData);
 
@@ -276,10 +278,11 @@ const buildSyncPlan = async (deps: SyncDependencies): Promise<{ plan: SyncPlan; 
   return { plan, serverTime };
 };
 
-const createSyncContext = (deps: SyncDependencies): SyncContext => ({
+const createSyncContext = (deps: SyncDependencies, serverTime: string): SyncContext => ({
   executor: createExecutor(deps.api, deps.rootFolder, deps.fs),
   state: deps.state,
   fs: deps.fs,
+  serverTime,
 });
 
 export const syncFiles = async (config: OrgNotePublishedConfig): Promise<void> => {
@@ -297,19 +300,11 @@ export const syncFiles = async (config: OrgNotePublishedConfig): Promise<void> =
 
   if (isPlanEmpty(plan)) {
     logger.info('Everything is up to date.');
-    await deps.state.setLastSyncTime(serverTime);
     return;
   }
 
-  const ctx = createSyncContext(deps);
+  const ctx = createSyncContext(deps, serverTime);
   const stats = await executePlan(plan, ctx);
 
   logStats(stats);
-
-  if (stats.errors > 0) {
-    logger.error('Sync completed with errors, not updating lastSyncTime');
-    return;
-  }
-
-  await deps.state.setLastSyncTime(serverTime);
 };

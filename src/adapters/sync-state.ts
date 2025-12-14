@@ -6,15 +6,11 @@ export const createSyncState = (accountName: string): SyncState => {
 
   const getData = (): SyncStateData => {
     const files = get('files') ?? {};
-    const lastSyncTime = get('lastSyncTime');
-    return { files, lastSyncTime };
+    return { files };
   };
 
   const saveData = (data: SyncStateData): void => {
     set('files', data.files);
-    if (data.lastSyncTime) {
-      set('lastSyncTime', data.lastSyncTime);
-    }
   };
 
   return {
@@ -37,13 +33,8 @@ export const createSyncState = (accountName: string): SyncState => {
       saveData(data);
     },
 
-    setLastSyncTime: async (time: string) => {
-      set('lastSyncTime', time);
-    },
-
     clear: async () => {
       set('files', {});
-      set('lastSyncTime', undefined);
     },
   };
 };

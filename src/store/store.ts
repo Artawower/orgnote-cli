@@ -4,7 +4,6 @@ import { join, dirname } from 'path';
 import type { SyncedFile } from 'orgnote-api';
 
 interface Store {
-  lastSyncTime?: string;
   files?: Record<string, SyncedFile>;
 }
 
