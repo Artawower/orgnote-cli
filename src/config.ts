@@ -5,14 +5,6 @@ import { getLogger } from './logger.js';
 import { parseToml } from 'orgnote-api/utils';
 import * as v from 'valibot';
 
-const EncryptionTypeSchema = v.picklist([
-  'disabled',
-  'gpg-password',
-  'gpg-keys',
-  'gpgPassword',
-  'gpgKeys',
-]);
-
 const AccountSchema = v.object({
   name: v.string(),
   remoteAddress: v.optional(v.string(), 'http://localhost:8000/v1'),
@@ -22,11 +14,6 @@ const AccountSchema = v.object({
   debug: v.optional(v.boolean(), false),
   backupDir: v.optional(v.string(), ''),
   backupCount: v.optional(v.number(), 3),
-  encrypt: v.optional(EncryptionTypeSchema, 'disabled'),
-  gpgPassword: v.optional(v.string(), ''),
-  gpgPublicKeyPath: v.optional(v.string(), ''),
-  gpgPrivateKeyPath: v.optional(v.string(), ''),
-  gpgPrivateKeyPassphrase: v.optional(v.string(), ''),
 });
 
 const ConfigSchema = v.object({
@@ -42,7 +29,6 @@ const getAccountsFromConfig = (config: v.InferOutput<typeof ConfigSchema>): Acco
 };
 
 type Account = v.InferOutput<typeof AccountSchema>;
-type EncryptionType = 'disabled' | 'gpg-password' | 'gpg-keys';
 
 export interface OrgNotePublishedConfig {
   name: string;
@@ -53,13 +39,6 @@ export interface OrgNotePublishedConfig {
   logPath: string;
   backupCount: number;
   backupDir: string;
-  encrypt: EncryptionType;
-  gpgPassword: string;
-  gpgPublicKeyPath: string;
-  gpgPrivateKeyPath: string;
-  gpgPrivateKeyPassphrase: string;
-  gpgPublicKey?: string;
-  gpgPrivateKey?: string;
 }
 
 const DEFAULT_CONFIG_PATH = `${os.homedir()}/.config/orgnote/config.toml`;
@@ -93,12 +72,6 @@ const findAccount = (accounts: Account[], accountName?: string): Account | null 
   return accounts.find((a) => a.name === accountName) ?? null;
 };
 
-const normalizeEncryptType = (encrypt: string): EncryptionType => {
-  if (encrypt === 'gpgPassword') return 'gpg-password';
-  if (encrypt === 'gpgKeys') return 'gpg-keys';
-  return encrypt as EncryptionType;
-};
-
 const mapAccountToPublished = (account: Account): OrgNotePublishedConfig => ({
   name: account.name,
   remoteAddress: account.remoteAddress,
@@ -108,42 +81,7 @@ const mapAccountToPublished = (account: Account): OrgNotePublishedConfig => ({
   logPath: resolveHome(account.logPath),
   backupCount: account.backupCount,
   backupDir: resolveHome(account.backupDir),
-  encrypt: normalizeEncryptType(account.encrypt),
-  gpgPassword: account.gpgPassword,
-  gpgPublicKeyPath: account.gpgPublicKeyPath,
-  gpgPrivateKeyPath: account.gpgPrivateKeyPath,
-  gpgPrivateKeyPassphrase: account.gpgPrivateKeyPassphrase,
 });
-
-const readGpgKeys = async (config: OrgNotePublishedConfig): Promise<{
-  gpgPrivateKey: string;
-  gpgPublicKey: string;
-}> => {
-  const privateArmoredKey = readFileSync(
-    resolveHome(config.gpgPrivateKeyPath),
-    'utf8'
-  );
-  const publicArmoredKey = readFileSync(
-    resolveHome(config.gpgPublicKeyPath),
-    'utf8'
-  );
-
-  return {
-    gpgPrivateKey: privateArmoredKey,
-    gpgPublicKey: publicArmoredKey,
-  };
-};
-
-const applyGpgKeys = async (
-  config: OrgNotePublishedConfig
-): Promise<OrgNotePublishedConfig> => {
-  if (config.encrypt !== 'gpg-keys') {
-    return config;
-  }
-
-  const { gpgPrivateKey, gpgPublicKey } = await readGpgKeys(config);
-  return { ...config, gpgPrivateKey, gpgPublicKey };
-};
 
 const applyOverrides = (
   config: OrgNotePublishedConfig,
@@ -187,7 +125,7 @@ export async function getConfig(
     return null;
   }
 
-  return applyGpgKeys(configWithOverrides);
+  return configWithOverrides;
 }
 
 export interface ValidateConfigResult {
@@ -240,17 +178,6 @@ export function validateConfigFile(): ValidateConfigResult {
       }
       if (!account.rootFolder) {
         result.errors.push(`Account "${account.name || index + 1}": missing "rootFolder" field`);
-      }
-      if (account.encrypt === 'gpg-keys') {
-        if (!account.gpgPublicKeyPath) {
-          result.errors.push(`Account "${account.name}": gpg-keys encryption requires "gpgPublicKeyPath"`);
-        }
-        if (!account.gpgPrivateKeyPath) {
-          result.errors.push(`Account "${account.name}": gpg-keys encryption requires "gpgPrivateKeyPath"`);
-        }
-      }
-      if (account.encrypt === 'gpg-password' && !account.gpgPassword) {
-        result.errors.push(`Account "${account.name}": gpg-password encryption requires "gpgPassword"`);
       }
     });
 

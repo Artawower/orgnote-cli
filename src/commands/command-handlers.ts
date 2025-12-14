@@ -1,6 +1,7 @@
 import { OrgNotePublishedConfig } from '../config.js';
 import { backupDirectory } from '../backup.js';
 import { validateConfig } from './validate-config.js';
+import { syncFiles } from './sync.js';
 
 export enum CliCommand {
   Sync = 'sync',
@@ -18,8 +19,11 @@ const registerCommand = (command: CliCommand, handler: CommandHandlerFn) => {
   commands[command] = handler;
 };
 
-registerCommand(CliCommand.Sync, async (): Promise<void> => {
-  throw new Error('Sync command not implemented yet');
+registerCommand(CliCommand.Sync, async (config): Promise<void> => {
+  if (!config) {
+    throw new Error('Config is required for sync');
+  }
+  await syncFiles(config);
 });
 
 registerCommand(CliCommand.ValidateConfig, async (): Promise<void> => {

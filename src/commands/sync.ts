@@ -1,0 +1,315 @@
+import type {
+  SyncExecutor,
+  LocalFile,
+  RemoteFile,
+  SyncPlan,
+  SyncContext,
+  UploadResult,
+  FileSystem,
+} from 'orgnote-api';
+import type { VersionConflictResponse } from 'orgnote-api/remote-api';
+import {
+  createPlan,
+  processUpload,
+  processDownload,
+  processDeleteLocal,
+  processDeleteRemote,
+  recoverState,
+  fetchRemoteChanges,
+  scanLocalFiles,
+  findDeletedLocally,
+  toRelativePath,
+} from 'orgnote-api';
+import type { OrgNotePublishedConfig } from '../config.js';
+import { createNodeFileSystem } from '../adapters/node-file-system.js';
+import { createSyncState } from '../adapters/sync-state.js';
+import { getApi, type Api } from './sdk.js';
+import { getLogger } from '../logger.js';
+import { join } from 'path';
+import { readFileSync, existsSync } from 'fs';
+import FormData from 'form-data';
+import axios, { type AxiosError } from 'axios';
+
+const logger = getLogger();
+
+const createFormData = (filePath: string, absolutePath: string): FormData => {
+  if (!existsSync(absolutePath)) {
+    throw new Error(`File not found: ${absolutePath}`);
+  }
+
+  const content = readFileSync(absolutePath);
+  const filename = filePath.split('/').pop() || 'file';
+
+  const formData = new FormData();
+  formData.append('filePath', filePath);
+  formData.append('file', content, {
+    filename,
+    contentType: 'application/octet-stream',
+  });
+
+  logger.debug('FormData created: filePath=%s, absolutePath=%s, size=%d bytes', filePath, absolutePath, content.length);
+  return formData;
+};
+
+const isConflictError = (error: unknown): error is AxiosError<VersionConflictResponse> =>
+  axios.isAxiosError(error) && error.response?.status === 409;
+
+const extractConflictVersion = (error: AxiosError<VersionConflictResponse>): number =>
+  error.response?.data?.serverVersion ?? 0;
+
+const uploadFile =
+  (api: Api, rootFolder: string) =>
+  async (file: LocalFile, expectedVersion?: number): Promise<UploadResult> => {
+    logger.info('Uploading: %s', file.path);
+
+    const relativePath = toRelativePath(file.path);
+    const absolutePath = join(rootFolder, relativePath);
+    const formData = createFormData(file.path, absolutePath);
+
+    try {
+      const response = await api.sync.uploadFile(relativePath, formData, expectedVersion);
+      return { status: 'ok', version: response.data.data.version };
+    } catch (error) {
+      if (isConflictError(error)) {
+        return { status: 'conflict', serverVersion: extractConflictVersion(error) };
+      }
+      throw error;
+    }
+  };
+
+const downloadFile =
+  (api: Api, fs: FileSystem) =>
+  async (file: RemoteFile): Promise<void> => {
+    logger.info('Downloading: %s', file.path);
+
+    const response = await api.sync.downloadFile(file.path);
+    const content = new Uint8Array(response.data);
+    await fs.writeFile(file.path, content);
+  };
+
+const deleteLocalFile =
+  (fs: FileSystem) =>
+  async (path: string): Promise<void> => {
+    logger.info('Deleting local: %s', path);
+    await fs.deleteFile(path);
+  };
+
+const deleteRemoteFile =
+  (api: Api) =>
+  async (path: string, expectedVersion: number): Promise<void> => {
+    logger.info('Deleting remote: %s', path);
+    await api.sync.deleteFile(path, expectedVersion);
+  };
+
+const createExecutor = (api: Api, rootFolder: string, fs: FileSystem): SyncExecutor => ({
+  upload: uploadFile(api, rootFolder),
+  download: downloadFile(api, fs),
+  deleteLocal: deleteLocalFile(fs),
+  deleteRemote: deleteRemoteFile(api),
+});
+
+const logPlanSummary = (plan: SyncPlan): void => {
+  logger.info('Sync plan:');
+  logger.info('  To upload: %d files', plan.toUpload.length);
+  logger.info('  To download: %d files', plan.toDownload.length);
+  logger.info('  To delete locally: %d files', plan.toDeleteLocal.length);
+  logger.info('  To delete remotely: %d files', plan.toDeleteRemote.length);
+};
+
+const logPlanDetails = (plan: SyncPlan): void => {
+  plan.toUpload.forEach((f) => logger.debug('    upload: %s', f.path));
+  plan.toDownload.forEach((f) => logger.debug('    download: %s', f.path));
+  plan.toDeleteLocal.forEach((p) => logger.debug('    delete local: %s', p));
+  plan.toDeleteRemote.forEach((p) => logger.debug('    delete remote: %s', p));
+};
+
+const isPlanEmpty = (plan: SyncPlan): boolean =>
+  plan.toUpload.length === 0 &&
+  plan.toDownload.length === 0 &&
+  plan.toDeleteLocal.length === 0 &&
+  plan.toDeleteRemote.length === 0;
+
+interface SyncStats {
+  uploaded: number;
+  downloaded: number;
+  deletedLocal: number;
+  deletedRemote: number;
+  errors: number;
+}
+
+const createStats = (): SyncStats => ({
+  uploaded: 0,
+  downloaded: 0,
+  deletedLocal: 0,
+  deletedRemote: 0,
+  errors: 0,
+});
+
+const logStats = (stats: SyncStats): void => {
+  logger.info('Sync completed:');
+  logger.info('  Uploaded: %d', stats.uploaded);
+  logger.info('  Downloaded: %d', stats.downloaded);
+  logger.info('  Deleted locally: %d', stats.deletedLocal);
+  logger.info('  Deleted remotely: %d', stats.deletedRemote);
+
+  if (stats.errors > 0) {
+    logger.error('  Errors: %d', stats.errors);
+  }
+};
+
+const processItem = async <T>(
+  item: T,
+  processor: (item: T) => Promise<void>,
+  getPath: (item: T) => string,
+  operationName: string
+): Promise<boolean> => {
+  try {
+    await processor(item);
+    return true;
+  } catch (error) {
+    logger.error('%s failed: %s - %s', operationName, getPath(item), error);
+    return false;
+  }
+};
+
+const executeWithErrorHandling = async <T>(
+  items: T[],
+  processor: (item: T) => Promise<void>,
+  getPath: (item: T) => string,
+  operationName: string
+): Promise<{ success: number; errors: number }> => {
+  const results = await Promise.all(
+    items.map((item) => processItem(item, processor, getPath, operationName))
+  );
+
+  const success = results.filter(Boolean).length;
+  return { success, errors: results.length - success };
+};
+
+interface SyncOperation<T> {
+  items: T[];
+  processor: (item: T) => Promise<void>;
+  getPath: (item: T) => string;
+  name: string;
+  statKey: keyof Omit<SyncStats, 'errors'>;
+}
+
+const createOperations = (plan: SyncPlan, ctx: SyncContext): SyncOperation<LocalFile | RemoteFile | string>[] => [
+  {
+    items: plan.toUpload,
+    processor: (file) => processUpload(file as LocalFile, ctx),
+    getPath: (file) => (file as LocalFile).path,
+    name: 'Upload',
+    statKey: 'uploaded',
+  },
+  {
+    items: plan.toDownload,
+    processor: (file) => processDownload(file as RemoteFile, ctx),
+    getPath: (file) => (file as RemoteFile).path,
+    name: 'Download',
+    statKey: 'downloaded',
+  },
+  {
+    items: plan.toDeleteLocal,
+    processor: (path) => processDeleteLocal(path as string, ctx),
+    getPath: (path) => path as string,
+    name: 'Delete local',
+    statKey: 'deletedLocal',
+  },
+  {
+    items: plan.toDeleteRemote,
+    processor: (path) => processDeleteRemote(path as string, ctx),
+    getPath: (path) => path as string,
+    name: 'Delete remote',
+    statKey: 'deletedRemote',
+  },
+];
+
+const executePlan = async (plan: SyncPlan, ctx: SyncContext): Promise<SyncStats> => {
+  const operations = createOperations(plan, ctx);
+
+  const results = await Promise.all(
+    operations.map(async (op) => ({
+      statKey: op.statKey,
+      result: await executeWithErrorHandling(op.items, op.processor, op.getPath, op.name),
+    }))
+  );
+
+  return results.reduce(
+    (stats, { statKey, result }) => ({
+      ...stats,
+      [statKey]: result.success,
+      errors: stats.errors + result.errors,
+    }),
+    createStats()
+  );
+};
+
+interface SyncDependencies {
+  api: Api;
+  fs: FileSystem;
+  state: ReturnType<typeof createSyncState>;
+  rootFolder: string;
+}
+
+const initDependencies = (config: OrgNotePublishedConfig): SyncDependencies => ({
+  api: getApi(config),
+  fs: createNodeFileSystem(config.rootFolder),
+  state: createSyncState(config.name),
+  rootFolder: config.rootFolder,
+});
+
+const buildSyncPlan = async (deps: SyncDependencies): Promise<{ plan: SyncPlan; serverTime: string }> => {
+  const stateData = await deps.state.get();
+  const { files: remoteFiles, serverTime } = await fetchRemoteChanges(deps.api.sync, stateData.lastSyncTime);
+  const localFiles = await scanLocalFiles(deps.fs, '/');
+  const deletedLocally = findDeletedLocally(localFiles, stateData);
+
+  const plan = createPlan({
+    localFiles,
+    deletedLocally,
+    remoteFiles,
+    stateData,
+    serverTime,
+  });
+
+  return { plan, serverTime };
+};
+
+const createSyncContext = (deps: SyncDependencies): SyncContext => ({
+  executor: createExecutor(deps.api, deps.rootFolder, deps.fs),
+  state: deps.state,
+  fs: deps.fs,
+});
+
+export const syncFiles = async (config: OrgNotePublishedConfig): Promise<void> => {
+  logger.info('Starting sync for account: %s', config.name);
+  logger.info('Root folder: %s', config.rootFolder);
+
+  const deps = initDependencies(config);
+
+  await recoverState(deps.state);
+
+  const { plan, serverTime } = await buildSyncPlan(deps);
+
+  logPlanSummary(plan);
+  logPlanDetails(plan);
+
+  if (isPlanEmpty(plan)) {
+    logger.info('Everything is up to date.');
+    await deps.state.setLastSyncTime(serverTime);
+    return;
+  }
+
+  const ctx = createSyncContext(deps);
+  const stats = await executePlan(plan, ctx);
+
+  logStats(stats);
+
+  if (stats.errors > 0) {
+    logger.error('Sync completed with errors, not updating lastSyncTime');
+    return;
+  }
+
+  await deps.state.setLastSyncTime(serverTime);
+};
