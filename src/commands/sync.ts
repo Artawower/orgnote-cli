@@ -21,6 +21,7 @@ import {
   toRelativePath,
   getOldestSyncedAt,
 } from 'orgnote-api';
+import { to } from 'orgnote-api/utils';
 import type { OrgNotePublishedConfig } from '../config.js';
 import { createNodeFileSystem } from '../adapters/node-file-system.js';
 import { createSyncState } from '../adapters/sync-state.js';
@@ -75,22 +76,23 @@ const uploadFile =
     const absolutePath = join(rootFolder, relativePath);
     const formData = createFormData(file.path, absolutePath);
 
-    try {
-      const response = await api.sync.uploadFile(
-        relativePath,
-        formData,
-        expectedVersion
-      );
-      return { status: 'ok', version: response.data.data.version };
-    } catch (error) {
-      if (isConflictError(error)) {
-        return {
-          status: 'conflict',
-          serverVersion: extractConflictVersion(error),
-        };
-      }
-      throw error;
+    const result = await to(() => api.sync.uploadFile(
+      relativePath,
+      formData,
+      expectedVersion
+    ))();
+
+    if (result.isOk()) {
+      return { status: 'ok', version: result.value.data.data.version };
     }
+
+    if (isConflictError(result.error)) {
+      return {
+        status: 'conflict',
+        serverVersion: extractConflictVersion(result.error),
+      };
+    }
+    throw result.error;
   };
 
 const downloadFile =
@@ -183,13 +185,12 @@ const processItem = async <T>(
   getPath: (item: T) => string,
   operationName: string
 ): Promise<boolean> => {
-  try {
-    await processor(item);
-    return true;
-  } catch (error) {
-    logger.error('%s failed: %s - %s', operationName, getPath(item), error);
+  const result = await to(() => processor(item))();
+  if (result.isErr()) {
+    logger.error('%s failed: %s - %s', operationName, getPath(item), result.error);
     return false;
   }
+  return true;
 };
 
 const executeWithErrorHandling = async <T>(

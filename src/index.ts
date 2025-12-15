@@ -10,6 +10,7 @@ import { resolveHome } from './tools/with-home-dir.js';
 import { prettifyHttpError } from './tools/prettify-http-error';
 import { AxiosError } from 'axios';
 import { CliArguments, run } from './cli';
+import { to } from 'orgnote-api/utils';
 
 run(commandHandler);
 
@@ -51,9 +52,12 @@ async function commandHandler(
 
   createLogFile(config);
 
-  try {
-    await handleCommand(command as CliCommand, config, config.rootFolder);
-  } catch (e) {
+  const result = await to(() =>
+    handleCommand(command as CliCommand, config, config.rootFolder)
+  )();
+
+  if (result.isErr()) {
+    const e = result.error;
     if (e instanceof AxiosError) {
       logger.error(`[index.ts] Unexpected error: ${prettifyHttpError(e)}`);
     } else {

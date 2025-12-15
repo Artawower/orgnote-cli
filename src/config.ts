@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'fs';
 import os from 'os';
 import { resolveHome } from './tools/with-home-dir.js';
 import { getLogger } from './logger.js';
-import { parseToml } from 'orgnote-api/utils';
+import { parseToml, to } from 'orgnote-api/utils';
 import * as v from 'valibot';
 
 const AccountSchema = v.object({
@@ -55,14 +55,18 @@ const readConfigFile = (): Account[] | null => {
     return null;
   }
 
-  try {
+  const result = to(() => {
     const content = readFileSync(configPath, 'utf8');
     const config = parseToml(content, ConfigSchema);
     return getAccountsFromConfig(config);
-  } catch (e) {
-    logger.error(`Failed to read config: %o`, e);
+  })();
+
+  if (result.isErr()) {
+    logger.error(`Failed to read config: %o`, result.error);
     return null;
   }
+
+  return result.value;
 };
 
 const findAccount = (accounts: Account[], accountName?: string): Account | null => {
@@ -151,20 +155,19 @@ export function validateConfigFile(): ValidateConfigResult {
     return result;
   }
 
-  try {
-    result.rawContent = readFileSync(configPath, 'utf8');
-  } catch (e) {
-    result.errors.push(`Failed to read config file: ${e}`);
+  const readResult = to(() => readFileSync(configPath, 'utf8'))();
+  if (readResult.isErr()) {
+    result.errors.push(`Failed to read config file: ${readResult.error}`);
     return result;
   }
+  result.rawContent = readResult.value;
 
-  try {
+  const parseResult = to(() => {
     const config = parseToml(result.rawContent, ConfigSchema);
     const accounts = getAccountsFromConfig(config);
 
     if (accounts.length === 0) {
-      result.errors.push('No accounts defined in config (use [[accounts]] or [[root]])');
-      return result;
+      throw new Error('No accounts defined in config (use [[accounts]] or [[root]])');
     }
 
     result.accounts = accounts.map((a) => a.name);
@@ -182,7 +185,10 @@ export function validateConfigFile(): ValidateConfigResult {
     });
 
     result.valid = result.errors.length === 0;
-  } catch (e) {
+  })();
+
+  if (parseResult.isErr()) {
+    const e = parseResult.error;
     if (e instanceof SyntaxError) {
       result.errors.push(`Invalid TOML syntax: ${e.message}`);
     } else if (e instanceof TypeError) {

@@ -2,6 +2,7 @@ import { existsSync, mkdirSync, readdirSync, statSync, unlinkSync } from 'fs';
 import { getLogger } from './logger.js';
 import { join } from 'path';
 import { zip } from 'zip-a-folder';
+import { to } from 'orgnote-api/utils';
 
 const logger = getLogger();
 export async function backupDirectory(
@@ -27,15 +28,14 @@ BE NOTICE. THE APP CURRENTLY IN THE BETA VERSION. YOU CAN LOOSE YOUR DATA AND NO
 }
 
 function createBackupDir(backupDir: string): void {
-  try {
-    if (existsSync(backupDir)) {
-      return;
-    }
-    mkdirSync(backupDir, { recursive: true });
-  } catch (e) {
+  if (existsSync(backupDir)) {
+    return;
+  }
+  const result = to(() => mkdirSync(backupDir, { recursive: true }))();
+  if (result.isErr()) {
     logger.error(
       `[backup.ts][createBackupDir]: error while creating backup dir \n%o`,
-      e
+      result.error
     );
   }
 }
@@ -44,7 +44,8 @@ function clearOldBackups(dir: string, backupCount: number): void {
   if (!dir) {
     return;
   }
-  try {
+
+  const result = to(() => {
     const files = readdirSync(dir)
       .map((name) => ({
         name,
@@ -62,10 +63,12 @@ function clearOldBackups(dir: string, backupCount: number): void {
     filesToDelete.forEach((file) => {
       unlinkSync(join(dir, file));
     });
-  } catch (e) {
+  })();
+
+  if (result.isErr()) {
     logger.error(
       `✎: [backup.ts][clearOldBackups] error when clear old backups %o`,
-      e
+      result.error
     );
   }
 }

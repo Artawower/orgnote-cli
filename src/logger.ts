@@ -5,6 +5,7 @@ import { SpectralLogger, FileLoggerPlugin } from 'spectrallogs';
 import type { Logger } from 'orgnote-api';
 import { format } from 'util';
 import createRedact from '@pinojs/redact';
+import { to } from 'orgnote-api/utils';
 
 const SECRET_PLACEHOLDER = '***';
 const SENSITIVE_PATHS = [
@@ -51,13 +52,12 @@ const pathRedactor = createRedact({
 
 const sanitizeArg = (arg: unknown): unknown => {
   if (arg && typeof arg === 'object') {
-    try {
-      // Fast clone to avoid mutating original objects in application
+    // Fast clone to avoid mutating original objects in application
+    const result = to(() => {
       const clone = JSON.parse(JSON.stringify(arg));
       return pathRedactor(clone);
-    } catch {
-      return arg;
-    }
+    })();
+    return result.unwrapOr(arg);
   }
   return arg;
 };

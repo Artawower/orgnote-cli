@@ -2,6 +2,7 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import os from 'os';
 import { join, dirname } from 'path';
 import type { SyncedFile } from 'orgnote-api';
+import { to } from 'orgnote-api/utils';
 
 interface Store {
   files?: Record<string, SyncedFile>;
@@ -46,15 +47,16 @@ export const initStore = (accountName: string) => {
   };
 
   const readStore = (): void => {
-    try {
-      store = JSON.parse(readFileSync(storeFile).toString());
-    } catch (e) {
-      if ((e as NodeJS.ErrnoException).code === 'ENOENT') {
-        store = getDefaultStore();
-        return;
-      }
-      throw e;
+    const result = to(() => JSON.parse(readFileSync(storeFile).toString()))();
+    if (result.isOk()) {
+      store = result.value;
+      return;
     }
+    if ((result.error as NodeJS.ErrnoException).code === 'ENOENT') {
+      store = getDefaultStore();
+      return;
+    }
+    throw result.error;
   };
 
   const clear = (): void => {
