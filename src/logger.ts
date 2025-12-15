@@ -1,49 +1,116 @@
 import { OrgNotePublishedConfig } from 'config';
 import { dirname } from 'path';
 import { resolveHome } from './tools/with-home-dir.js';
-import { createLogger, format, Logger, transports, config } from 'winston';
+import { SpectralLogger, FileLoggerPlugin } from 'spectrallogs';
+import type { Logger } from 'orgnote-api';
+import { format } from 'util';
+import createRedact from '@pinojs/redact';
+
+const SECRET_PLACEHOLDER = '***';
+const SENSITIVE_PATHS = [
+  'password',
+  'pass',
+  'pwd',
+  'secret',
+  'token',
+  'apiKey',
+  'apikey',
+  'api_key',
+  'email',
+  'phone',
+  'Authorization',
+  'authorization',
+  'context.password',
+  'context.pass',
+  'context.pwd',
+  'context.secret',
+  'context.token',
+  'context.apiKey',
+  'context.apikey',
+  'context.api_key',
+  'context.email',
+  'context.phone',
+  'bindings.password',
+  'bindings.pass',
+  'bindings.pwd',
+  'bindings.secret',
+  'bindings.token',
+  'bindings.apiKey',
+  'bindings.apikey',
+  'bindings.api_key',
+  'bindings.email',
+  'bindings.phone',
+];
+
+const pathRedactor = createRedact({
+  paths: SENSITIVE_PATHS,
+  censor: SECRET_PLACEHOLDER,
+  serialize: false,
+  strict: false,
+});
+
+const sanitizeArg = (arg: unknown): unknown => {
+  if (arg && typeof arg === 'object') {
+    try {
+      // Fast clone to avoid mutating original objects in application
+      const clone = JSON.parse(JSON.stringify(arg));
+      return pathRedactor(clone);
+    } catch {
+      return arg;
+    }
+  }
+  return arg;
+};
+
+const formatSanitized = (msg: string, ...args: unknown[]) => {
+  const sanitizedArgs = args.map(sanitizeArg);
+  return format(msg, ...sanitizedArgs);
+};
 
 let logger: Logger;
+let spectral: SpectralLogger;
 
 function initLogger(): void {
-  logger = createLogger({
-    levels: config.cli.levels,
-    level: 'info',
-    format: format.combine(format.splat(), format.json()),
-    transports: [
-      new transports.Console({
-        format: format.combine(format.colorize({ all: true }), format.simple()),
-      }),
-    ],
-  });
+  if (spectral) return;
+  spectral = new SpectralLogger();
+
+  logger = {
+    info: (msg: string, ...args: unknown[]) => spectral.info(formatSanitized(msg, ...args)),
+    error: (msg: string, ...args: unknown[]) => spectral.error(formatSanitized(msg, ...args)),
+    warn: (msg: string, ...args: unknown[]) => spectral.warn(formatSanitized(msg, ...args)),
+    debug: (msg: string, ...args: unknown[]) => spectral.debug(formatSanitized(msg, ...args)),
+    trace: (msg: string, ...args: unknown[]) => spectral.debug(formatSanitized(msg, ...args)),
+    child: () => getLogger(),
+  };
 }
 
-function configureLogger(config?: Partial<OrgNotePublishedConfig>): void {
-  if (!config?.debug) {
-    return;
-  }
-  if (!config.logPath) {
-    logger.debug(`[logger.ts][configureLogger]: no log path provided`);
-    return;
+function configure(config?: Partial<OrgNotePublishedConfig>): void {
+  if (!config) return;
+
+  if (config.debug) {
+    spectral.configure({ debugMode: true });
   }
 
-  logger.level = 'debug';
-  const dirName = dirname(config.logPath);
-  const fileName = config.logPath.split('/').pop();
-  [
-    new transports.File({
-      dirname: resolveHome(dirName),
-      filename: fileName,
-      level: 'debug',
-    }),
-  ].forEach((transport) => logger.add(transport));
+  if (config.logPath) {
+    const dirName = dirname(config.logPath);
+    const fileName = config.logPath.split('/').pop() || 'orgnote.log';
+    const filePath = resolveHome(dirName) + '/' + fileName;
+
+    const hasFilePlugin = spectral.getPlugins().some(p => p instanceof FileLoggerPlugin);
+    
+    if (!hasFilePlugin) {
+      spectral.use(new FileLoggerPlugin({ filePath }));
+    }
+  }
 }
+
 export function getLogger(
   config: Partial<OrgNotePublishedConfig> = {}
 ): Logger {
   if (!logger) {
     initLogger();
   }
-  configureLogger(config);
+  configure(config);
   return logger;
 }
+

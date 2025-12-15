@@ -1,11 +1,18 @@
 import { OrgNotePublishedConfig } from 'config.js';
-import { SyncApiFactory, type HandlersHttpResponseFileUploadResponseAny } from 'orgnote-api/remote-api';
+import {
+  SyncApiFactory,
+  type HandlersHttpResponseFileUploadResponseAny,
+} from 'orgnote-api/remote-api';
 import axios, { type AxiosError, type AxiosResponse } from 'axios';
 import { getLogger } from '../logger.js';
 import FormData from 'form-data';
 
 type SyncApi = ReturnType<typeof SyncApiFactory> & {
-  uploadFile: (filePath: string, formData: FormData, expectedVersion?: number) => Promise<AxiosResponse<HandlersHttpResponseFileUploadResponseAny>>;
+  uploadFile: (
+    filePath: string,
+    formData: FormData,
+    expectedVersion?: number
+  ) => Promise<AxiosResponse<HandlersHttpResponseFileUploadResponseAny>>;
   downloadFile: (path: string) => Promise<AxiosResponse<Buffer>>;
   deleteFile: (path: string, version?: number) => Promise<AxiosResponse<void>>;
 };
@@ -20,10 +27,15 @@ let currentConfig: OrgNotePublishedConfig | null = null;
 const logger = getLogger();
 
 const logResponseError = (error: AxiosError): void => {
-  logger.error('Status: %s %s', error.response?.status, error.response?.statusText);
+  logger.error(
+    'Status: %s %s',
+    error.response?.status,
+    error.response?.statusText
+  );
   const data = error.response?.data;
   if (!data) return;
-  const message = typeof data === 'object' && 'message' in data ? data.message : data;
+  const message =
+    typeof data === 'object' && 'message' in data ? data.message : data;
   logger.error('Response: %o', message);
 };
 
@@ -65,18 +77,25 @@ function initApi(c: OrgNotePublishedConfig): void {
   });
 
   axiosInstance.interceptors.request.use((config) => {
-    logger.debug('Request: %s %s', config.method?.toUpperCase(), config.baseURL + config.url);
-    logger.debug('Headers: %o', config.headers);
+    logger.debug(
+      'Request: %s %s',
+      config.method?.toUpperCase(),
+      config.baseURL + config.url
+    );
+    const headers =
+      config.headers &&
+      typeof config.headers === 'object' &&
+      'toJSON' in config.headers
+        ? config.headers.toJSON()
+        : config.headers;
+    logger.debug('Headers: %o', headers);
     return config;
   });
 
-  axiosInstance.interceptors.response.use(
-    (response) => {
-      logger.debug('Response: %s %s', response.status, response.statusText);
-      return response;
-    },
-    handleResponseError
-  );
+  axiosInstance.interceptors.response.use((response) => {
+    logger.debug('Response: %s %s', response.status, response.statusText);
+    return response;
+  }, handleResponseError);
 
   logger.info('API initialized: %s', c.remoteAddress);
 
@@ -102,7 +121,10 @@ function initApi(c: OrgNotePublishedConfig): void {
     });
   };
 
-  const deleteFile = async (path: string, version?: number): Promise<AxiosResponse<void>> => {
+  const deleteFile = async (
+    path: string,
+    version?: number
+  ): Promise<AxiosResponse<void>> => {
     return axiosInstance.delete('/sync/files', {
       params: { path, version },
     });
@@ -119,7 +141,8 @@ function initApi(c: OrgNotePublishedConfig): void {
 }
 
 const isSameConfig = (c: OrgNotePublishedConfig): boolean =>
-  currentConfig?.name === c.name && currentConfig?.remoteAddress === c.remoteAddress;
+  currentConfig?.name === c.name &&
+  currentConfig?.remoteAddress === c.remoteAddress;
 
 export function getApi(c: OrgNotePublishedConfig): Api {
   if (api && isSameConfig(c)) {
