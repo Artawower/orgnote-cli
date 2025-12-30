@@ -50,12 +50,32 @@ const pathRedactor = createRedact({
   strict: false,
 });
 
+const removeRestore = (obj: unknown): unknown => {
+  if (obj && typeof obj === 'object' && 'restore' in obj) {
+    delete (obj as Record<string, unknown>).restore;
+  }
+  return obj;
+};
+
 const sanitizeArg = (arg: unknown): unknown => {
+  if (arg instanceof Error) {
+    const errorObj: Record<string, unknown> = {
+      message: arg.message,
+      name: arg.name,
+      stack: arg.stack,
+    };
+    Object.getOwnPropertyNames(arg).forEach((key) => {
+      if (!(key in errorObj)) {
+        errorObj[key] = (arg as unknown as Record<string, unknown>)[key];
+      }
+    });
+    return removeRestore(pathRedactor(errorObj));
+  }
+  
   if (arg && typeof arg === 'object') {
-    // Fast clone to avoid mutating original objects in application
     const result = to(() => {
       const clone = JSON.parse(JSON.stringify(arg));
-      return pathRedactor(clone);
+      return removeRestore(pathRedactor(clone));
     })();
     return result.unwrapOr(arg);
   }
