@@ -44,6 +44,7 @@ Create ~~/.config/orgnote/config.toml~ with the following structure:
 [[accounts]]
 name = "Local"
 remoteAddress = "http://localhost:8000/v1"
+clientAddress = "http://localhost:3000"
 token = "your-api-token-here"
 rootFolder = "~/org-roam"
 logPath = "~/tmp/logs/orgnote.log"

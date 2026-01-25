@@ -33,6 +33,7 @@ type Account = v.InferOutput<typeof AccountSchema>;
 export interface OrgNotePublishedConfig {
   name: string;
   remoteAddress: string;
+  clientAddress?: string;
   token: string;
   rootFolder: string;
   debug: boolean;
