@@ -2,33 +2,19 @@ import { existsSync, readFileSync } from 'fs';
 import os from 'os';
 import { resolveHome } from './tools/with-home-dir.js';
 import { getLogger } from './logger.js';
+import {
+  SyncProfileConfigSchema,
+  type SyncProfile,
+  type SyncProfileConfig,
+} from 'orgnote-api';
 import { parseToml, to } from 'orgnote-api/utils';
-import * as v from 'valibot';
 
-const AccountSchema = v.object({
-  name: v.string(),
-  remoteAddress: v.optional(v.string(), 'http://localhost:8000/v1'),
-  token: v.optional(v.string(), ''),
-  rootFolder: v.optional(v.string(), ''),
-  logPath: v.optional(v.string(), '/tmp/log/orgnote'),
-  debug: v.optional(v.boolean(), false),
-  backupDir: v.optional(v.string(), ''),
-  backupCount: v.optional(v.number(), 3),
-});
-
-const ConfigSchema = v.object({
-  accounts: v.optional(v.array(AccountSchema), []),
-  root: v.optional(v.array(AccountSchema), []),
-});
-
-const getAccountsFromConfig = (config: v.InferOutput<typeof ConfigSchema>): Account[] => {
+const getAccountsFromConfig = (config: SyncProfileConfig): SyncProfile[] => {
   if (config.accounts && config.accounts.length > 0) {
     return config.accounts;
   }
   return config.root ?? [];
 };
-
-type Account = v.InferOutput<typeof AccountSchema>;
 
 export interface OrgNotePublishedConfig {
   name: string;
@@ -47,7 +33,7 @@ const DEFAULT_CONFIG_PATH = `${os.homedir()}/.config/orgnote/config.toml`;
 export const getConfigPath = (): string =>
   process.env.ORGNOTE_CONFIG_PATH || DEFAULT_CONFIG_PATH;
 
-const readConfigFile = (): Account[] | null => {
+const readConfigFile = (): SyncProfile[] | null => {
   const logger = getLogger();
   const configPath = getConfigPath();
 
@@ -58,7 +44,7 @@ const readConfigFile = (): Account[] | null => {
 
   const result = to(() => {
     const content = readFileSync(configPath, 'utf8');
-    const config = parseToml(content, ConfigSchema);
+    const config = parseToml(content, SyncProfileConfigSchema);
     return getAccountsFromConfig(config);
   })();
 
@@ -70,14 +56,17 @@ const readConfigFile = (): Account[] | null => {
   return result.value;
 };
 
-const findAccount = (accounts: Account[], accountName?: string): Account | null => {
+const findAccount = (
+  accounts: SyncProfile[],
+  accountName?: string
+): SyncProfile | null => {
   if (!accountName) {
     return accounts[0] ?? null;
   }
   return accounts.find((a) => a.name === accountName) ?? null;
 };
 
-const mapAccountToPublished = (account: Account): OrgNotePublishedConfig => ({
+const mapAccountToPublished = (account: SyncProfile): OrgNotePublishedConfig => ({
   name: account.name,
   remoteAddress: account.remoteAddress,
   token: account.token,
@@ -164,7 +153,7 @@ export function validateConfigFile(): ValidateConfigResult {
   result.rawContent = readResult.value;
 
   const parseResult = to(() => {
-    const config = parseToml(result.rawContent, ConfigSchema);
+    const config = parseToml(result.rawContent, SyncProfileConfigSchema);
     const accounts = getAccountsFromConfig(config);
 
     if (accounts.length === 0) {
