@@ -69,6 +69,7 @@ const findAccount = (
 const mapAccountToPublished = (account: SyncProfile): OrgNotePublishedConfig => ({
   name: account.name,
   remoteAddress: account.remoteAddress,
+  clientAddress: account.clientAddress || undefined,
   token: account.token,
   rootFolder: resolveHome(account.rootFolder),
   debug: account.debug,
