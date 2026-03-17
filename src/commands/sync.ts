@@ -9,17 +9,13 @@ import type {
 } from 'orgnote-api';
 import type { VersionConflictResponse } from 'orgnote-api/remote-api';
 import {
-  createPlan,
+  createSyncPlan,
   processUpload,
   processDownload,
   processDeleteLocal,
   processDeleteRemote,
   recoverState,
-  fetchRemoteChanges,
-  scanLocalFiles,
-  findDeletedLocally,
   toRelativePath,
-  getOldestSyncedAt,
 } from 'orgnote-api';
 import { to } from 'orgnote-api/utils';
 import type { OrgNotePublishedConfig } from '../config.js';
@@ -76,11 +72,14 @@ const uploadFile =
     const absolutePath = join(rootFolder, relativePath);
     const formData = createFormData(file.path, absolutePath);
 
-    const result = await to(() => api.sync.uploadFile(
-      relativePath,
-      formData,
-      expectedVersion
-    ))();
+    const result = await to(() =>
+      api.sync.uploadFile(
+        relativePath,
+        formData,
+        file.contentHash,
+        expectedVersion
+      )
+    )();
 
     if (result.isOk()) {
       return { status: 'ok', version: result.value.data.data.version };
@@ -187,7 +186,12 @@ const processItem = async <T>(
 ): Promise<boolean> => {
   const result = await to(() => processor(item))();
   if (result.isErr()) {
-    logger.error('%s failed: %s - %s', operationName, getPath(item), result.error);
+    logger.error(
+      '%s failed: %s - %s',
+      operationName,
+      getPath(item),
+      result.error
+    );
     return false;
   }
   return true;
@@ -296,24 +300,15 @@ const initDependencies = (
 const buildSyncPlan = async (
   deps: SyncDependencies
 ): Promise<{ plan: SyncPlan; serverTime: string }> => {
-  const stateData = await deps.state.get();
-  const since = getOldestSyncedAt(stateData);
-  const { files: remoteFiles, serverTime } = await fetchRemoteChanges(
-    deps.api.sync,
-    since
-  );
-  const localFiles = await scanLocalFiles(deps.fs, '/');
-  const deletedLocally = findDeletedLocally(localFiles, stateData);
-
-  const plan = createPlan({
-    localFiles,
-    deletedLocally,
-    remoteFiles,
-    stateData,
-    serverTime,
+  const plan = await createSyncPlan({
+    fs: deps.fs,
+    api: deps.api.sync,
+    state: deps.state,
+    rootPath: '/',
+    enableContentHashCheck: true,
   });
 
-  return { plan, serverTime };
+  return { plan, serverTime: plan.serverTime };
 };
 
 const createSyncContext = (

@@ -11,6 +11,7 @@ type SyncApi = ReturnType<typeof SyncApiFactory> & {
   uploadFile: (
     filePath: string,
     formData: FormData,
+    contentHash?: string,
     expectedVersion?: number
   ) => Promise<AxiosResponse<HandlersHttpResponseFileUploadResponseAny>>;
   downloadFile: (path: string) => Promise<AxiosResponse<Buffer>>;
@@ -104,13 +105,20 @@ function initApi(c: OrgNotePublishedConfig): void {
   const uploadFile = async (
     _filePath: string,
     formData: FormData,
+    contentHash?: string,
     expectedVersion?: number
   ): Promise<AxiosResponse<HandlersHttpResponseFileUploadResponseAny>> => {
     if (expectedVersion !== undefined) {
       formData.append('expectedVersion', String(expectedVersion));
     }
+
+    const headers = {
+      ...formData.getHeaders(),
+      ...(contentHash ? { 'x-content-hash': contentHash } : {}),
+    };
+
     return axiosInstance.put('/sync/files', formData, {
-      headers: formData.getHeaders(),
+      headers,
     });
   };
 
