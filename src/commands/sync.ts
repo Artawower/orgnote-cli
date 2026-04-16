@@ -6,6 +6,7 @@ import type {
   SyncContext,
   UploadResult,
   FileSystem,
+  BaseContentStore,
 } from 'orgnote-api';
 import type { VersionConflictResponse } from 'orgnote-api/remote-api';
 import {
@@ -21,6 +22,7 @@ import { to } from 'orgnote-api/utils';
 import type { OrgNotePublishedConfig } from '../config.js';
 import { createNodeFileSystem } from '../adapters/node-file-system.js';
 import { createSyncState } from '../adapters/sync-state.js';
+import { createFileBaseContentStore } from '../adapters/base-content-store.js';
 import { getApi, type Api } from './sdk.js';
 import { getLogger } from '../logger.js';
 import { join } from 'path';
@@ -286,6 +288,7 @@ interface SyncDependencies {
   fs: FileSystem;
   state: ReturnType<typeof createSyncState>;
   rootFolder: string;
+  baseStore: BaseContentStore;
 }
 
 const initDependencies = (
@@ -295,6 +298,7 @@ const initDependencies = (
   fs: createNodeFileSystem(config.rootFolder),
   state: createSyncState(config.name),
   rootFolder: config.rootFolder,
+  baseStore: createFileBaseContentStore(config.name),
 });
 
 const buildSyncPlan = async (
@@ -319,6 +323,7 @@ const createSyncContext = (
   state: deps.state,
   fs: deps.fs,
   serverTime,
+  baseStore: deps.baseStore,
 });
 
 export const syncFiles = async (

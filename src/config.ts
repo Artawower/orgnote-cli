@@ -1,13 +1,13 @@
 import { existsSync, readFileSync } from 'fs';
-import os from 'os';
-import { resolveHome } from './tools/with-home-dir.js';
-import { getLogger } from './logger.js';
 import {
   SyncProfileConfigSchema,
   type SyncProfile,
   type SyncProfileConfig,
 } from 'orgnote-api';
 import { parseToml, to } from 'orgnote-api/utils';
+import { resolveHome } from './tools/with-home-dir.js';
+import { getLogger } from './logger.js';
+import { getDefaultConfigPath } from './tools/paths.js';
 
 const getAccountsFromConfig = (config: SyncProfileConfig): SyncProfile[] => {
   if (config.accounts && config.accounts.length > 0) {
@@ -28,10 +28,8 @@ export interface OrgNotePublishedConfig {
   backupDir: string;
 }
 
-const DEFAULT_CONFIG_PATH = `${os.homedir()}/.config/orgnote/config.toml`;
-
 export const getConfigPath = (): string =>
-  process.env.ORGNOTE_CONFIG_PATH || DEFAULT_CONFIG_PATH;
+  process.env.ORGNOTE_CONFIG_PATH || getDefaultConfigPath();
 
 const readConfigFile = (): SyncProfile[] | null => {
   const logger = getLogger();
@@ -66,7 +64,9 @@ const findAccount = (
   return accounts.find((a) => a.name === accountName) ?? null;
 };
 
-const mapAccountToPublished = (account: SyncProfile): OrgNotePublishedConfig => ({
+const mapAccountToPublished = (
+  account: SyncProfile
+): OrgNotePublishedConfig => ({
   name: account.name,
   remoteAddress: account.remoteAddress,
   clientAddress: account.clientAddress || undefined,
@@ -103,7 +103,9 @@ export async function getConfig(
   const account = findAccount(accounts, accountName);
   if (!account) {
     logger.error(`Account "${accountName}" not found in config`);
-    logger.info(`Available accounts: ${accounts.map((a) => a.name).join(', ')}`);
+    logger.info(
+      `Available accounts: ${accounts.map((a) => a.name).join(', ')}`
+    );
     return null;
   }
 
@@ -111,12 +113,18 @@ export async function getConfig(
   const configWithOverrides = applyOverrides(baseConfig, override);
 
   if (!configWithOverrides.token) {
-    logger.error('No token provided for account "%s"', configWithOverrides.name);
+    logger.error(
+      'No token provided for account "%s"',
+      configWithOverrides.name
+    );
     return null;
   }
 
   if (!configWithOverrides.rootFolder) {
-    logger.error('No rootFolder provided for account "%s"', configWithOverrides.name);
+    logger.error(
+      'No rootFolder provided for account "%s"',
+      configWithOverrides.name
+    );
     return null;
   }
 
@@ -158,7 +166,9 @@ export function validateConfigFile(): ValidateConfigResult {
     const accounts = getAccountsFromConfig(config);
 
     if (accounts.length === 0) {
-      throw new Error('No accounts defined in config (use [[accounts]] or [[root]])');
+      throw new Error(
+        'No accounts defined in config (use [[accounts]] or [[root]])'
+      );
     }
 
     result.accounts = accounts.map((a) => a.name);
@@ -168,10 +178,14 @@ export function validateConfigFile(): ValidateConfigResult {
         result.errors.push(`Account #${index + 1}: missing "name" field`);
       }
       if (!account.token) {
-        result.errors.push(`Account "${account.name || index + 1}": missing "token" field`);
+        result.errors.push(
+          `Account "${account.name || index + 1}": missing "token" field`
+        );
       }
       if (!account.rootFolder) {
-        result.errors.push(`Account "${account.name || index + 1}": missing "rootFolder" field`);
+        result.errors.push(
+          `Account "${account.name || index + 1}": missing "rootFolder" field`
+        );
       }
     });
 

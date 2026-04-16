@@ -1,8 +1,8 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
-import os from 'os';
-import { join, dirname } from 'path';
+import { dirname } from 'path';
 import type { SyncedFile } from 'orgnote-api';
 import { to } from 'orgnote-api/utils';
+import { getStorePath } from '../tools/paths.js';
 
 interface Store {
   files?: Record<string, SyncedFile>;
@@ -13,11 +13,7 @@ let store: Store;
 const getDefaultStore = (): Store => ({ files: {} });
 
 export const initStore = (accountName: string) => {
-  const storeFile = join(
-    os.homedir(),
-    '.config/orgnote/store',
-    `${accountName}.json`
-  );
+  const storeFile = getStorePath(accountName);
 
   const ensureStoreDir = (): void => {
     const dir = dirname(storeFile);
