@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 
 import { getLogger } from './logger.js';
 import { OrgNotePublishedConfig, getConfig } from './config.js';
