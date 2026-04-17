@@ -17,7 +17,10 @@
     "prepublishOnly": "npm run test && npm run build",
     "convert:api": "fix-esm-import-path src/generated"
   },
-  "repository": "git+https://github.com/Artawower/orgnote-cli.git",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Artawower/orgnote-cli.git"
+  },
   "keywords": [
     "org",
     "roam",
@@ -67,7 +70,7 @@
     "neverthrow": "8.2.0",
     "openpgp": "6.3.0",
     "org-mode-ast": "0.11.7",
-    "orgnote-api": "file:.yalc/orgnote-api",
+    "orgnote-api": "0.42.0",
     "partysocket": "1.1.6",
     "smol-toml": "1.5.2",
     "spectrallogs": "0.2.2",
