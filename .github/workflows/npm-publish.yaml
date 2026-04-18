@@ -88,7 +88,9 @@ jobs:
         run: |
           : > "$NPM_CONFIG_USERCONFIG"
           : > "$NPM_CONFIG_GLOBALCONFIG"
-          env -u NODE_AUTH_TOKEN -u NPM_TOKEN npm publish --provenance --access public --ignore-scripts --registry https://registry.npmjs.org
+          echo "--- npm config before publish ---"
+          npm config ls
+          env -u NODE_AUTH_TOKEN -u NPM_TOKEN npm publish --provenance --access public --registry https://registry.npmjs.org
 
       - name: Publish dev package
         if: >-
@@ -101,4 +103,6 @@ jobs:
           npm version "${{ steps.check_release.outputs.release_tag }}" --no-git-tag-version
           : > "$NPM_CONFIG_USERCONFIG"
           : > "$NPM_CONFIG_GLOBALCONFIG"
-          env -u NODE_AUTH_TOKEN -u NPM_TOKEN npm publish --provenance --tag dev --access public --ignore-scripts --registry https://registry.npmjs.org
+          echo "--- npm config before publish ---"
+          npm config ls
+          env -u NODE_AUTH_TOKEN -u NPM_TOKEN npm publish --provenance --tag dev --access public --registry https://registry.npmjs.org
