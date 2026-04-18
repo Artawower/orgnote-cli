@@ -103,6 +103,8 @@ jobs:
           npm version "${{ steps.check_release.outputs.release_tag }}" --no-git-tag-version
           : > "$NPM_CONFIG_USERCONFIG"
           : > "$NPM_CONFIG_GLOBALCONFIG"
-          echo "--- npm config before publish ---"
-          npm config ls
+          echo "=== local .npmrc ==="
+          cat .npmrc 2>/dev/null || echo "(not found)"
+          echo "=== npm config ls -l | grep authToken ==="
+          npm config ls -l | grep -i "auth\|token\|registry" || echo "(nothing)"
           env -u NODE_AUTH_TOKEN -u NPM_TOKEN npm publish --provenance --tag dev --access public --registry https://registry.npmjs.org
