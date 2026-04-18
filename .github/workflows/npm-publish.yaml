@@ -65,34 +65,27 @@ jobs:
           echo "release_tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
           echo "Release $RELEASE_TAG exists and not yet on npm, will publish"
 
-      - name: Diagnose npm environment
-        run: |
-          echo "=== npm version ==="
-          npm --version
-          echo "=== node version ==="
-          node --version
-          echo "=== npm config ==="
-          npm config list
-          echo "=== OIDC env ==="
-          echo "GITHUB_ACTIONS: ${GITHUB_ACTIONS}"
-          echo "ACTIONS_ID_TOKEN_REQUEST_URL set: $([ -n "${ACTIONS_ID_TOKEN_REQUEST_URL:-}" ] && echo yes || echo no)"
-          echo "NODE_AUTH_TOKEN set: $([ -n "${NODE_AUTH_TOKEN:-}" ] && echo yes || echo no)"
-          echo "NPM_CONFIG_USERCONFIG: ${NPM_CONFIG_USERCONFIG:-not set}"
-          [ -f "${NPM_CONFIG_USERCONFIG:-/nonexistent}" ] && echo "=== npmrc content ===" && cat "$NPM_CONFIG_USERCONFIG" || echo "(no npmrc file)"
-
       - name: Publish stable package
         if: >-
           github.event.workflow_run.head_branch == 'master' &&
           steps.check_release.outputs.should_publish == 'true'
+        env:
+          NPM_CONFIG_USERCONFIG: ${{ runner.temp }}/npmrc
+          NPM_CONFIG_GLOBALCONFIG: ${{ runner.temp }}/npmrc-global
         run: |
-          echo "registry=https://registry.npmjs.org/" > "$NPM_CONFIG_USERCONFIG"
-          npm publish --provenance --access public
+          : > "$NPM_CONFIG_USERCONFIG"
+          : > "$NPM_CONFIG_GLOBALCONFIG"
+          env -u NODE_AUTH_TOKEN -u NPM_TOKEN npm publish --provenance --access public --registry https://registry.npmjs.org
 
       - name: Publish dev package
         if: >-
           github.event.workflow_run.head_branch == 'dev' &&
           steps.check_release.outputs.should_publish == 'true'
+        env:
+          NPM_CONFIG_USERCONFIG: ${{ runner.temp }}/npmrc
+          NPM_CONFIG_GLOBALCONFIG: ${{ runner.temp }}/npmrc-global
         run: |
           npm version "${{ steps.check_release.outputs.release_tag }}" --no-git-tag-version
-          echo "registry=https://registry.npmjs.org/" > "$NPM_CONFIG_USERCONFIG"
-          npm publish --provenance --tag dev --access public
+          : > "$NPM_CONFIG_USERCONFIG"
+          : > "$NPM_CONFIG_GLOBALCONFIG"
+          env -u NODE_AUTH_TOKEN -u NPM_TOKEN npm publish --provenance --tag dev --access public --registry https://registry.npmjs.org
