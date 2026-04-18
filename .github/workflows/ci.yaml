@@ -53,8 +53,24 @@ jobs:
             exit 0
           fi
           echo "changed=false" >> "$GITHUB_OUTPUT"
-      - name: Create stable release
+      - name: Check stable release existence
+        id: stable_release
         if: steps.version_change.outputs.changed == 'true' && github.ref == 'refs/heads/master'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          if gh release view "$VERSION" >/dev/null 2>&1; then
+            echo "should_create=false" >> "$GITHUB_OUTPUT"
+            echo "Release $VERSION already exists, skipping"
+            exit 0
+          fi
+          echo "should_create=true" >> "$GITHUB_OUTPUT"
+      - name: Create stable release
+        if: >-
+          steps.version_change.outputs.changed == 'true' &&
+          github.ref == 'refs/heads/master' &&
+          steps.stable_release.outputs.should_create == 'true'
         uses: justincy/github-action-npm-release@2.0.2
         with:
           token: ${{ github.token }}
