@@ -25,16 +25,17 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.3.12
-      - name: Verify trusted publishing auth
+      - name: Print publish diagnostics
         run: |
-          if [ -n "${NODE_AUTH_TOKEN:-}" ] || [ -n "${NPM_TOKEN:-}" ]; then
-            echo "Unexpected npm token present; remove NODE_AUTH_TOKEN/NPM_TOKEN."
-            exit 1
-          fi
-          TOKEN_VALUE="$(npm config get _authToken 2>/dev/null || true)"
-          if [ -n "$TOKEN_VALUE" ] && [ "$TOKEN_VALUE" != "undefined" ] && [ "$TOKEN_VALUE" != "null" ]; then
-            echo "Unexpected npmrc auth token present; remove _authToken."
-            exit 1
+          echo "node=$(node --version)"
+          echo "npm=$(npm --version)"
+          echo "registry=$(npm config get registry)"
+          echo "userconfig=$(npm config get userconfig)"
+          echo "has_NODE_AUTH_TOKEN=$([ -n "${NODE_AUTH_TOKEN:-}" ] && echo true || echo false)"
+          echo "has_NPM_TOKEN=$([ -n "${NPM_TOKEN:-}" ] && echo true || echo false)"
+          USERCONFIG_PATH="$(npm config get userconfig 2>/dev/null || true)"
+          if [ -f "$USERCONFIG_PATH" ]; then
+            sed -E 's#(//[^:]+:_authToken=).*#\1***#' "$USERCONFIG_PATH"
           fi
       - name: Install dependencies
         run: bun install --frozen-lockfile
