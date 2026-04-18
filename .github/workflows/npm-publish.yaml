@@ -69,12 +69,16 @@ jobs:
         if: >-
           github.event.workflow_run.head_branch == 'master' &&
           steps.check_release.outputs.should_publish == 'true'
+        env:
+          NODE_AUTH_TOKEN: ''
         run: npm publish --provenance --access public
 
       - name: Publish dev package
         if: >-
           github.event.workflow_run.head_branch == 'dev' &&
           steps.check_release.outputs.should_publish == 'true'
+        env:
+          NODE_AUTH_TOKEN: ''
         run: |
           npm version "${{ steps.check_release.outputs.release_tag }}" --no-git-tag-version
           npm publish --provenance --tag dev --access public
