@@ -80,7 +80,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           VERSION=$(node -p "require('./package.json').version")
-          DEV_VERSION="${VERSION}-dev.${{ github.run_number }}.${{ github.run_attempt }}"
+          DEV_VERSION="${VERSION}-dev.$(echo '${{ github.sha }}' | cut -c1-7)"
           if gh release view "$DEV_VERSION" >/dev/null 2>&1; then
             echo "Prerelease $DEV_VERSION already exists"
             exit 0

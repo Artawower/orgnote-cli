@@ -26,7 +26,7 @@ jobs:
         run: |
           VERSION=$(node -p "require('./package.json').version")
           if [ "${{ github.event.workflow_run.head_branch }}" = "dev" ]; then
-            RELEASE_TAG="${VERSION}-dev.${{ github.event.workflow_run.run_number }}.${{ github.event.workflow_run.run_attempt }}"
+            RELEASE_TAG="${VERSION}-dev.$(echo '${{ github.event.workflow_run.head_sha }}' | cut -c1-7)"
           else
             RELEASE_TAG="$VERSION"
           fi
