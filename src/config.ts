@@ -23,6 +23,7 @@ export interface OrgNotePublishedConfig {
   token: string;
   rootFolder: string;
   debug: boolean;
+  ignorePatterns: string[];
   logPath: string;
   backupCount: number;
   backupDir: string;
@@ -73,6 +74,7 @@ const mapAccountToPublished = (
   token: account.token,
   rootFolder: resolveHome(account.rootFolder),
   debug: account.debug,
+  ignorePatterns: account.ignorePatterns ?? [],
   logPath: resolveHome(account.logPath),
   backupCount: account.backupCount,
   backupDir: resolveHome(account.backupDir),
