@@ -1,6 +1,6 @@
 {
   "name": "orgnote-cli",
-  "version": "0.42.11",
+  "version": "0.42.14",
   "description": "Project for synchronizing org roam notes and Org Note ",
   "type": "module",
   "main": "dist/index.js",
@@ -18,16 +18,10 @@
     "convert:api": "fix-esm-import-path src/generated"
   },
   "repository": "git+https://github.com/Artawower/orgnote-cli.git",
-  "keywords": [
-    "org",
-    "roam",
-    "Org Note"
-  ],
+  "keywords": ["org", "roam", "Org Note"],
   "author": "darkawower <app.orgnote@gmail.com> (https://about.org-note.com)",
   "license": "MIT",
-  "files": [
-    "dist/**"
-  ],
+  "files": ["dist/**"],
   "bin": {
     "orgnote-cli": "dist/index.js"
   },
@@ -67,7 +61,7 @@
     "neverthrow": "8.2.0",
     "openpgp": "6.3.0",
     "org-mode-ast": "0.11.7",
-    "orgnote-api": "0.42.0",
+    "orgnote-api": "0.42.9",
     "partysocket": "1.1.6",
     "smol-toml": "1.5.2",
     "spectrallogs": "0.2.2",
