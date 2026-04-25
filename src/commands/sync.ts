@@ -29,6 +29,7 @@ import { join } from 'path';
 import { readFileSync, existsSync } from 'fs';
 import FormData from 'form-data';
 import axios, { type AxiosError } from 'axios';
+import { readGitignorePatterns } from '../tools/gitignore.js';
 
 const logger = getLogger();
 
@@ -289,6 +290,7 @@ interface SyncDependencies {
   state: ReturnType<typeof createSyncState>;
   rootFolder: string;
   baseStore: BaseContentStore;
+  ignorePatterns: string[];
 }
 
 const initDependencies = (
@@ -299,6 +301,7 @@ const initDependencies = (
   state: createSyncState(config.name),
   rootFolder: config.rootFolder,
   baseStore: createFileBaseContentStore(config.name),
+  ignorePatterns: config.ignorePatterns,
 });
 
 const buildSyncPlan = async (
@@ -309,6 +312,7 @@ const buildSyncPlan = async (
     api: deps.api.sync,
     state: deps.state,
     rootPath: '/',
+    ignorePatterns: deps.ignorePatterns,
     enableContentHashCheck: true,
   });
 
@@ -332,7 +336,16 @@ export const syncFiles = async (
   logger.info('Starting sync for account: %s', config.name);
   logger.info('Root folder: %s', config.rootFolder);
 
-  const deps = initDependencies(config);
+  const gitignorePatterns = readGitignorePatterns(config.rootFolder);
+  const mergedIgnorePatterns = [
+    ...gitignorePatterns,
+    ...config.ignorePatterns,
+  ];
+
+  const deps = initDependencies({
+    ...config,
+    ignorePatterns: mergedIgnorePatterns,
+  });
 
   await recoverState(deps.state);
 
