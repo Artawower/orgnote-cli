@@ -29,9 +29,11 @@ import { join } from 'path';
 import { readFileSync, existsSync } from 'fs';
 import FormData from 'form-data';
 import axios, { type AxiosError } from 'axios';
+import pMap from 'p-map';
 import { readGitignorePatterns } from '../tools/gitignore.js';
 
 const logger = getLogger();
+const DEFAULT_SYNC_CONCURRENCY = 4;
 
 const createFormData = (filePath: string, absolutePath: string): FormData => {
   if (!existsSync(absolutePath)) {
@@ -200,14 +202,22 @@ const processItem = async <T>(
   return true;
 };
 
-const executeWithErrorHandling = async <T>(
+export const getSyncConcurrency = (): number => {
+  const rawConcurrency = Number(process.env.SYNC_CONCURRENCY);
+  if (Number.isInteger(rawConcurrency) && rawConcurrency > 0) return rawConcurrency;
+  return DEFAULT_SYNC_CONCURRENCY;
+};
+
+export const executeWithErrorHandling = async <T>(
   items: T[],
   processor: (item: T) => Promise<void>,
   getPath: (item: T) => string,
   operationName: string
 ): Promise<{ success: number; errors: number }> => {
-  const results = await Promise.all(
-    items.map((item) => processItem(item, processor, getPath, operationName))
+  const results = await pMap(
+    items,
+    (item) => processItem(item, processor, getPath, operationName),
+    { concurrency: getSyncConcurrency(), stopOnError: false }
   );
 
   const success = results.filter(Boolean).length;
