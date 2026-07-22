@@ -99,14 +99,18 @@ const uploadFile =
     throw result.error;
   };
 
+const fetchFileContent =
+  (api: Api) =>
+  async (file: RemoteFile): Promise<Uint8Array> => {
+    logger.info('Fetching: %s', file.path);
+    const response = await api.sync.downloadFile(file.path);
+    return new Uint8Array(response.data);
+  };
+
 const downloadFile =
   (api: Api, fs: FileSystem) =>
   async (file: RemoteFile): Promise<void> => {
-    logger.info('Downloading: %s', file.path);
-
-    const response = await api.sync.downloadFile(file.path);
-    const content = new Uint8Array(response.data);
-    await fs.writeFile(file.path, content);
+    await fs.writeFile(file.path, await fetchFileContent(api)(file));
   };
 
 const deleteLocalFile =
@@ -123,13 +127,14 @@ const deleteRemoteFile =
     await api.sync.deleteFile(path, expectedVersion);
   };
 
-const createExecutor = (
+export const createExecutor = (
   api: Api,
   rootFolder: string,
   fs: FileSystem
 ): SyncExecutor => ({
   upload: uploadFile(api, rootFolder),
   download: downloadFile(api, fs),
+  fetchContent: fetchFileContent(api),
   deleteLocal: deleteLocalFile(fs),
   deleteRemote: deleteRemoteFile(api),
 });

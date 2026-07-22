@@ -27,6 +27,15 @@ export const createSyncState = (accountName: string): SyncState => {
       saveData(data);
     },
 
+    setSyncedAt: async (paths: readonly string[], syncedAt: string) => {
+      const data = getData();
+      paths.forEach((path) => {
+        const file = data.files[path];
+        if (file) data.files[path] = { ...file, syncedAt };
+      });
+      saveData(data);
+    },
+
     removeFile: async (path: string) => {
       const data = getData();
       delete data.files[path];
