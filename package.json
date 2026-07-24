@@ -1,6 +1,6 @@
 {
   "name": "orgnote-cli",
-  "version": "0.63.0",
+  "version": "0.64.0",
   "description": "Project for synchronizing org roam notes and Org Note ",
   "type": "module",
   "main": "dist/index.js",
@@ -61,7 +61,7 @@
     "neverthrow": "8.2.0",
     "openpgp": "6.3.0",
     "org-mode-ast": "0.11.7",
-    "orgnote-api": "file:.yalc/orgnote-api",
+    "orgnote-api": "0.64.0",
     "p-map": "7.0.4",
     "partysocket": "1.1.6",
     "smol-toml": "1.5.2",
