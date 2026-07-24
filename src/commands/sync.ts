@@ -17,6 +17,7 @@ import {
   processDeleteRemote,
   recoverState,
   toRelativePath,
+  validateSyncFileResponse,
 } from 'orgnote-api';
 import { to } from 'orgnote-api/utils';
 import type { OrgNotePublishedConfig } from '../config.js';
@@ -104,7 +105,7 @@ const fetchFileContent =
   async (file: RemoteFile): Promise<Uint8Array> => {
     logger.info('Fetching: %s', file.path);
     const response = await api.sync.downloadFile(file.path);
-    return new Uint8Array(response.data);
+    return validateSyncFileResponse(response, file);
   };
 
 const downloadFile =
