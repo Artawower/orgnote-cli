@@ -34,6 +34,31 @@ test('createExecutor fetchContent reads remote bytes without writing locally', a
   expect(fs.writeFile).not.toHaveBeenCalled();
 });
 
+test('createExecutor returns successful remote deletion result', async () => {
+  const deleteFile = vi.fn(async () => undefined);
+  const api = { sync: { deleteFile } } as unknown as Api;
+  const executor = createExecutor(api, '/vault', {} as FileSystem);
+
+  const result = await executor.deleteRemote('/notes/deleted.org', 8);
+
+  expect(result).toEqual({ status: 'ok' });
+  expect(deleteFile).toHaveBeenCalledWith('/notes/deleted.org', 8);
+});
+
+test('createExecutor returns current server version after delete conflict', async () => {
+  const conflict = Object.assign(new Error('Version mismatch'), {
+    isAxiosError: true,
+    response: { status: 409, data: { serverVersion: 9 } },
+  });
+  const deleteFile = vi.fn(async () => Promise.reject(conflict));
+  const api = { sync: { deleteFile } } as unknown as Api;
+  const executor = createExecutor(api, '/vault', {} as FileSystem);
+
+  const result = await executor.deleteRemote('/notes/deleted.org', 8);
+
+  expect(result).toEqual({ status: 'conflict', serverVersion: 9 });
+});
+
 test('createExecutor rejects response without content hash before writing locally', async () => {
   const content = new TextEncoder().encode(
     '<!doctype html><html><head><title>orgnote</title></head></html>',

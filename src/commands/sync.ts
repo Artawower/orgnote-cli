@@ -5,6 +5,7 @@ import type {
   SyncPlan,
   SyncContext,
   UploadResult,
+  DeleteResult,
   FileSystem,
   BaseContentStore,
 } from 'orgnote-api';
@@ -123,9 +124,14 @@ const deleteLocalFile =
 
 const deleteRemoteFile =
   (api: Api) =>
-  async (path: string, expectedVersion: number): Promise<void> => {
+  async (path: string, expectedVersion: number): Promise<DeleteResult> => {
     logger.info('Deleting remote: %s', path);
-    await api.sync.deleteFile(path, expectedVersion);
+    const result = await to(() => api.sync.deleteFile(path, expectedVersion))();
+    if (result.isOk()) return { status: 'ok' };
+    if (isConflictError(result.error)) {
+      return { status: 'conflict', serverVersion: extractConflictVersion(result.error) };
+    }
+    throw result.error;
   };
 
 export const createExecutor = (
