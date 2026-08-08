@@ -1,8 +1,17 @@
 import type { SyncState, SyncStateData, SyncedFile } from 'orgnote-api';
 import { initStore } from '../store/store.js';
+import { getLogger } from '../logger.js';
+
+const logger = getLogger();
 
 export const createSyncState = (accountName: string): SyncState => {
-  const { get, set } = initStore(accountName);
+  const onRecovery = (corruptedFile: string): void => {
+    logger.warn(
+      'Corrupted sync state was moved to %s; rebuilding state with a full sync',
+      corruptedFile
+    );
+  };
+  const { get, set } = initStore(accountName, onRecovery);
 
   const getData = (): SyncStateData => {
     const files = get('files') ?? {};

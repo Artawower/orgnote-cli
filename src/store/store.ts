@@ -1,4 +1,10 @@
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  renameSync,
+  writeFileSync,
+} from 'fs';
 import { dirname } from 'path';
 import type { SyncedFile } from 'orgnote-api';
 import { to } from 'orgnote-api/utils';
@@ -8,12 +14,20 @@ interface Store {
   files?: Record<string, SyncedFile>;
 }
 
-let store: Store;
-
 const getDefaultStore = (): Store => ({ files: {} });
 
-export const initStore = (accountName: string) => {
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const isStore = (value: unknown): value is Store =>
+  isRecord(value) && (value.files === undefined || isRecord(value.files));
+
+export const initStore = (
+  accountName: string,
+  onRecovery?: (corruptedFile: string) => void
+) => {
   const storeFile = getStorePath(accountName);
+  let store: Store | undefined;
 
   const ensureStoreDir = (): void => {
     const dir = dirname(storeFile);
@@ -24,7 +38,10 @@ export const initStore = (accountName: string) => {
 
   const preserveStore = (): void => {
     ensureStoreDir();
-    writeFileSync(storeFile, JSON.stringify(store, null, 2));
+    store ??= getDefaultStore();
+    const temporaryFile = `${storeFile}.tmp-${process.pid}-${Date.now()}`;
+    writeFileSync(temporaryFile, JSON.stringify(store, null, 2));
+    renameSync(temporaryFile, storeFile);
   };
 
   const get = <K extends keyof Store>(key: K): Store[K] => {
@@ -42,17 +59,30 @@ export const initStore = (accountName: string) => {
     preserveStore();
   };
 
+  const restoreCorruptedStore = (): void => {
+    const corruptedFile = `${storeFile}.corrupt-${Date.now()}-${process.pid}`;
+    renameSync(storeFile, corruptedFile);
+    store = getDefaultStore();
+    preserveStore();
+    onRecovery?.(corruptedFile);
+  };
+
   const readStore = (): void => {
-    const result = to(() => JSON.parse(readFileSync(storeFile).toString()))();
-    if (result.isOk()) {
-      store = result.value;
+    const readResult = to(() => readFileSync(storeFile, 'utf8'))();
+    if (readResult.isErr()) {
+      if ((readResult.error as NodeJS.ErrnoException).code === 'ENOENT') {
+        store = getDefaultStore();
+        return;
+      }
+      throw readResult.error;
+    }
+
+    const parseResult = to(JSON.parse)(readResult.value);
+    if (parseResult.isErr() || !isStore(parseResult.value)) {
+      restoreCorruptedStore();
       return;
     }
-    if ((result.error as NodeJS.ErrnoException).code === 'ENOENT') {
-      store = getDefaultStore();
-      return;
-    }
-    throw result.error;
+    store = parseResult.value;
   };
 
   const clear = (): void => {
